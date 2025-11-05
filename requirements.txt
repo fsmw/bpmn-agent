@@ -1,0 +1,40 @@
+# Core Agent Framework & Orchestration
+pydantic>=2.0
+pydantic-settings>=2.0
+
+# LLM Integration
+requests>=2.31.0
+aiohttp>=3.9.0
+
+# XML Processing
+lxml>=4.9.3
+xmlschema>=2.4.0
+
+# Data Processing & ML
+numpy>=1.24.0
+scikit-learn>=1.3.0
+sentence-transformers>=2.2.0
+
+# NLP
+nltk>=3.8.0
+spacy>=3.6.0
+
+# Utilities
+python-dotenv>=1.0.0
+loguru>=0.7.0
+tenacity>=8.2.3
+
+# Observability & Telemetry
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-exporter-jaeger>=1.20.0
+
+# Development dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+black>=23.0.0
+ruff>=0.0.290
+mypy>=1.5.0
+pytest-mock>=3.11.1
+responses>=0.23.3

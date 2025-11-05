@@ -1,0 +1,219 @@
+{
+  "pattern_hr_recruitment_001": {
+    "name": "Recruitment Funnel",
+    "description": "Multi-stage recruitment process with screening and approval gates",
+    "domain": "hr",
+    "category": "exclusive_choice",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["receive_resume", "screen", "interview", "decision", "offer", "accept"],
+      "edges": ["receive->screen", "screen->interview", "interview->decision", "decision->offer", "offer->accept"],
+      "node_types": {
+        "receive_resume": "start_event",
+        "screen": "activity",
+        "interview": "activity",
+        "decision": "exclusive_gateway",
+        "offer": "activity",
+        "accept": "end_event"
+      }
+    },
+    "examples": [
+      "Applicant submits resume, HR screens, conducts interview, then decides to proceed with offer or rejection",
+      "Job posting receives applications, qualify candidates, interview selected, make hiring decision"
+    ],
+    "validation_rules": [
+      "Each stage must qualify candidates",
+      "Decision point required before offer",
+      "Clear rejection paths"
+    ],
+    "anti_patterns": [
+      "Multiple simultaneous offers",
+      "Missing screening stage",
+      "No rejection path"
+    ],
+    "tags": ["recruitment", "hiring", "interview", "selection"],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_hr_onboarding_001": {
+    "name": "Employee Onboarding",
+    "description": "Multi-step employee onboarding with parallel setup tasks",
+    "domain": "hr",
+    "category": "parallel",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["start", "fork", "it_setup", "hr_setup", "office_setup", "join", "training", "end"],
+      "edges": ["start->fork", "fork->it", "fork->hr", "fork->office", "it->join", "hr->join", "office->join", "join->training", "training->end"],
+      "node_types": {
+        "start": "start_event",
+        "fork": "parallel_gateway",
+        "it_setup": "activity",
+        "hr_setup": "activity",
+        "office_setup": "activity",
+        "join": "parallel_gateway",
+        "training": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "New hire starts; IT sets up computer and accounts, HR sets up payroll, office prepares desk - all in parallel; then training",
+      "Onboarding includes parallel: IT provisioning, facilities setup, paperwork processing, then orientation training"
+    ],
+    "validation_rules": [
+      "All parallel tasks must complete before training",
+      "Required IT, HR, and office tasks",
+      "Training is mandatory final step"
+    ],
+    "anti_patterns": [
+      "Sequential setup when tasks can be parallel",
+      "Missing any required setup",
+      "Training before all setup complete"
+    ],
+    "tags": ["onboarding", "employee", "setup", "training"],
+    "confidence": 0.93,
+    "version": "1.0"
+  },
+  "pattern_hr_timeoff_001": {
+    "name": "Time Off Request",
+    "description": "Employee time off request with approval workflow",
+    "domain": "hr",
+    "category": "exclusive_choice",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["request", "check", "approve_gateway", "approved", "rejected", "end"],
+      "edges": ["request->check", "check->approve_gateway", "approve_gateway->approved", "approve_gateway->rejected", "approved->end", "rejected->end"],
+      "node_types": {
+        "request": "start_event",
+        "check": "activity",
+        "approve_gateway": "exclusive_gateway",
+        "approved": "activity",
+        "rejected": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Employee requests time off, manager checks availability and approves or denies",
+      "Leave request submitted, HR validates dates and manager decides approval"
+    ],
+    "validation_rules": [
+      "Manager approval is required",
+      "Date conflict detection mandatory",
+      "Both approval and rejection paths needed"
+    ],
+    "anti_patterns": [
+      "Auto-approval without checking",
+      "Missing rejection reason",
+      "No manager involvement"
+    ],
+    "tags": ["time-off", "leave", "approval", "vacation"],
+    "confidence": 0.91,
+    "version": "1.0"
+  },
+  "pattern_hr_promotion_001": {
+    "name": "Employee Promotion",
+    "description": "Promotion workflow with review and approval stages",
+    "domain": "hr",
+    "category": "exclusive_choice",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["nominate", "review", "evaluate", "decision", "promote", "notify"],
+      "edges": ["nominate->review", "review->evaluate", "evaluate->decision", "decision->promote", "promote->notify"],
+      "node_types": {
+        "nominate": "start_event",
+        "review": "activity",
+        "evaluate": "activity",
+        "decision": "exclusive_gateway",
+        "promote": "activity",
+        "notify": "end_event"
+      }
+    },
+    "examples": [
+      "Manager nominates employee for promotion, HR reviews qualifications, management evaluates, decides, and processes if approved",
+      "Promotion initiated with performance review, skill assessment, approval, and salary adjustment"
+    ],
+    "validation_rules": [
+      "Review and evaluation required",
+      "Clear approval criteria",
+      "Notification process"
+    ],
+    "anti_patterns": [
+      "Skipping evaluation stage",
+      "No clear criteria",
+      "Missing notification"
+    ],
+    "tags": ["promotion", "career", "advancement", "review"],
+    "confidence": 0.90,
+    "version": "1.0"
+  },
+  "pattern_hr_training_001": {
+    "name": "Training Program",
+    "description": "Employee training enrollment and tracking",
+    "domain": "hr",
+    "category": "sequential",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["request", "enroll", "attend", "exam", "complete"],
+      "edges": ["request->enroll", "enroll->attend", "attend->exam", "exam->complete"],
+      "node_types": {
+        "request": "start_event",
+        "enroll": "activity",
+        "attend": "activity",
+        "exam": "activity",
+        "complete": "end_event"
+      }
+    },
+    "examples": [
+      "Employee requests training, enrolls in course, attends sessions, takes exam, completes program",
+      "Training workflow: enrollment, course attendance, assessment, completion"
+    ],
+    "validation_rules": [
+      "Enrollment verification",
+      "Attendance tracking",
+      "Assessment required"
+    ],
+    "anti_patterns": [
+      "Skipping assessment",
+      "No attendance tracking",
+      "Completion without verification"
+    ],
+    "tags": ["training", "development", "enrollment", "learning"],
+    "confidence": 0.89,
+    "version": "1.0"
+  },
+  "pattern_hr_performance_001": {
+    "name": "Performance Review Cycle",
+    "description": "Annual performance review process with goal setting and evaluation",
+    "domain": "hr",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["set_goals", "mid_review", "eval", "discuss", "feedback", "end"],
+      "edges": ["set->mid", "mid->eval", "eval->discuss", "discuss->feedback", "feedback->end"],
+      "node_types": {
+        "set_goals": "start_event",
+        "mid_review": "activity",
+        "eval": "activity",
+        "discuss": "activity",
+        "feedback": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Goals set, mid-year check-in, performance evaluation, manager discussion, feedback provided",
+      "Yearly cycle: goal planning, progress tracking, evaluation, review meeting, development plan"
+    ],
+    "validation_rules": [
+      "Goals must be set at start",
+      "Mid-year checkpoint required",
+      "Manager-employee discussion required"
+    ],
+    "anti_patterns": [
+      "Skipping mid-year review",
+      "No feedback discussion",
+      "Goals set after evaluation"
+    ],
+    "tags": ["review", "performance", "goals", "feedback"],
+    "confidence": 0.91,
+    "version": "1.0"
+  }
+}

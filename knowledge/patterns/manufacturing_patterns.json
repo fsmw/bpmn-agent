@@ -1,0 +1,283 @@
+{
+  "pattern_manufacturing_qc_001": {
+    "name": "Quality Control Inspection",
+    "description": "Incoming material inspection, in-process quality checks, final product inspection, and rejection handling",
+    "domain": "manufacturing",
+    "category": "exclusive_choice",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["inspect", "test", "measure", "quality_gate", "passed", "failed", "quarantine", "scrap"],
+      "edges": ["inspect->test", "test->measure", "measure->gate", "gate->passed", "gate->failed", "failed->quarantine", "quarantine->scrap"],
+      "node_types": {
+        "inspect": "start_event",
+        "test": "activity",
+        "measure": "activity",
+        "quality_gate": "exclusive_gateway",
+        "passed": "activity",
+        "failed": "activity",
+        "quarantine": "activity",
+        "scrap": "activity"
+      }
+    },
+    "examples": [
+      "Material arrives, inspected for defects, tested for specifications, measurements verified, passed items proceed to production, failed items quarantined and scrapped",
+      "Incoming material inspection, functional testing, dimensional verification, quality assessment, good parts to warehouse, defective parts rejected"
+    ],
+    "validation_rules": [
+      "All materials must be inspected",
+      "Test results must meet specification",
+      "Failed parts must be quarantined",
+      "Rejection documented with reason"
+    ],
+    "anti_patterns": [
+      "Production without QC inspection",
+      "No testing of critical parameters",
+      "Failed parts mixed with good parts",
+      "No rejection documentation"
+    ],
+    "tags": ["quality", "inspection", "testing", "control"],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_manufacturing_production_001": {
+    "name": "Production Scheduling and Execution",
+    "description": "Production order creation, resource allocation, scheduling, execution, and completion",
+    "domain": "manufacturing",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["order", "plan", "allocate", "schedule", "execute", "monitor", "complete", "end"],
+      "edges": ["order->plan", "plan->allocate", "allocate->schedule", "schedule->execute", "execute->monitor", "monitor->complete", "complete->end"],
+      "node_types": {
+        "order": "start_event",
+        "plan": "activity",
+        "allocate": "activity",
+        "schedule": "activity",
+        "execute": "activity",
+        "monitor": "activity",
+        "complete": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Production order received, demand planned, raw materials and labor allocated, production scheduled, execution monitored, KPIs tracked, order completed and delivered",
+      "Order creation, capacity planning, resource assignment, production line scheduling, manufacturing execution, quality/quantity monitoring, order completion"
+    ],
+    "validation_rules": [
+      "Sufficient inventory available",
+      "Production capacity verified",
+      "Due date feasible",
+      "Quality standards maintained during execution"
+    ],
+    "anti_patterns": [
+      "Production without planning",
+      "Over-allocation of resources",
+      "Infeasible scheduling",
+      "No quality monitoring"
+    ],
+    "tags": ["production", "scheduling", "execution", "manufacturing"],
+    "confidence": 0.93,
+    "version": "1.0"
+  },
+  "pattern_manufacturing_maintenance_001": {
+    "name": "Equipment Maintenance",
+    "description": "Preventive maintenance scheduling, maintenance execution, troubleshooting failures, and equipment upgrade",
+    "domain": "manufacturing",
+    "category": "exclusive_choice",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["schedule", "perform_maint", "failure_check", "working", "failure", "diagnose", "repair", "restart"],
+      "edges": ["schedule->perform", "perform->check", "check->working", "check->failure", "failure->diagnose", "diagnose->repair", "repair->restart"],
+      "node_types": {
+        "schedule": "start_event",
+        "perform_maint": "activity",
+        "failure_check": "exclusive_gateway",
+        "working": "activity",
+        "failure": "activity",
+        "diagnose": "activity",
+        "repair": "activity",
+        "restart": "activity"
+      }
+    },
+    "examples": [
+      "Maintenance scheduled per equipment manual, preventive maintenance performed, equipment tested, if functional continue operation, if failed diagnose issue, repair performed, equipment restarted",
+      "Scheduled preventive maintenance, maintenance tasks execution, post-maintenance testing, equipment failure detection and diagnosis, repair execution, restart verification"
+    ],
+    "validation_rules": [
+      "Maintenance performed on schedule",
+      "Pre-maintenance and post-maintenance tests required",
+      "Maintenance logs documented",
+      "Safety procedures followed"
+    ],
+    "anti_patterns": [
+      "Skipped preventive maintenance",
+      "No post-maintenance testing",
+      "Unscheduled equipment changes",
+      "Missing maintenance documentation"
+    ],
+    "tags": ["maintenance", "equipment", "downtime", "reliability"],
+    "confidence": 0.91,
+    "version": "1.0"
+  },
+  "pattern_manufacturing_supply_001": {
+    "name": "Supply Chain Management",
+    "description": "Supplier selection, purchase orders, delivery coordination, inventory management, and supplier performance",
+    "domain": "manufacturing",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["identify_need", "select_supplier", "create_po", "delivery", "receive", "inspect", "warehouse", "monitor"],
+      "edges": ["need->select", "select->po", "po->delivery", "delivery->receive", "receive->inspect", "inspect->warehouse", "warehouse->monitor"],
+      "node_types": {
+        "identify_need": "start_event",
+        "select_supplier": "activity",
+        "create_po": "activity",
+        "delivery": "activity",
+        "receive": "activity",
+        "inspect": "activity",
+        "warehouse": "activity",
+        "monitor": "activity"
+      }
+    },
+    "examples": [
+      "Material need identified, qualified supplier selected based on cost/quality/reliability, PO created with specifications, supplier delivers per schedule, receipt inspected, materials warehoused, supplier performance monitored",
+      "Supply requirement, vendor evaluation and selection, purchase order issuance, delivery tracking, goods receipt, quality inspection, inventory storage, supplier metrics tracking"
+    ],
+    "validation_rules": [
+      "Supplier must be qualified",
+      "PO contains clear specifications",
+      "Delivery deadlines communicated",
+      "Receipt inspection performed"
+    ],
+    "anti_patterns": [
+      "Single source supplier",
+      "No supplier qualification",
+      "Purchases without specs",
+      "No performance monitoring"
+    ],
+    "tags": ["supply-chain", "procurement", "supplier", "inventory"],
+    "confidence": 0.90,
+    "version": "1.0"
+  },
+  "pattern_manufacturing_assembly_001": {
+    "name": "Assembly Line Operation",
+    "description": "Component preparation, assembly stations, sub-assembly, final assembly, and packaging",
+    "domain": "manufacturing",
+    "category": "parallel",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["start", "prep_fork", "component_a", "component_b", "component_c", "join", "sub_assembly", "final_assembly", "packaging", "end"],
+      "edges": ["start->fork", "fork->a", "fork->b", "fork->c", "a->join", "b->join", "c->join", "join->sub", "sub->final", "final->packaging", "packaging->end"],
+      "node_types": {
+        "start": "start_event",
+        "prep_fork": "parallel_gateway",
+        "component_a": "activity",
+        "component_b": "activity",
+        "component_c": "activity",
+        "join": "parallel_gateway",
+        "sub_assembly": "activity",
+        "final_assembly": "activity",
+        "packaging": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Components prepared in parallel at different stations, sub-assemblies created, all sub-components combined for final assembly, product tested, packaged for shipment",
+      "Component preparation at multiple stations in parallel, intermediate assembly of subunits, final product assembly, quality validation, packing and labeling"
+    ],
+    "validation_rules": [
+      "All components available before assembly",
+      "Parallel tasks must complete before joining",
+      "Quality checks at each stage",
+      "Final inspection before packaging"
+    ],
+    "anti_patterns": [
+      "Assembly before all components ready",
+      "Skipping quality checks",
+      "Sequential when parallel possible",
+      "No final inspection"
+    ],
+    "tags": ["assembly", "manufacturing", "parallel-operations", "production"],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_manufacturing_demand_001": {
+    "name": "Demand Forecasting and Planning",
+    "description": "Sales forecasting, demand aggregation, capacity planning, and inventory optimization",
+    "domain": "manufacturing",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["forecast", "aggregate", "capacity_plan", "inventory_plan", "execute_plan", "monitor", "adjust"],
+      "edges": ["forecast->aggregate", "aggregate->capacity", "capacity->inventory", "inventory->execute", "execute->monitor", "monitor->adjust"],
+      "node_types": {
+        "forecast": "start_event",
+        "aggregate": "activity",
+        "capacity_plan": "activity",
+        "inventory_plan": "activity",
+        "execute_plan": "activity",
+        "monitor": "activity",
+        "adjust": "activity"
+      }
+    },
+    "examples": [
+      "Sales department forecasts demand by product, aggregates to total manufacturing requirement, capacity planning validates feasibility, inventory targets set, execution plan created, actual performance monitored and forecast adjusted",
+      "Sales forecasting, demand consolidation, production capacity verification, safety stock determination, production planning, execution tracking, forecast accuracy improvement"
+    ],
+    "validation_rules": [
+      "Forecasts based on historical data",
+      "Capacity constraints documented",
+      "Safety stock levels defined",
+      "Monitoring and adjustment process regular"
+    ],
+    "anti_patterns": [
+      "Unrealistic forecasts",
+      "Ignoring capacity constraints",
+      "Insufficient inventory levels",
+      "No forecast adjustments"
+    ],
+    "tags": ["forecasting", "demand-planning", "capacity", "inventory"],
+    "confidence": 0.89,
+    "version": "1.0"
+  },
+  "pattern_manufacturing_shipment_001": {
+    "name": "Product Shipment and Logistics",
+    "description": "Order fulfillment, warehouse picking, packaging, shipping documentation, carrier handoff, and delivery",
+    "domain": "manufacturing",
+    "category": "sequential",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["order_ready", "pick", "pack", "label", "docs", "handoff", "tracking", "delivered"],
+      "edges": ["ready->pick", "pick->pack", "pack->label", "label->docs", "docs->handoff", "handoff->tracking", "tracking->delivered"],
+      "node_types": {
+        "order_ready": "start_event",
+        "pick": "activity",
+        "pack": "activity",
+        "label": "activity",
+        "docs": "activity",
+        "handoff": "activity",
+        "tracking": "activity",
+        "delivered": "activity"
+      }
+    },
+    "examples": [
+      "Order ready for fulfillment, items picked from warehouse, packed with protective materials, labeled with tracking number, shipping docs prepared, handed to carrier, delivery tracked, customer receives shipment",
+      "Fulfillment initiation, warehouse picking, packaging assembly, labeling and documentation, carrier handoff, shipment tracking, delivery confirmation"
+    ],
+    "validation_rules": [
+      "Order items verified before packing",
+      "Packaging meets shipping requirements",
+      "Shipping labels correct",
+      "Documentation complete"
+    ],
+    "anti_patterns": [
+      "Shipping wrong items",
+      "Inadequate packaging",
+      "Missing shipping documentation",
+      "No tracking information"
+    ],
+    "tags": ["shipping", "fulfillment", "logistics", "delivery"],
+    "confidence": 0.91,
+    "version": "1.0"
+  }
+}

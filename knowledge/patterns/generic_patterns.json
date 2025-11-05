@@ -1,0 +1,313 @@
+{
+  "pattern_sequential_001": {
+    "name": "Sequential Flow",
+    "description": "Linear sequence of activities where one task leads to another without branching",
+    "domain": "generic",
+    "category": "sequential",
+    "complexity": "simple",
+    "graph_structure": {
+      "nodes": ["start", "task1", "task2", "end"],
+      "edges": ["start->task1", "task1->task2", "task2->end"],
+      "node_types": {
+        "start": "start_event",
+        "task1": "activity",
+        "task2": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "The process starts with receiving a request, then processes it, and finally sends a response",
+      "First step is validation, then processing, then delivery"
+    ],
+    "validation_rules": [
+      "Each task must have exactly one incoming and one outgoing edge",
+      "No branching or merging allowed",
+      "Start and end events are required"
+    ],
+    "anti_patterns": [
+      "Unconnected tasks",
+      "Tasks with multiple incoming/outgoing edges in sequential flow",
+      "Missing start or end events"
+    ],
+    "tags": ["linear", "sequence", "basic", "simple"],
+    "confidence": 0.95,
+    "version": "1.0"
+  },
+  "pattern_parallel_001": {
+    "name": "Parallel Fork-Join",
+    "description": "Multiple independent tasks execute in parallel, then rejoin at a synchronization point",
+    "domain": "generic",
+    "category": "parallel",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["fork_gateway", "task1", "task2", "task3", "join_gateway"],
+      "edges": ["fork->task1", "fork->task2", "fork->task3", "task1->join", "task2->join", "task3->join"],
+      "node_types": {
+        "fork_gateway": "parallel_gateway",
+        "task1": "activity",
+        "task2": "activity",
+        "task3": "activity",
+        "join_gateway": "parallel_gateway"
+      }
+    },
+    "examples": [
+      "Process payment and send confirmation in parallel",
+      "Validate order, check inventory, and process payment at the same time",
+      "Email notification, SMS notification, and update database concurrently"
+    ],
+    "validation_rules": [
+      "Fork gateway must have 2+ outgoing edges",
+      "Join gateway must have 2+ incoming edges",
+      "All parallel branches must converge at join",
+      "No tasks between fork and join without proper connections"
+    ],
+    "anti_patterns": [
+      "Unbalanced forks (more branches out than in)",
+      "Missing join point causing deadlock",
+      "Tasks that only branch without rejoining"
+    ],
+    "tags": ["parallelism", "fork", "join", "concurrent", "synchronization"],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_xor_001": {
+    "name": "Exclusive Choice (XOR)",
+    "description": "One of multiple mutually exclusive paths is taken based on a condition",
+    "domain": "generic",
+    "category": "exclusive_choice",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["xor_split", "path1_task", "path2_task", "path3_task", "xor_merge"],
+      "edges": ["split->path1", "split->path2", "split->path3", "path1->merge", "path2->merge", "path3->merge"],
+      "node_types": {
+        "xor_split": "exclusive_gateway",
+        "path1_task": "activity",
+        "path2_task": "activity",
+        "path3_task": "activity",
+        "xor_merge": "exclusive_gateway"
+      }
+    },
+    "examples": [
+      "If order amount > 1000, require manager approval; otherwise, auto-approve",
+      "Route based on customer type: premium customers get fast track, standard get normal",
+      "Check payment method: credit card vs bank transfer vs cash"
+    ],
+    "validation_rules": [
+      "Each outgoing edge must have a guard condition",
+      "Conditions must be mutually exclusive",
+      "Only one path executes",
+      "All paths must converge"
+    ],
+    "anti_patterns": [
+      "Multiple paths executing simultaneously (use Inclusive for that)",
+      "Missing conditions on edges",
+      "Overlapping conditions"
+    ],
+    "tags": ["decision", "xor", "gateway", "exclusive", "branching"],
+    "confidence": 0.93,
+    "version": "1.0"
+  },
+  "pattern_or_001": {
+    "name": "Inclusive Choice (OR)",
+    "description": "One or more paths can execute based on conditions",
+    "domain": "generic",
+    "category": "inclusive_choice",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["or_split", "task1", "task2", "task3", "or_merge"],
+      "edges": ["split->task1", "split->task2", "split->task3", "task1->merge", "task2->merge", "task3->merge"],
+      "node_types": {
+        "or_split": "inclusive_gateway",
+        "task1": "activity",
+        "task2": "activity",
+        "task3": "activity",
+        "or_merge": "inclusive_gateway"
+      }
+    },
+    "examples": [
+      "Send email AND/OR SMS AND/OR push notification based on customer preferences",
+      "Optional processing: do core processing, then optionally add analytics, optionally send report"
+    ],
+    "validation_rules": [
+      "Multiple paths can execute",
+      "All active paths must complete before merge",
+      "At least one path must execute"
+    ],
+    "anti_patterns": [
+      "Using OR for mutually exclusive options (use XOR)",
+      "Missing merge causing incomplete execution",
+      "Unbounded iterations"
+    ],
+    "tags": ["decision", "or", "inclusive", "gateway", "multiple-paths"],
+    "confidence": 0.88,
+    "version": "1.0"
+  },
+  "pattern_loop_001": {
+    "name": "Loop Pattern",
+    "description": "Tasks repeat based on a condition until the loop exit condition is met",
+    "domain": "generic",
+    "category": "multi_instance",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["loop_check", "task", "loop_end"],
+      "edges": ["check->task", "task->check", "check->end"],
+      "node_types": {
+        "loop_check": "exclusive_gateway",
+        "task": "activity",
+        "loop_end": "exclusive_gateway"
+      }
+    },
+    "examples": [
+      "Keep retrying failed payment until success or max retries reached",
+      "Process each item in a batch one by one until all processed",
+      "Iterate through approval chain until all approvals obtained"
+    ],
+    "validation_rules": [
+      "Loop must have entry and exit condition",
+      "Loop body must be well-defined",
+      "Infinite loops must be prevented"
+    ],
+    "anti_patterns": [
+      "Infinite loops without proper exit condition",
+      "Loop variable not progressing",
+      "Missing loop counter"
+    ],
+    "tags": ["loop", "iteration", "repeat", "while"],
+    "confidence": 0.90,
+    "version": "1.0"
+  },
+  "pattern_event_001": {
+    "name": "Event-Driven Subprocess",
+    "description": "Subprocess triggered by specific events with event handling",
+    "domain": "generic",
+    "category": "event_driven",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["event_gateway", "handler_task", "normal_flow"],
+      "edges": ["gateway->handler", "gateway->normal", "handler->end", "normal->end"],
+      "node_types": {
+        "event_gateway": "event_based_gateway",
+        "handler_task": "activity",
+        "normal_flow": "activity"
+      }
+    },
+    "examples": [
+      "Listen for payment confirmation event, trigger fulfillment",
+      "Monitor system health; if failure detected, execute emergency shutdown"
+    ],
+    "validation_rules": [
+      "Event gateway waits for events",
+      "Multiple event handlers possible",
+      "Timeout handling required"
+    ],
+    "anti_patterns": [
+      "Missing event definitions",
+      "Unhandled events",
+      "No timeout mechanism"
+    ],
+    "tags": ["event", "async", "trigger", "handler"],
+    "confidence": 0.85,
+    "version": "1.0"
+  },
+  "pattern_exception_001": {
+    "name": "Exception Handler",
+    "description": "Task with error handling and recovery paths",
+    "domain": "generic",
+    "category": "exception_handling",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["main_task", "error_event", "recovery_task", "end"],
+      "edges": ["main_task->end", "main_task->error_event", "error_event->recovery"],
+      "node_types": {
+        "main_task": "activity",
+        "error_event": "intermediate_event",
+        "recovery_task": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Try processing payment; if fails, retry with different payment method",
+      "Attempt connection; on error, log and continue",
+      "Execute critical task; if error, escalate to manager"
+    ],
+    "validation_rules": [
+      "Main task must have error event",
+      "Recovery path must be defined",
+      "Error conditions must be specific"
+    ],
+    "anti_patterns": [
+      "Generic error handling",
+      "Unspecified recovery actions",
+      "Error swallowing without logging"
+    ],
+    "tags": ["error", "exception", "recovery", "error-handling"],
+    "confidence": 0.89,
+    "version": "1.0"
+  },
+  "pattern_subprocess_001": {
+    "name": "Subprocess",
+    "description": "Complex process encapsulated as a reusable subprocess",
+    "domain": "generic",
+    "category": "sequential",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["start", "subprocess", "end"],
+      "edges": ["start->subprocess", "subprocess->end"],
+      "node_types": {
+        "start": "start_event",
+        "subprocess": "subprocess",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Invoice approval subprocess contains multiple review steps",
+      "Order processing subprocess includes validation, payment, and fulfillment"
+    ],
+    "validation_rules": [
+      "Subprocess must have clear inputs and outputs",
+      "Internal flow must be well-defined",
+      "Can be reused multiple times"
+    ],
+    "anti_patterns": [
+      "Overly complex subprocess",
+      "Missing subprocess documentation",
+      "Unclear inputs/outputs"
+    ],
+    "tags": ["subprocess", "reusable", "modular", "composition"],
+    "confidence": 0.91,
+    "version": "1.0"
+  },
+  "pattern_data_001": {
+    "name": "Data Object Flow",
+    "description": "Tasks produce and consume data objects in a defined flow",
+    "domain": "generic",
+    "category": "data_flow",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["task1", "data_obj", "task2"],
+      "edges": ["task1->data_obj", "data_obj->task2"],
+      "node_types": {
+        "task1": "activity",
+        "data_obj": "data_object",
+        "task2": "activity"
+      }
+    },
+    "examples": [
+      "Order task produces order document, which is consumed by fulfillment task",
+      "Invoice creation produces invoice, which is used for payment processing"
+    ],
+    "validation_rules": [
+      "Data object must have producer and consumer",
+      "Data flow must be explicit",
+      "Data type must be consistent"
+    ],
+    "anti_patterns": [
+      "Implicit data passing",
+      "Data object with no producer",
+      "Data object with no consumer"
+    ],
+    "tags": ["data", "object", "flow", "input-output"],
+    "confidence": 0.87,
+    "version": "1.0"
+  }
+}

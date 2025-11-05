@@ -1,0 +1,284 @@
+{
+  "pattern_it_incident_001": {
+    "name": "Incident Management",
+    "description": "IT incident reporting, triage, investigation, resolution, and closure workflow",
+    "domain": "it",
+    "category": "exclusive_choice",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["report", "triage", "severity_check", "low_priority", "high_priority", "investigate", "resolve", "verify", "close"],
+      "edges": ["report->triage", "triage->check", "check->low", "check->high", "low->investigate", "high->investigate", "investigate->resolve", "resolve->verify", "verify->close"],
+      "node_types": {
+        "report": "start_event",
+        "triage": "activity",
+        "severity_check": "exclusive_gateway",
+        "low_priority": "activity",
+        "high_priority": "activity",
+        "investigate": "activity",
+        "resolve": "activity",
+        "verify": "activity",
+        "close": "end_event"
+      }
+    },
+    "examples": [
+      "User reports issue, IT triages and assigns severity, critical issues escalated for immediate investigation, resolution tested and verified before closure",
+      "Incident logged, prioritized by impact, high-severity incidents prioritized, root cause investigation, fix implementation, user verification, ticket closed"
+    ],
+    "validation_rules": [
+      "Incident must be triaged within 1 hour",
+      "Critical incidents require immediate assignment",
+      "Resolution must be verified by end user",
+      "Closure includes root cause analysis"
+    ],
+    "anti_patterns": [
+      "Closing without resolution verification",
+      "Missing triage step",
+      "No escalation for critical incidents",
+      "Incomplete root cause documentation"
+    ],
+    "tags": ["incident", "support", "troubleshooting", "resolution"],
+    "confidence": 0.93,
+    "version": "1.0"
+  },
+  "pattern_it_change_001": {
+    "name": "Change Management",
+    "description": "Change request submission, review, approval, implementation, and validation process",
+    "domain": "it",
+    "category": "exclusive_choice",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["submit_change", "assess", "review_gate", "approved", "rejected", "plan", "implement", "test", "deploy", "monitor"],
+      "edges": ["submit->assess", "assess->gate", "gate->approved", "gate->rejected", "approved->plan", "plan->implement", "implement->test", "test->deploy", "deploy->monitor"],
+      "node_types": {
+        "submit_change": "start_event",
+        "assess": "activity",
+        "review_gate": "exclusive_gateway",
+        "approved": "activity",
+        "rejected": "activity",
+        "plan": "activity",
+        "implement": "activity",
+        "test": "activity",
+        "deploy": "activity",
+        "monitor": "activity"
+      }
+    },
+    "examples": [
+      "Change request submitted, impact assessed and reviewed by CAB, approved changes planned and implemented, tested in staging, deployed to production, monitored for issues",
+      "IT change initiated, risk assessment, approval process, implementation planning, testing phase, production deployment, post-deployment monitoring"
+    ],
+    "validation_rules": [
+      "All changes require risk assessment",
+      "CAB approval mandatory",
+      "Rollback plan required",
+      "Testing required before production",
+      "Post-deployment monitoring"
+    ],
+    "anti_patterns": [
+      "Changes deployed without CAB approval",
+      "No testing in staging",
+      "Missing rollback plan",
+      "No post-deployment monitoring"
+    ],
+    "tags": ["change", "deployment", "approval", "implementation"],
+    "confidence": 0.94,
+    "version": "1.0"
+  },
+  "pattern_it_deployment_001": {
+    "name": "Software Deployment",
+    "description": "Release planning, build validation, staged deployment, and verification workflow",
+    "domain": "it",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["plan", "build", "validate_build", "stage_deploy", "stage_test", "prod_deploy", "monitor", "end"],
+      "edges": ["plan->build", "build->validate", "validate->stage", "stage->test", "test->prod", "prod->monitor", "monitor->end"],
+      "node_types": {
+        "plan": "start_event",
+        "build": "activity",
+        "validate_build": "activity",
+        "stage_deploy": "activity",
+        "stage_test": "activity",
+        "prod_deploy": "activity",
+        "monitor": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Release planned, code built and validated, deployed to staging, tested thoroughly, then deployed to production with monitoring",
+      "Deployment planning, artifact build, validation checks, staging environment deployment, UAT, production rollout, health monitoring"
+    ],
+    "validation_rules": [
+      "All builds must pass automated tests",
+      "Staging deployment required",
+      "UAT sign-off before production",
+      "Rollback capability maintained"
+    ],
+    "anti_patterns": [
+      "Direct production deployment",
+      "Skipping staging environment",
+      "No build validation",
+      "Missing UAT sign-off"
+    ],
+    "tags": ["deployment", "release", "testing", "production"],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_it_access_001": {
+    "name": "Access Request Management",
+    "description": "Employee access request submission, review, approval, and provisioning workflow",
+    "domain": "it",
+    "category": "exclusive_choice",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["submit", "verify", "security_check", "approved", "denied", "provision", "verify_access", "end"],
+      "edges": ["submit->verify", "verify->security", "security->approved", "security->denied", "approved->provision", "provision->verify", "verify->end"],
+      "node_types": {
+        "submit": "start_event",
+        "verify": "activity",
+        "security_check": "exclusive_gateway",
+        "approved": "activity",
+        "denied": "activity",
+        "provision": "activity",
+        "verify_access": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Employee requests system access, request verified against employee status, security review for least privilege, approved if compliant, access provisioned, verified working",
+      "Access request submitted, manager validation, security approval, provisioning of credentials, user verification of access"
+    ],
+    "validation_rules": [
+      "Manager approval required",
+      "Security review based on role",
+      "Least privilege principle applied",
+      "Access verified before closure"
+    ],
+    "anti_patterns": [
+      "No manager verification",
+      "Excessive permissions granted",
+      "No verification of access",
+      "Missing security review"
+    ],
+    "tags": ["access", "provisioning", "security", "authorization"],
+    "confidence": 0.91,
+    "version": "1.0"
+  },
+  "pattern_it_backup_001": {
+    "name": "Backup and Recovery",
+    "description": "Regular backup scheduling, verification, and disaster recovery testing",
+    "domain": "it",
+    "category": "sequential",
+    "complexity": "moderate",
+    "graph_structure": {
+      "nodes": ["schedule", "backup_run", "verify", "catalog", "test_restore", "document", "monitor"],
+      "edges": ["schedule->run", "run->verify", "verify->catalog", "catalog->test", "test->document", "document->monitor"],
+      "node_types": {
+        "schedule": "start_event",
+        "backup_run": "activity",
+        "verify": "activity",
+        "catalog": "activity",
+        "test_restore": "activity",
+        "document": "activity",
+        "monitor": "activity"
+      }
+    },
+    "examples": [
+      "Backup scheduled daily, runs automatically, backup integrity verified, files cataloged, quarterly restore tests, documentation updated, ongoing monitoring",
+      "Scheduled backup execution, verification of backup completeness, backup catalog maintenance, DR testing, documentation of procedures"
+    ],
+    "validation_rules": [
+      "Daily backups scheduled",
+      "Backup integrity verified",
+      "Restore testing quarterly",
+      "Recovery procedures documented"
+    ],
+    "anti_patterns": [
+      "No verification of backups",
+      "No restore testing",
+      "Missing backup catalog",
+      "Outdated recovery procedures"
+    ],
+    "tags": ["backup", "recovery", "disaster-recovery", "data-protection"],
+    "confidence": 0.90,
+    "version": "1.0"
+  },
+  "pattern_it_security_audit_001": {
+    "name": "Security Audit and Compliance",
+    "description": "Periodic security assessments, vulnerability scanning, and compliance verification",
+    "domain": "it",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["plan_audit", "scan", "assess", "identify_vulns", "report", "remediate", "retest", "certify"],
+      "edges": ["plan->scan", "scan->assess", "assess->identify", "identify->report", "report->remediate", "remediate->retest", "retest->certify"],
+      "node_types": {
+        "plan_audit": "start_event",
+        "scan": "activity",
+        "assess": "activity",
+        "identify_vulns": "activity",
+        "report": "activity",
+        "remediate": "activity",
+        "retest": "activity",
+        "certify": "activity"
+      }
+    },
+    "examples": [
+      "Annual security audit planned, vulnerability scanning performed, assessment conducted, vulnerabilities identified and reported, remediation actions taken, retesting done, compliance certified",
+      "Security audit scheduled, system scanning, vulnerability assessment, findings documented, remediation tracking, verification of fixes, compliance sign-off"
+    ],
+    "validation_rules": [
+      "Annual security audit mandatory",
+      "All vulnerabilities documented",
+      "Remediation within SLA",
+      "Retesting of fixes required"
+    ],
+    "anti_patterns": [
+      "Skipped audits",
+      "Unpatched vulnerabilities",
+      "No remediation tracking",
+      "Missing retest verification"
+    ],
+    "tags": ["security", "audit", "compliance", "vulnerability"],
+    "confidence": 0.89,
+    "version": "1.0"
+  },
+  "pattern_it_network_001": {
+    "name": "Network Infrastructure Change",
+    "description": "Network modification planning, implementation, testing, and documentation",
+    "domain": "it",
+    "category": "sequential",
+    "complexity": "complex",
+    "graph_structure": {
+      "nodes": ["design", "test_lab", "implement", "validate", "monitor", "document", "end"],
+      "edges": ["design->lab", "lab->implement", "implement->validate", "validate->monitor", "monitor->document", "document->end"],
+      "node_types": {
+        "design": "start_event",
+        "test_lab": "activity",
+        "implement": "activity",
+        "validate": "activity",
+        "monitor": "activity",
+        "document": "activity",
+        "end": "end_event"
+      }
+    },
+    "examples": [
+      "Network change designed and reviewed, tested in lab environment, implemented during maintenance window, connectivity validated, monitored for performance, documentation updated",
+      "Network design, lab testing, production implementation, validation of connections, performance monitoring, procedure documentation"
+    ],
+    "validation_rules": [
+      "Design documented and reviewed",
+      "Lab testing required",
+      "Maintenance window scheduled",
+      "Rollback plan prepared"
+    ],
+    "anti_patterns": [
+      "No lab testing",
+      "Unplanned implementation",
+      "No validation after change",
+      "Incomplete documentation"
+    ],
+    "tags": ["network", "infrastructure", "implementation", "change"],
+    "confidence": 0.88,
+    "version": "1.0"
+  }
+}
