@@ -465,7 +465,7 @@ class EnhancedXSDValidator:
                 ))
                 result.is_valid = False
             
-            # Validar que tiene startEvent (warning, no error)
+            # Validate that it has startEvent (warning, not error)
             start_events = process.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}startEvent')
             if not start_events:
                 start_events = process.findall('.//startEvent')
@@ -503,7 +503,7 @@ class EnhancedXSDValidator:
                 analyzer = GraphAnalyzer()
                 analysis_result = analyzer.analyze_graph_structure(graph, extraction_result)
                 
-                # Convertir anomalías a errores de validación
+                # Convert anomalies to validation errors
                 for anomaly in analysis_result.anomalies:
                     if anomaly.severity in ["high", "critical"]:
                         result.errors.append(XSDValidationError(
@@ -529,7 +529,7 @@ class EnhancedXSDValidator:
         if domain:
             self._validate_domain_semantics(xml_content, result, domain)
         
-        # 3. Validación de patrones aplicados
+        # 3. Validation of applied patterns
         if patterns_applied:
             self._validate_pattern_application(xml_content, result, patterns_applied)
     

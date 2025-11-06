@@ -212,28 +212,28 @@ When you create PR, these GitHub Actions run:
 ### PR Template (Use in PR Description)
 
 ```markdown
-## Descripción
-Breve descripción de los cambios.
+## Description
+Brief description of changes.
 
 Fixes #<ISSUE_NUMBER>
 
-## Cambios
-- Cambio 1
-- Cambio 2
-- Cambio 3
+## Changes
+- Change 1
+- Change 2
+- Change 3
 
 ## Testing
-- [x] Tests unitarios pasan
-- [x] Tests de integración pasan
+- [x] Unit tests pass
+- [x] Integration tests pass
 - [x] Coverage > 75%
-- [x] Probado localmente
+- [x] Tested locally
 
 ## Checklist
-- [x] Código sigue estilo del proyecto (black, ruff)
-- [x] Type checking pasa (mypy)
-- [x] Documentación actualizada si es necesario
-- [x] Sin breaking changes (o documentados)
-- [x] Pre-commit hooks pasan
+- [x] Code follows project style (black, ruff)
+- [x] Type checking passes (mypy)
+- [x] Documentation updated if necessary
+- [x] No breaking changes (or documented)
+- [x] Pre-commit hooks pass
 
 ## Testing Local
 
