@@ -136,17 +136,17 @@ git commit -m "feat: add new entity extraction logic (fixed tests)"
 
 ```bash
 # Push branch
-git push origin feature/issue-<NUMBER>-descripcion
+git push origin feature/issue-<NUMBER>-description
 
 # Create PR linked to issue (use "Fixes #<NUMBER>" to auto-close issue)
-gh pr create --title "feat: Título descriptivo" --body "Fixes #<ISSUE_NUMBER>
+gh pr create --title "feat: Descriptive title" --body "Fixes #<ISSUE_NUMBER>
 
-## Cambios
-- Cambio 1
-- Cambio 2
+## Changes
+- Change 1
+- Change 2
 
 ## Testing
-- [x] Tests pasan
+- [x] Tests pass
 - [x] Coverage > 75%
 
 Fixes #<ISSUE_NUMBER>"

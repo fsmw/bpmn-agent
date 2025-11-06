@@ -496,7 +496,7 @@ class EnhancedXSDValidator:
     ) -> None:
         """Validate semantic compliance with knowledge base enhancement."""
         
-        # 1. Validación semántica básica usando GraphAnalyzer si disponible
+        # 1. Basic semantic validation using GraphAnalyzer if available
         if graph:
             try:
                 from bpmn_agent.tools.graph_analysis import GraphAnalyzer
