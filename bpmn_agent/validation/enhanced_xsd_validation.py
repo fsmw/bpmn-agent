@@ -592,8 +592,8 @@ class EnhancedXSDValidator:
                 suggestion=f"Add HR elements like {', '.join(missing_elements[:3])} to improve process description",
                 pattern_reference="hr_domain_patterns"
             ))
-            result.errors_by_level[XSDValidationErrorLevel.INFO] += 1
-            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] += 1
+            result.errors_by_level[XSDValidationErrorLevel.INFO] = result.errors_by_level.get(XSDValidationErrorLevel.INFO, 0) + 1
+            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] = result.errors_by_category.get(ValidationErrorCategory.DOMAIN_SPECIFIC, 0) + 1
     
     def _validate_finance_semantics(self, xml_content: str, result: XSDValidationResult) -> None:
         """Validate finance domain-specific BPMN semantics."""
@@ -688,8 +688,8 @@ class EnhancedXSDValidator:
                         suggestion="Ensure approval sequence is properly implemented in the generated BPMN",
                         pattern_reference=pattern
                     ))
-                    result.errors_by_level[XSDValidationErrorLevel.INFO] += 1
-                    result.errors_by_category[ValidationErrorCategory.PATTERN_VIOLATION] += 1
+                    result.errors_by_level[XSDValidationErrorLevel.INFO] = result.errors_by_level.get(XSDValidationErrorLevel.INFO, 0) + 1
+                    result.errors_by_category[ValidationErrorCategory.PATTERN_VIOLATION] = result.errors_by_category.get(ValidationErrorCategory.PATTERN_VIOLATION, 0) + 1
     
     def _convert_validation_level(self, level: ValidationLevel) -> XSDValidationErrorLevel:
         """Convert ValidationLevel enum to XSDValidationErrorLevel."""
@@ -754,12 +754,15 @@ class EnhancedXSDValidator:
             )
         
         result.metrics = metrics
-        result.quality_score = (
+        # Calculate quality score as percentage (0-100), then normalize to 0.0-1.0
+        quality_percentage = (
             metrics.get("xsd_compliance_rate", 0) * 0.4 +
             metrics.get("semantic_validity_rate", 0) * 0.3 +
             metrics.get("domain_compliance_rate", 0) * 0.2 +
             metrics.get("structure_quality", 0) * 0.1
         )
+        # Normalize to 0.0-1.0 range
+        result.quality_score = quality_percentage / 100.0 if quality_percentage > 1.0 else quality_percentage
     
     def _generate_remediation_plan(self, result: XSDValidationResult) -> None:
         """Generate prioritized remediation plan for validation issues."""
@@ -828,9 +831,13 @@ class EnhancedXSDValidator:
             result.metrics["pattern_compliance_rate"] = pattern_compliance_rate
             
             # Recalculate overall quality score with pattern compliance
+            # Ensure quality_score stays in 0.0-1.0 range
+            pattern_score = pattern_compliance_rate / 100.0 if pattern_compliance_rate > 1.0 else pattern_compliance_rate
             result.quality_score = (
-                result.quality_score * 0.8 + pattern_compliance_rate * 0.2
+                result.quality_score * 0.8 + pattern_score * 0.2
             )
+            # Ensure it stays within bounds
+            result.quality_score = max(0.0, min(1.0, result.quality_score))
             
             # Add pattern validation summary
             result.remediation_plan.append("ℹ️ PATTERN COMPLIANCE:")

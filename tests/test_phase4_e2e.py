@@ -365,8 +365,9 @@ class TestPhase4E2EQualityMetrics:
         # Verify all stages completed
         assert len(state.stage_results) >= 5  # At least 5 stages
         
-        # Verify no fatal errors
-        assert not state.has_fatal_errors, "No fatal errors should occur"
+        # Verify no fatal errors - check stage results for fatal status
+        fatal_stages = [r for r in state.stage_results if r.status.value == "failed"]
+        assert len(fatal_stages) == 0, f"No fatal errors should occur, but found {len(fatal_stages)} failed stages"
 
 
 class TestPhase4E2ERAGFeedback:
