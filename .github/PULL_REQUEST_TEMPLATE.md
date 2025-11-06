@@ -1,44 +1,44 @@
-## Descripción
-Breve descripción de los cambios realizados.
+## Description
+Brief description of the changes made.
 
-<!-- Vincular al Issue usando: Fixes #<NUMBER>, Closes #<NUMBER>, o Related to #<NUMBER> -->
+<!-- Link to Issue using: Fixes #<NUMBER>, Closes #<NUMBER>, or Related to #<NUMBER> -->
 Fixes #<ISSUE_NUMBER>
 
-## Tipo de Cambio
-- [ ] Bug fix (corrección que no rompe funcionalidad existente)
-- [ ] Nueva funcionalidad (cambio que agrega funcionalidad sin romper existente)
-- [ ] Breaking change (cambio que rompe funcionalidad existente)
-- [ ] Documentación (solo cambios en documentación)
-- [ ] Refactorización (mejora de código sin cambiar funcionalidad)
+## Type of Change
+- [ ] Bug fix (fix that doesn't break existing functionality)
+- [ ] New feature (change that adds functionality without breaking existing)
+- [ ] Breaking change (change that breaks existing functionality)
+- [ ] Documentation (only documentation changes)
+- [ ] Refactoring (code improvement without changing functionality)
 
-## Cambios Realizados
-- Cambio 1
-- Cambio 2
-- Cambio 3
+## Changes Made
+- Change 1
+- Change 2
+- Change 3
 
 ## Testing
-- [x] Tests unitarios pasan
-- [x] Tests de integración pasan
+- [x] Unit tests pass
+- [x] Integration tests pass
 - [x] Coverage > 75%
-- [x] Probado localmente
-- [ ] Tests adicionales agregados para nueva funcionalidad
+- [x] Tested locally
+- [ ] Additional tests added for new functionality
 
 ## Checklist
-- [x] Código sigue estilo del proyecto (black, ruff)
-- [x] Type checking pasa (mypy)
-- [x] Pre-commit hooks pasan
-- [x] Documentación actualizada si es necesario
-- [x] Sin breaking changes (o documentados explícitamente)
-- [x] Commits siguen convención (feat:, fix:, docs:, etc.)
-- [x] PR vinculado al Issue correspondiente
+- [x] Code follows project style (black, ruff)
+- [x] Type checking passes (mypy)
+- [x] Pre-commit hooks pass
+- [x] Documentation updated if necessary
+- [x] No breaking changes (or explicitly documented)
+- [x] Commits follow convention (feat:, fix:, docs:, etc.)
+- [x] PR linked to corresponding Issue
 
-## Screenshots (si aplica)
-<!-- Agregar screenshots si hay cambios visuales -->
+## Screenshots (if applicable)
+<!-- Add screenshots if there are visual changes -->
 
-## Notas Adicionales
-<!-- Información adicional, consideraciones, etc. -->
+## Additional Notes
+<!-- Additional information, considerations, etc. -->
 
-## Relacionado
-<!-- Referencias a otros Issues o PRs -->
+## Related
+<!-- References to other Issues or PRs -->
 - Issue: #<NUMBER>
-- Relacionado: #<NUMBER>
+- Related: #<NUMBER>

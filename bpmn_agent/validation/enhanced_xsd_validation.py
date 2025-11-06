@@ -420,7 +420,7 @@ class EnhancedXSDValidator:
     def _validate_xml_structure(self, xml_doc: ET.Element, result: XSDValidationResult) -> None:
         """Validate basic XML structure and BPMN requirements."""
         
-        # 1. Validar namespace BPMN
+        # 1. Validate BPMN namespace
         root_tag = xml_doc.tag
         if not any(ns in root_tag for ns in ['definitions', '{http://www.omg.org/spec/BPMN']):
             # Try to find definitions element
@@ -436,7 +436,7 @@ class EnhancedXSDValidator:
                     ))
                     result.is_valid = False
         
-        # 2. Validar que existe al menos un proceso
+        # 2. Validate that at least one process exists
         # Try with namespace first
         processes = xml_doc.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}process')
         # Also try without namespace (for compatibility)
@@ -452,7 +452,7 @@ class EnhancedXSDValidator:
             ))
             result.is_valid = False
         
-        # 3. Validar estructura básica de cada proceso
+        # 3. Validate basic structure of each process
         for process in processes:
             process_id = process.get('id')
             if not process_id:
@@ -465,7 +465,7 @@ class EnhancedXSDValidator:
                 ))
                 result.is_valid = False
             
-            # Validar que tiene startEvent (warning, no error)
+            # Validate that it has startEvent (warning, not error)
             start_events = process.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}startEvent')
             if not start_events:
                 start_events = process.findall('.//startEvent')
@@ -479,7 +479,7 @@ class EnhancedXSDValidator:
                     suggestion="Add at least one startEvent to the process"
                 ))
         
-        # Actualizar contadores
+        # Update counters
         if result.errors:
             for error in result.errors:
                 result.errors_by_level[error.level] = result.errors_by_level.get(error.level, 0) + 1
@@ -496,14 +496,14 @@ class EnhancedXSDValidator:
     ) -> None:
         """Validate semantic compliance with knowledge base enhancement."""
         
-        # 1. Validación semántica básica usando GraphAnalyzer si disponible
+        # 1. Basic semantic validation using GraphAnalyzer if available
         if graph:
             try:
                 from bpmn_agent.tools.graph_analysis import GraphAnalyzer
                 analyzer = GraphAnalyzer()
                 analysis_result = analyzer.analyze_graph_structure(graph, extraction_result)
                 
-                # Convertir anomalías a errores de validación
+                # Convert anomalies to validation errors
                 for anomaly in analysis_result.anomalies:
                     if anomaly.severity in ["high", "critical"]:
                         result.errors.append(XSDValidationError(
@@ -525,11 +525,11 @@ class EnhancedXSDValidator:
             except Exception as e:
                 self.logger.warning(f"Graph analysis failed during semantic validation: {e}")
         
-        # 2. Validación de dominio específica
+        # 2. Domain-specific validation
         if domain:
             self._validate_domain_semantics(xml_content, result, domain)
         
-        # 3. Validación de patrones aplicados
+        # 3. Validation of applied patterns
         if patterns_applied:
             self._validate_pattern_application(xml_content, result, patterns_applied)
     

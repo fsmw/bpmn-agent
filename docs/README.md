@@ -1,53 +1,53 @@
-# Documentación del Proyecto BPMN Agent
+# BPMN Agent Project Documentation
 
-Bienvenido a la documentación del proyecto BPMN Agent. Esta carpeta contiene toda la documentación organizada por categorías.
+Welcome to the BPMN Agent project documentation. This folder contains all documentation organized by category.
 
-## 📚 Estructura de Documentación
+## 📚 Documentation Structure
 
-### [Guías de Usuario](guides/)
-Guías prácticas para usuarios del proyecto:
-- **[Getting Started](guides/getting-started.md)** - Instalación y configuración inicial
-- **[Integration Guide](guides/integration-guide.md)** - Guía de integración
-- **[KB Integration](guides/kb-integration.md)** - Integración con Knowledge Base
-- **[KB Integration Examples](guides/kb-integration-examples.md)** - Ejemplos de uso del KB
-- **[Quick Reference](guides/quick-reference.md)** - Referencia rápida de comandos
+### [User Guides](guides/)
+Practical guides for project users:
+- **[Getting Started](guides/getting-started.md)** - Installation and initial setup
+- **[Integration Guide](guides/integration-guide.md)** - Integration guide
+- **[KB Integration](guides/kb-integration.md)** - Knowledge Base integration
+- **[KB Integration Examples](guides/kb-integration-examples.md)** - KB usage examples
+- **[Quick Reference](guides/quick-reference.md)** - Command quick reference
 
-### [Desarrollo](development/)
-Documentación para desarrolladores:
-- **[DevOps Setup](development/devops-setup.md)** - Configuración de CI/CD y desarrollo
-- **[GitHub Workflow](development/github-workflow.md)** - Workflow de desarrollo con GitHub
-- **[VENV Usage](development/venv-usage.md)** - Uso de entornos virtuales
-- **[VENV Enforcement](development/venv-enforcement.md)** - Configuración de enforcement de venv
+### [Development](development/)
+Documentation for developers:
+- **[DevOps Setup](development/devops-setup.md)** - CI/CD and development setup
+- **[GitHub Workflow](development/github-workflow.md)** - Development workflow with GitHub
+- **[VENV Usage](development/venv-usage.md)** - Virtual environment usage
+- **[VENV Enforcement](development/venv-enforcement.md)** - VENV enforcement configuration
 
-### [Planes](plans/)
-Planes estratégicos y resúmenes de fases:
-- Planes de implementación por fase
-- Resúmenes de completación
-- Roadmaps estratégicos
+### [Plans](plans/)
+Strategic plans and phase summaries:
+- Implementation plans by phase
+- Completion summaries
+- Strategic roadmaps
 
-### [Arquitectura](architecture/)
-Documentación de arquitectura del sistema (futuro):
-- Overview del sistema
-- Documentación de fases
-- Decisiones de diseño
+### [Architecture](architecture/)
+System architecture documentation (future):
+- System overview
+- Phase documentation
+- Design decisions
 
-## 🚀 Inicio Rápido
+## 🚀 Quick Start
 
-Si eres nuevo en el proyecto:
-1. Lee el [README.md](../README.md) principal
-2. Sigue la guía [Getting Started](guides/getting-started.md)
-3. Revisa los [ejemplos](../examples/) de BPMN
+If you're new to the project:
+1. Read the main [README.md](../README.md)
+2. Follow the [Getting Started](guides/getting-started.md) guide
+3. Review the [BPMN examples](../examples/)
 
-## 📝 Contribuir
+## 📝 Contributing
 
-Si quieres contribuir al proyecto:
-1. Lee [CONTRIBUTING.md](../CONTRIBUTING.md)
-2. Revisa [GitHub Workflow](development/github-workflow.md)
-3. Configura tu entorno con [DevOps Setup](development/devops-setup.md)
+If you want to contribute to the project:
+1. Read [CONTRIBUTING.md](../CONTRIBUTING.md)
+2. Review [GitHub Workflow](development/github-workflow.md)
+3. Set up your environment with [DevOps Setup](development/devops-setup.md)
 
-## 🔗 Enlaces Útiles
+## 🔗 Useful Links
 
-- [README Principal](../README.md)
+- [Main README](../README.md)
 - [CONTRIBUTING.md](../CONTRIBUTING.md)
-- [Estado del Proyecto](../PROJECT_STATUS.md) (si existe)
-- [Índice del Proyecto](../PROJECT_INDEX.md) (si existe)
+- [Project Status](../PROJECT_STATUS.md) (if exists)
+- [Project Index](../PROJECT_INDEX.md) (if exists)

@@ -87,7 +87,7 @@ We follow a structured workflow using GitHub Issues, Branches, and Pull Requests
 ```bash
 # From terminal
 cd src/bpmn-agent
-gh issue create --title "Título descriptivo" --body "Descripción" --label "enhancement"
+gh issue create --title "Descriptive title" --body "Description" --label "enhancement"
 
 # Or from GitHub web: https://github.com/fsmw/bpmn-agent/issues/new
 ```
@@ -107,7 +107,7 @@ gh issue develop <ISSUE_NUMBER>
 # Or manually
 git checkout main
 git pull origin main
-git checkout -b feature/issue-<NUMBER>-descripcion-corta
+git checkout -b feature/issue-<NUMBER>-short-description
 ```
 
 #### Step 3: Develop Locally
@@ -136,17 +136,17 @@ git commit -m "feat: add new entity extraction logic (fixed tests)"
 
 ```bash
 # Push branch
-git push origin feature/issue-<NUMBER>-descripcion
+git push origin feature/issue-<NUMBER>-description
 
 # Create PR linked to issue (use "Fixes #<NUMBER>" to auto-close issue)
-gh pr create --title "feat: Título descriptivo" --body "Fixes #<ISSUE_NUMBER>
+gh pr create --title "feat: Descriptive title" --body "Fixes #<ISSUE_NUMBER>
 
-## Cambios
-- Cambio 1
-- Cambio 2
+## Changes
+- Change 1
+- Change 2
 
 ## Testing
-- [x] Tests pasan
+- [x] Tests pass
 - [x] Coverage > 75%
 
 Fixes #<ISSUE_NUMBER>"
@@ -212,28 +212,28 @@ When you create PR, these GitHub Actions run:
 ### PR Template (Use in PR Description)
 
 ```markdown
-## Descripción
-Breve descripción de los cambios.
+## Description
+Brief description of changes.
 
 Fixes #<ISSUE_NUMBER>
 
-## Cambios
-- Cambio 1
-- Cambio 2
-- Cambio 3
+## Changes
+- Change 1
+- Change 2
+- Change 3
 
 ## Testing
-- [x] Tests unitarios pasan
-- [x] Tests de integración pasan
+- [x] Unit tests pass
+- [x] Integration tests pass
 - [x] Coverage > 75%
-- [x] Probado localmente
+- [x] Tested locally
 
 ## Checklist
-- [x] Código sigue estilo del proyecto (black, ruff)
-- [x] Type checking pasa (mypy)
-- [x] Documentación actualizada si es necesario
-- [x] Sin breaking changes (o documentados)
-- [x] Pre-commit hooks pasan
+- [x] Code follows project style (black, ruff)
+- [x] Type checking passes (mypy)
+- [x] Documentation updated if necessary
+- [x] No breaking changes (or documented)
+- [x] Pre-commit hooks pass
 
 ## Testing Local
 

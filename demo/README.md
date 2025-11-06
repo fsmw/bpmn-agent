@@ -1,56 +1,56 @@
-# Demos y Ejemplos Ejecutables
+# Demos and Executable Examples
 
-Esta carpeta contiene scripts de demostración y ejemplos ejecutables del proyecto BPMN Agent.
+This folder contains demonstration scripts and executable examples for the BPMN Agent project.
 
-## 📋 Demos Disponibles
+## 📋 Available Demos
 
 ### Orchestrator Demos
 
-- **`orchestrator.py`** - Demo básico del orchestrator
-- **`phase3_orchestrator.py`** - Demo del orchestrator con funcionalidades Phase 3
-- **`phase3_tools.py`** - Demo de herramientas Phase 3
-- **`phase3_tools_working.py`** - Demo funcional de herramientas Phase 3
+- **`orchestrator.py`** - Basic orchestrator demo
+- **`phase3_orchestrator.py`** - Orchestrator demo with Phase 3 features
+- **`phase3_tools.py`** - Phase 3 tools demo
+- **`phase3_tools_working.py`** - Working Phase 3 tools demo
 
 ### Validation Demos
 
-- **`validation_phase4_demo.sh`** - Script de demostración de validación Phase 4
+- **`validation_phase4_demo.sh`** - Phase 4 validation demonstration script
 
-## 🚀 Ejecución
+## 🚀 Execution
 
-### Requisitos Previos
+### Prerequisites
 
-1. Asegúrate de tener el entorno virtual activado:
+1. Make sure you have the virtual environment activated:
    ```bash
    cd /home/fsmw/dev/bpmn/src/bpmn-agent
    source .venv/bin/activate
    ```
 
-2. Verifica que las dependencias estén instaladas:
+2. Verify that dependencies are installed:
    ```bash
    pip install -e ".[dev]"
    ```
 
-### Ejecutar Demos
+### Run Demos
 
 ```bash
-# Demo básico del orchestrator
+# Basic orchestrator demo
 python demo/orchestrator.py
 
-# Demo Phase 3
+# Phase 3 demo
 python demo/phase3_orchestrator.py
 
-# Demo de validación Phase 4
+# Phase 4 validation demo
 bash demo/validation_phase4_demo.sh
 ```
 
-## 📝 Notas
+## 📝 Notes
 
-- Los demos pueden requerir configuración de variables de entorno (LLM_PROVIDER, etc.)
-- Algunos demos pueden requerir servicios externos (Ollama, OpenAI, etc.)
-- Revisa los comentarios en cada archivo para más detalles
+- Demos may require environment variable configuration (LLM_PROVIDER, etc.)
+- Some demos may require external services (Ollama, OpenAI, etc.)
+- Review comments in each file for more details
 
-## 🔗 Ver También
+## 🔗 See Also
 
-- [Guías de Usuario](../docs/guides/)
-- [Ejemplos BPMN](../examples/)
-- [Documentación Principal](../README.md)
+- [User Guides](../docs/guides/)
+- [BPMN Examples](../examples/)
+- [Main Documentation](../README.md)

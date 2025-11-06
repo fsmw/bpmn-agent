@@ -1,174 +1,174 @@
-# Guía de Contribución
+# Contributing Guide
 
-¡Gracias por tu interés en contribuir a `bpmn-agent`! Este documento describe nuestro proceso de desarrollo y cómo trabajar con Issues, Branches, Pull Requests y CI/CD.
+Thank you for your interest in contributing to `bpmn-agent`! This document describes our development process and how to work with Issues, Branches, Pull Requests, and CI/CD.
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-- [Workflow de Desarrollo](#workflow-de-desarrollo)
-- [Crear un Issue](#crear-un-issue)
-- [Crear un Branch](#crear-un-branch)
-- [Desarrollo Local](#desarrollo-local)
-- [Crear un Pull Request](#crear-un-pull-request)
-- [CI/CD y Quality Gates](#cicd-y-quality-gates)
-- [Estándares de Código](#estándares-de-código)
+- [Development Workflow](#development-workflow)
+- [Creating an Issue](#creating-an-issue)
+- [Creating a Branch](#creating-a-branch)
+- [Local Development](#local-development)
+- [Creating a Pull Request](#creating-a-pull-request)
+- [CI/CD and Quality Gates](#cicd-and-quality-gates)
+- [Code Standards](#code-standards)
 - [Testing](#testing)
-- [Commits y Mensajes](#commits-y-mensajes)
+- [Commits and Messages](#commits-and-messages)
 
 ---
 
-## 🔄 Workflow de Desarrollo
+## 🔄 Development Workflow
 
-Nuestro proceso sigue un flujo estructurado: **Issue → Branch → PR → CI → Merge**
+Our process follows a structured flow: **Issue → Branch → PR → CI → Merge**
 
 ```
-1. Crear Issue          → Documenta qué se va a hacer
-2. Crear Branch          → Trabaja en una rama específica
-3. Desarrollo Local      → Pre-commit hooks aseguran calidad
-4. Crear Pull Request    → Vincula PR al Issue
-5. CI/CD Automático      → Tests, linting, coverage
-6. Code Review           → Revisión y aprobación
-7. Merge                 → Cierre automático del Issue
+1. Create Issue          → Document what will be done
+2. Create Branch          → Work on a specific branch
+3. Local Development      → Pre-commit hooks ensure quality
+4. Create Pull Request    → Link PR to Issue
+5. Automatic CI/CD        → Tests, linting, coverage
+6. Code Review           → Review and approval
+7. Merge                 → Automatic Issue closure
 ```
 
-### ¿Por qué este workflow?
+### Why this workflow?
 
-- ✅ **Trazabilidad completa**: Cada cambio está vinculado a un issue
-- ✅ **Calidad garantizada**: CI/CD previene código roto en `main`
-- ✅ **Documentación automática**: Issues documentan decisiones y contexto
-- ✅ **Colaboración efectiva**: Code review más informado
-- ✅ **Métricas**: Visibilidad del progreso del proyecto
+- ✅ **Complete traceability**: Every change is linked to an issue
+- ✅ **Guaranteed quality**: CI/CD prevents broken code in `main`
+- ✅ **Automatic documentation**: Issues document decisions and context
+- ✅ **Effective collaboration**: More informed code review
+- ✅ **Metrics**: Visibility into project progress
 
 ---
 
-## 📝 Crear un Issue
+## 📝 Creating an Issue
 
-Antes de empezar a codificar, **siempre crea un Issue** que describa el trabajo a realizar.
+Before starting to code, **always create an Issue** that describes the work to be done.
 
-### Cuándo crear un Issue
+### When to create an Issue
 
-- ✅ Nueva funcionalidad
-- ✅ Corrección de bugs
-- ✅ Mejoras de documentación
-- ✅ Refactorización
-- ✅ Tareas de infraestructura
+- ✅ New functionality
+- ✅ Bug fixes
+- ✅ Documentation improvements
+- ✅ Refactoring
+- ✅ Infrastructure tasks
 
-### Cómo crear un Issue
+### How to create an Issue
 
-#### Opción 1: Desde GitHub CLI
+#### Option 1: From GitHub CLI
 
 ```bash
 cd src/bpmn-agent
-gh issue create --title "Título descriptivo" --body "Descripción detallada" --label "enhancement"
+gh issue create --title "Descriptive title" --body "Detailed description" --label "enhancement"
 ```
 
-#### Opción 2: Desde GitHub Web
+#### Option 2: From GitHub Web
 
-1. Ve a https://github.com/fsmw/bpmn-agent/issues/new
-2. Usa el template apropiado (si existe)
-3. Completa título, descripción, labels
+1. Go to https://github.com/fsmw/bpmn-agent/issues/new
+2. Use the appropriate template (if available)
+3. Complete title, description, labels
 
-### Template de Issue Recomendado
+### Recommended Issue Template
 
 ```markdown
-## 🎯 Objetivo
-Descripción clara del objetivo y contexto.
+## 🎯 Objective
+Clear description of the objective and context.
 
-## 📋 Tareas
-- [ ] Tarea 1
-- [ ] Tarea 2
-- [ ] Tarea 3
+## 📋 Tasks
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task 3
 
-## 📁 Archivos a Modificar
-- `ruta/al/archivo.py`
-- `tests/test_archivo.py`
+## 📁 Files to Modify
+- `path/to/file.py`
+- `tests/test_file.py`
 
-## ✅ Criterios de Éxito
-- [ ] Criterio 1
-- [ ] Criterio 2
-- [ ] Tests pasan
+## ✅ Success Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Tests pass
 - [ ] Coverage > 75%
 
-## 🔗 Relacionado
+## 🔗 Related
 - Issue: #X
-- Plan: `ARCHIVO.md`
+- Plan: `FILE.md`
 
-## 📝 Notas
-Notas adicionales, consideraciones, etc.
+## 📝 Notes
+Additional notes, considerations, etc.
 ```
 
-### Labels Disponibles
+### Available Labels
 
-**Por Tipo:**
-- `bug` - Corrección de errores
-- `enhancement` - Nueva funcionalidad
-- `documentation` - Cambios en documentación
-- `refactoring` - Refactorización
+**By Type:**
+- `bug` - Bug fixes
+- `enhancement` - New functionality
+- `documentation` - Documentation changes
+- `refactoring` - Refactoring
 
-**Por Fase/Componente:**
+**By Phase/Component:**
 - `phase1`, `phase2`, `phase3`, `phase4`, `phase5`
-- `ci-cd` - Mejoras de CI/CD
+- `ci-cd` - CI/CD improvements
 - `testing` - Tests
-- `validation` - Validación
+- `validation` - Validation
 
-**Por Prioridad:**
-- `priority:high` - Alta prioridad
-- `priority:medium` - Prioridad media
-- `priority:low` - Baja prioridad
+**By Priority:**
+- `priority:high` - High priority
+- `priority:medium` - Medium priority
+- `priority:low` - Low priority
 
 ---
 
-## 🌿 Crear un Branch
+## 🌿 Creating a Branch
 
-Una vez que tengas un Issue, crea un branch para trabajar en él.
+Once you have an Issue, create a branch to work on it.
 
-### Opción 1: Usar GitHub CLI (Recomendado)
+### Option 1: Use GitHub CLI (Recommended)
 
 ```bash
 cd src/bpmn-agent
 gh issue develop <ISSUE_NUMBER>
 ```
 
-Esto automáticamente:
-- Crea un branch vinculado al issue (ej: `issue-2-integrate-phase4-validation`)
-- Hace checkout del branch
-- Vincula el branch al issue en GitHub
+This automatically:
+- Creates a branch linked to the issue (e.g., `issue-2-integrate-phase4-validation`)
+- Checks out the branch
+- Links the branch to the issue on GitHub
 
-### Opción 2: Crear Manualmente
+### Option 2: Create Manually
 
 ```bash
 cd src/bpmn-agent
 git checkout main
 git pull origin main
-git checkout -b feature/issue-<NUMBER>-descripcion-corta
+git checkout -b feature/issue-<NUMBER>-short-description
 ```
 
-### Convención de Nombres de Branches
+### Branch Naming Convention
 
 ```
-feature/issue-<NUMBER>-descripcion-corta
-bugfix/issue-<NUMBER>-descripcion-corta
-docs/issue-<NUMBER>-descripcion-corta
-refactor/issue-<NUMBER>-descripcion-corta
+feature/issue-<NUMBER>-short-description
+bugfix/issue-<NUMBER>-short-description
+docs/issue-<NUMBER>-short-description
+refactor/issue-<NUMBER>-short-description
 ```
 
-Ejemplos:
+Examples:
 - `feature/issue-2-integrate-phase4-validation`
 - `bugfix/issue-5-fix-xsd-validation-error`
 - `docs/issue-8-update-readme`
 
 ---
 
-## 💻 Desarrollo Local
+## 💻 Local Development
 
-### Setup Inicial
+### Initial Setup
 
 ```bash
 cd src/bpmn-agent
 
-# Setup automatizado (recomendado)
+# Automated setup (recommended)
 bash scripts/setup-dev.sh
 
-# O manualmente
+# Or manually
 pip install -e ".[dev]"
 pre-commit install
 pre-commit install --hook-type pre-push
@@ -176,152 +176,152 @@ pre-commit install --hook-type pre-push
 
 ### Pre-commit Hooks
 
-Los hooks se ejecutan automáticamente en cada commit:
+Hooks run automatically on each commit:
 
-- ✅ **black** - Formateo de código
-- ✅ **ruff** - Linting y auto-fix
+- ✅ **black** - Code formatting
+- ✅ **ruff** - Linting and auto-fix
 - ✅ **mypy** - Type checking
-- ✅ **pytest-unit** - Tests unitarios rápidos
-- ✅ **pytest-integration** - Tests de integración
-- ✅ **coverage-check** - Verificación de coverage (warning si < 75%)
+- ✅ **pytest-unit** - Fast unit tests
+- ✅ **pytest-integration** - Integration tests
+- ✅ **coverage-check** - Coverage verification (warning if < 75%)
 
-### Ejecutar Hooks Manualmente
+### Run Hooks Manually
 
 ```bash
-# Todos los archivos
+# All files
 pre-commit run --all-files
 
-# Solo archivos staged
+# Only staged files
 pre-commit run
 
-# Hook específico
+# Specific hook
 pre-commit run black --all-files
 ```
 
-### Desarrollo Iterativo
+### Iterative Development
 
 ```bash
-# 1. Hacer cambios
-vim bpmn_agent/archivo.py
+# 1. Make changes
+vim bpmn_agent/file.py
 
-# 2. Agregar cambios
-git add bpmn_agent/archivo.py
+# 2. Add changes
+git add bpmn_agent/file.py
 
-# 3. Commit (pre-commit se ejecuta automáticamente)
-git commit -m "feat: agregar funcionalidad X (refs #<ISSUE_NUMBER>)"
+# 3. Commit (pre-commit runs automatically)
+git commit -m "feat: add feature X (refs #<ISSUE_NUMBER>)"
 
-# 4. Si pre-commit falla, corregir y volver a commitear
-# 5. Repetir hasta completar el trabajo
+# 4. If pre-commit fails, fix and commit again
+# 5. Repeat until work is complete
 ```
 
 ---
 
-## 🔀 Crear un Pull Request
+## 🔀 Creating a Pull Request
 
-Cuando tu trabajo esté listo, crea un Pull Request.
+When your work is ready, create a Pull Request.
 
-### Requisitos Previos
+### Prerequisites
 
-- ✅ Todos los tests pasan localmente
-- ✅ Pre-commit hooks pasan
+- ✅ All tests pass locally
+- ✅ Pre-commit hooks pass
 - ✅ Coverage > 75%
-- ✅ Código formateado y linted
-- ✅ Commits con mensajes descriptivos
+- ✅ Code formatted and linted
+- ✅ Commits with descriptive messages
 
-### Crear PR desde Terminal
+### Create PR from Terminal
 
 ```bash
 cd src/bpmn-agent
 
-# Push del branch
-git push origin feature/issue-<NUMBER>-descripcion
+# Push branch
+git push origin feature/issue-<NUMBER>-description
 
-# Crear PR vinculado al issue
-gh pr create --title "feat: Título descriptivo" --body "Fixes #<ISSUE_NUMBER>
+# Create PR linked to issue
+gh pr create --title "feat: Descriptive title" --body "Fixes #<ISSUE_NUMBER>
 
-## Cambios
-- Cambio 1
-- Cambio 2
-- Cambio 3
+## Changes
+- Change 1
+- Change 2
+- Change 3
 
 ## Testing
-- [x] Tests unitarios pasan
-- [x] Tests de integración pasan
+- [x] Unit tests pass
+- [x] Integration tests pass
 - [x] Coverage > 75%
 
 ## Checklist
-- [x] Código sigue estilo del proyecto
-- [x] Documentación actualizada si es necesario
-- [x] Sin breaking changes (o documentados)
+- [x] Code follows project style
+- [x] Documentation updated if necessary
+- [x] No breaking changes (or documented)
 
 Fixes #<ISSUE_NUMBER>"
 ```
 
-### Crear PR desde GitHub Web
+### Create PR from GitHub Web
 
-1. Push tu branch: `git push origin feature/issue-<NUMBER>-descripcion`
-2. Ve a https://github.com/fsmw/bpmn-agent/compare
-3. Selecciona tu branch
-4. Completa el formulario del PR
-5. **Importante**: Incluye `Fixes #<ISSUE_NUMBER>` en la descripción
+1. Push your branch: `git push origin feature/issue-<NUMBER>-description`
+2. Go to https://github.com/fsmw/bpmn-agent/compare
+3. Select your branch
+4. Complete the PR form
+5. **Important**: Include `Fixes #<ISSUE_NUMBER>` in the description
 
-### Template de PR
+### PR Template
 
 ```markdown
-## Descripción
-Breve descripción de los cambios.
+## Description
+Brief description of changes.
 
 Fixes #<ISSUE_NUMBER>
 
-## Cambios
-- Cambio 1
-- Cambio 2
-- Cambio 3
+## Changes
+- Change 1
+- Change 2
+- Change 3
 
 ## Testing
-- [x] Tests unitarios pasan
-- [x] Tests de integración pasan
+- [x] Unit tests pass
+- [x] Integration tests pass
 - [x] Coverage > 75%
-- [x] Probado localmente
+- [x] Tested locally
 
 ## Checklist
-- [x] Código sigue estilo del proyecto (black, ruff)
-- [x] Type checking pasa (mypy)
-- [x] Documentación actualizada si es necesario
-- [x] Sin breaking changes (o documentados)
-- [x] Pre-commit hooks pasan
+- [x] Code follows project style (black, ruff)
+- [x] Type checking passes (mypy)
+- [x] Documentation updated if necessary
+- [x] No breaking changes (or documented)
+- [x] Pre-commit hooks pass
 
-## Screenshots (si aplica)
+## Screenshots (if applicable)
 ...
 
-## Notas Adicionales
+## Additional Notes
 ...
 ```
 
-### Palabras Clave para Cerrar Issues
+### Keywords to Close Issues
 
-Incluye una de estas frases en el PR para cerrar automáticamente el issue:
+Include one of these phrases in the PR to automatically close the issue:
 
-- `Fixes #<NUMBER>` - Cierra el issue cuando se mergea
-- `Closes #<NUMBER>` - Igual que Fixes
-- `Resolves #<NUMBER>` - Igual que Fixes
-- `Related to #<NUMBER>` - Solo vincula, no cierra
+- `Fixes #<NUMBER>` - Closes the issue when merged
+- `Closes #<NUMBER>` - Same as Fixes
+- `Resolves #<NUMBER>` - Same as Fixes
+- `Related to #<NUMBER>` - Only links, doesn't close
 
 ---
 
-## ✅ CI/CD y Quality Gates
+## ✅ CI/CD and Quality Gates
 
-### ¿Qué pasa cuando creas un PR?
+### What happens when you create a PR?
 
-GitHub Actions ejecuta automáticamente:
+GitHub Actions automatically runs:
 
 #### 1. CI Workflow (`ci.yml`)
-- ✅ Tests en Python 3.10, 3.11, 3.12
+- ✅ Tests on Python 3.10, 3.11, 3.12
 - ✅ Linting (black, ruff)
 - ✅ Type checking (mypy)
 - ✅ Unit tests
 - ✅ Integration tests
-- ✅ Coverage check (debe ser > 75%)
+- ✅ Coverage check (must be > 75%)
 
 #### 2. Quality Workflow (`quality.yml`)
 - ✅ Security scanning (Bandit)
@@ -331,51 +331,51 @@ GitHub Actions ejecuta automáticamente:
 - ✅ SBOM generation
 
 #### 3. Release Workflow (`release.yml`)
-- Solo se ejecuta cuando se crea un tag `v*`
+- Only runs when a `v*` tag is created
 
-### Verificar Estado de CI
+### Check CI Status
 
 ```bash
-# Ver checks del PR actual
+# View checks for current PR
 gh pr checks
 
-# Ver runs recientes
+# View recent runs
 gh run list
 
-# Ver detalles de un run específico
+# View details of a specific run
 gh run view <RUN_ID>
 ```
 
-### ¿Qué hacer si CI falla?
+### What to do if CI fails?
 
-1. **Revisar logs**: `gh run view <RUN_ID>` o desde GitHub web
-2. **Reproducir localmente**: Ejecutar el mismo comando que falló
-3. **Corregir el problema**
-4. **Push nuevo commit**: CI se ejecutará automáticamente
+1. **Review logs**: `gh run view <RUN_ID>` or from GitHub web
+2. **Reproduce locally**: Run the same command that failed
+3. **Fix the problem**
+4. **Push new commit**: CI will run automatically
 
-### Quality Gates (REQUERIDOS)
+### Quality Gates (REQUIRED)
 
-**El PR NO puede mergearse si:**
+**The PR CANNOT be merged if:**
 
-- ❌ Tests fallan
+- ❌ Tests fail
 - ❌ Coverage < 75%
-- ❌ Linting falla
-- ❌ Type checking falla
-- ❌ Security issues críticos
+- ❌ Linting fails
+- ❌ Type checking fails
+- ❌ Critical security issues
 
-**El PR puede mergearse cuando:**
+**The PR can be merged when:**
 
-- ✅ Todos los checks pasan
-- ✅ Al menos 1 aprobación de review (si está configurado)
-- ✅ Branch está actualizado con `main`
+- ✅ All checks pass
+- ✅ At least 1 review approval (if configured)
+- ✅ Branch is up to date with `main`
 
 ---
 
-## 📏 Estándares de Código
+## 📏 Code Standards
 
-### Formateo
+### Formatting
 
-Usamos **black** con configuración estándar:
+We use **black** with standard configuration:
 
 ```bash
 black bpmn_agent/
@@ -383,7 +383,7 @@ black bpmn_agent/
 
 ### Linting
 
-Usamos **ruff** para linting rápido:
+We use **ruff** for fast linting:
 
 ```bash
 ruff check bpmn_agent/
@@ -392,7 +392,7 @@ ruff check --fix bpmn_agent/  # Auto-fix
 
 ### Type Checking
 
-Usamos **mypy** para type safety:
+We use **mypy** for type safety:
 
 ```bash
 mypy bpmn_agent/ --ignore-missing-imports
@@ -400,7 +400,7 @@ mypy bpmn_agent/ --ignore-missing-imports
 
 ### Imports
 
-Orden de imports (ruff los ordena automáticamente):
+Import order (ruff orders them automatically):
 
 ```python
 # 1. Standard library
@@ -420,66 +420,67 @@ from bpmn_agent.models import Process
 
 ## 🧪 Testing
 
-### Estructura de Tests
+### Test Structure
 
 ```
 tests/
-├── unit/              # Tests unitarios rápidos
-├── integration/      # Tests de integración
-├── test_*.py         # Tests por módulo
-└── conftest.py       # Fixtures compartidas
+├── unit/              # Fast unit tests
+├── integration/      # Integration tests
+├── test_*.py         # Tests by module
+└── conftest.py       # Shared fixtures
 ```
 
-### Ejecutar Tests
+### Run Tests
 
 ```bash
-# Todos los tests
+# All tests
 pytest
 
-# Solo unitarios (rápidos)
+# Only unit tests (fast)
 pytest -m "unit and not llm and not slow"
 
-# Solo integración
+# Only integration
 pytest -m "integration and not llm"
 
-# Con coverage
+# With coverage
 pytest --cov=bpmn_agent --cov-report=term --cov-report=html
 
-# Archivo específico
-pytest tests/test_archivo.py
+# Specific file
+pytest tests/test_file.py
 
-# Test específico
-pytest tests/test_archivo.py::test_funcion
+# Specific test
+pytest tests/test_file.py::test_function
 ```
 
-### Markers Disponibles
+### Available Markers
 
-- `@pytest.mark.unit` - Test unitario
-- `@pytest.mark.integration` - Test de integración
-- `@pytest.mark.llm` - Requiere LLM (se salta en CI por defecto)
-- `@pytest.mark.slow` - Test lento
+- `@pytest.mark.unit` - Unit test
+- `@pytest.mark.integration` - Integration test
+- `@pytest.mark.llm` - Requires LLM (skipped in CI by default)
+- `@pytest.mark.slow` - Slow test
+- `@pytest.mark.e2e` - End-to-end test
 
 ### Coverage Requirements
 
-- **Mínimo**: 75% (línea y branch)
-- **Objetivo**: 80%+
-- **CI falla** si coverage < 75%
+- **Minimum**: 75% (line and branch)
+- **Target**: 80%+
+- **CI fails** if coverage < 75%
 
-### Escribir Tests
+### Writing Tests
 
 ```python
 import pytest
 from bpmn_agent.core import LLMClient
 
 @pytest.mark.unit
-def test_funcion_basica():
-    """Test unitario simple."""
-    result = funcion_a_testear()
+def test_basic_function():
+    """Simple unit test."""
+    result = function_to_test()
     assert result == expected
 
 @pytest.mark.integration
-async def test_integracion():
-    """Test de integración."""
+async def test_integration():
+    """Integration test."""
     client = LLMClient(...)
     result = await client.call(...)
     assert result is not None
@@ -487,86 +488,86 @@ async def test_integracion():
 
 ---
 
-## 📝 Commits y Mensajes
+## 📝 Commits and Messages
 
-### Convención de Commits
+### Commit Convention
 
-Usamos **Conventional Commits**:
+We use **Conventional Commits**:
 
 ```
-<tipo>(<scope>): <descripción>
+<type>(<scope>): <description>
 
-[body opcional]
+[optional body]
 
-[footer opcional]
+[optional footer]
 ```
 
-### Tipos de Commits
+### Commit Types
 
-- `feat`: Nueva funcionalidad
-- `fix`: Corrección de bug
-- `docs`: Documentación
-- `style`: Formateo (sin cambios de código)
-- `refactor`: Refactorización
+- `feat`: New functionality
+- `fix`: Bug fix
+- `docs`: Documentation
+- `style`: Formatting (no code changes)
+- `refactor`: Refactoring
 - `test`: Tests
-- `chore`: Tareas de mantenimiento
-- `ci`: Cambios en CI/CD
-- `perf`: Mejoras de rendimiento
+- `chore`: Maintenance tasks
+- `ci`: CI/CD changes
+- `perf`: Performance improvements
 
-### Ejemplos
+### Examples
 
 ```bash
 # Feature
-git commit -m "feat(validation): agregar validación XSD (refs #2)"
+git commit -m "feat(validation): add XSD validation (refs #2)"
 
 # Bug fix
-git commit -m "fix(xsd): corregir error de parsing (fixes #5)"
+git commit -m "fix(xsd): fix parsing error (fixes #5)"
 
-# Documentación
-git commit -m "docs(readme): actualizar instrucciones de instalación"
+# Documentation
+git commit -m "docs(readme): update installation instructions"
 
 # Refactor
-git commit -m "refactor(orchestrator): simplificar lógica de validación"
+git commit -m "refactor(orchestrator): simplify validation logic"
 ```
 
-### Vincular Commits a Issues
+### Linking Commits to Issues
 
 ```bash
-# Cierra el issue cuando se mergea el PR
-git commit -m "feat: implementar X (fixes #2)"
+# Closes the issue when PR is merged
+git commit -m "feat: implement X (fixes #2)"
 
-# Solo referencia el issue
-git commit -m "feat: implementar X (refs #2)"
+# Only references the issue
+git commit -m "feat: implement X (refs #2)"
 ```
 
 ---
 
 ## 🔍 Code Review
 
-### Proceso de Review
+### Review Process
 
-1. **Crear PR** → CI se ejecuta automáticamente
-2. **Esperar aprobaciones** → Al menos 1 reviewer (si está configurado)
-3. **Abordar comentarios** → Hacer cambios y push nuevos commits
-4. **Merge** → Cuando todos los checks pasan y hay aprobación
+1. **Create PR** → CI runs automatically
+2. **Wait for approvals** → At least 1 reviewer (if configured)
+3. **Address comments** → Make changes and push new commits
+4. **Merge** → When all checks pass and there's approval
 
-### Qué Buscar en un Review
+### What to Look for in a Review
 
-- ✅ Código sigue estándares del proyecto
-- ✅ Tests cubren los cambios
-- ✅ Sin regresiones
-- ✅ Documentación actualizada
-- ✅ Performance aceptable
-- ✅ Seguridad considerada
+- ✅ Code follows project standards
+- ✅ Tests cover the changes
+- ✅ No regressions
+- ✅ Documentation updated
+- ✅ Acceptable performance
+- ✅ Security considered
 
 ---
 
 ## 🚀 Merge
 
-### Opciones de Merge
+### Merge Options
 
 ```bash
-# Squash merge (recomendado)
+# Squash merge (recommended)
 gh pr merge <PR_NUMBER> --squash --delete-branch
 
 # Merge commit
@@ -576,77 +577,76 @@ gh pr merge <PR_NUMBER> --merge --delete-branch
 gh pr merge <PR_NUMBER> --rebase --delete-branch
 ```
 
-### Después del Merge
+### After Merge
 
-- ✅ Issue se cierra automáticamente (si PR tiene "Fixes #X")
-- ✅ Branch se elimina automáticamente (si usas `--delete-branch`)
-- ✅ CI se ejecuta en `main` para verificar que todo sigue funcionando
-
----
-
-## 📚 Recursos Adicionales
-
-- **[DevOps Setup](docs/development/devops-setup.md)** - Setup detallado de CI/CD
-- **[GitHub Workflow](docs/development/github-workflow.md)** - Mejores prácticas de workflow
-- **README.md** - Documentación general del proyecto
-- **CI_CD_IMPROVEMENTS.md** - Detalles de mejoras CI/CD
+- ✅ Issue closes automatically (if PR has "Fixes #X")
+- ✅ Branch is deleted automatically (if using `--delete-branch`)
+- ✅ CI runs on `main` to verify everything still works
 
 ---
 
-## ❓ Preguntas Frecuentes
+## 📚 Additional Resources
 
-### ¿Puedo saltarme los pre-commit hooks?
+- **[DevOps Setup](docs/development/devops-setup.md)** - Detailed CI/CD setup
+- **[GitHub Workflow](docs/development/github-workflow.md)** - Workflow best practices
+- **README.md** - General project documentation
 
-Sí, con `git commit --no-verify`, pero **NO recomendado**. Los hooks previenen problemas antes de que lleguen a CI.
+---
 
-### ¿Qué pasa si mi PR falla en CI pero pasa localmente?
+## ❓ Frequently Asked Questions
 
-1. Verifica versiones de herramientas (black, ruff, mypy, pytest)
-2. Verifica versión de Python (CI usa 3.10, 3.11, 3.12)
-3. Ejecuta `pre-commit run --all-files` localmente
-4. Revisa logs de CI para detalles específicos
+### Can I skip pre-commit hooks?
 
-### ¿Puedo crear un PR sin un Issue?
+Yes, with `git commit --no-verify`, but **NOT recommended**. Hooks prevent problems before they reach CI.
 
-Técnicamente sí, pero **recomendamos crear un Issue primero** para documentar el contexto y permitir discusión antes de implementar.
+### What if my PR fails in CI but passes locally?
 
-### ¿Cómo actualizo mi branch con cambios de main?
+1. Verify tool versions (black, ruff, mypy, pytest)
+2. Verify Python version (CI uses 3.10, 3.11, 3.12)
+3. Run `pre-commit run --all-files` locally
+4. Review CI logs for specific details
+
+### Can I create a PR without an Issue?
+
+Technically yes, but **we recommend creating an Issue first** to document context and allow discussion before implementing.
+
+### How do I update my branch with changes from main?
 
 ```bash
-git checkout feature/issue-<NUMBER>-descripcion
+git checkout feature/issue-<NUMBER>-description
 git fetch origin
 git merge origin/main
-# O usar rebase si prefieres
+# Or use rebase if you prefer
 git rebase origin/main
 ```
 
 ---
 
-## 🎯 Resumen Rápido
+## 🎯 Quick Summary
 
 ```bash
-# 1. Crear Issue
+# 1. Create Issue
 gh issue create --title "..." --body "..." --label "enhancement"
 
-# 2. Crear Branch
+# 2. Create Branch
 gh issue develop <ISSUE_NUMBER>
 
-# 3. Desarrollo
-# ... hacer cambios ...
+# 3. Development
+# ... make changes ...
 git add .
 git commit -m "feat: ... (refs #<NUMBER>)"
-git push origin feature/issue-<NUMBER>-descripcion
+git push origin feature/issue-<NUMBER>-description
 
-# 4. Crear PR
+# 4. Create PR
 gh pr create --title "..." --body "Fixes #<NUMBER>"
 
-# 5. Esperar CI y Review
+# 5. Wait for CI and Review
 gh pr checks
 
-# 6. Merge (cuando esté listo)
+# 6. Merge (when ready)
 gh pr merge <PR_NUMBER> --squash --delete-branch
 ```
 
 ---
 
-**¡Gracias por contribuir a bpmn-agent!** 🚀
+**Thank you for contributing to bpmn-agent!** 🚀
