@@ -420,7 +420,7 @@ class EnhancedXSDValidator:
     def _validate_xml_structure(self, xml_doc: ET.Element, result: XSDValidationResult) -> None:
         """Validate basic XML structure and BPMN requirements."""
         
-        # 1. Validar namespace BPMN
+        # 1. Validate BPMN namespace
         root_tag = xml_doc.tag
         if not any(ns in root_tag for ns in ['definitions', '{http://www.omg.org/spec/BPMN']):
             # Try to find definitions element
@@ -436,7 +436,7 @@ class EnhancedXSDValidator:
                     ))
                     result.is_valid = False
         
-        # 2. Validar que existe al menos un proceso
+        # 2. Validate that at least one process exists
         # Try with namespace first
         processes = xml_doc.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}process')
         # Also try without namespace (for compatibility)
@@ -452,7 +452,7 @@ class EnhancedXSDValidator:
             ))
             result.is_valid = False
         
-        # 3. Validar estructura básica de cada proceso
+        # 3. Validate basic structure of each process
         for process in processes:
             process_id = process.get('id')
             if not process_id:
