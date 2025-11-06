@@ -466,7 +466,7 @@ class EnhancedXSDValidator:
                 ))
                 result.is_valid = False
             
-            # Validar que tiene startEvent (warning, no error)
+            # Validate that it has startEvent (warning, not error)
             start_events = process.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}startEvent')
             if not start_events:
                 start_events = process.findall('.//startEvent')
