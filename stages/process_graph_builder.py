@@ -250,6 +250,147 @@ class ProcessGraphBuilder:
             },
         )
 
+        # Detect and upgrade gateway types from DECISION to PARALLEL_FORK/PARALLEL_JOIN
+        graph = self._upgrade_gateway_types(graph)
+
+        # Inject synthetic start/end nodes if needed
+        graph = self._inject_synthetic_start_end_nodes(graph)
+
+        return graph
+
+    def _upgrade_gateway_types(self, graph: ProcessGraph) -> ProcessGraph:
+        """
+        Detect and upgrade gateway node types from DECISION to PARALLEL_FORK/PARALLEL_JOIN.
+        
+        A gateway is considered:
+        - PARALLEL_FORK if it has 1 incoming edge and 2+ outgoing edges
+        - PARALLEL_JOIN if it has 2+ incoming edges and 1 outgoing edge
+        - DECISION otherwise (exclusive choice)
+        
+        Args:
+            graph: ProcessGraph to enhance
+            
+        Returns:
+            Updated ProcessGraph with upgraded gateway types
+        """
+        updated_nodes = []
+        
+        for node in graph.nodes:
+            if node.type != NodeType.DECISION:
+                updated_nodes.append(node)
+                continue
+            
+            # Get control flow edges only
+            incoming = [e for e in graph.edges if e.target_id == node.id and e.type == EdgeType.CONTROL_FLOW]
+            outgoing = [e for e in graph.edges if e.source_id == node.id and e.type == EdgeType.CONTROL_FLOW]
+            
+            # Determine gateway type based on incoming/outgoing edges
+            if len(incoming) == 1 and len(outgoing) >= 2:
+                # Fork: single path splits into multiple
+                node.type = NodeType.PARALLEL_FORK
+                node.bpmn_type = "ParallelGateway"
+            elif len(incoming) >= 2 and len(outgoing) == 1:
+                # Join: multiple paths converge
+                node.type = NodeType.PARALLEL_JOIN
+                node.bpmn_type = "ParallelGateway"
+            
+            updated_nodes.append(node)
+        
+        # Create new graph with updated nodes
+        return ProcessGraph(
+            id=graph.id,
+            name=graph.name,
+            description=graph.description,
+            nodes=updated_nodes,
+            edges=graph.edges,
+            created_timestamp=graph.created_timestamp,
+            metadata=graph.metadata,
+        )
+
+    def _inject_synthetic_start_end_nodes(self, graph: ProcessGraph) -> ProcessGraph:
+        """
+        Inject synthetic START and END nodes if they don't exist.
+        
+        This ensures the graph has explicit start and end events for proper BPMN generation.
+        
+        Args:
+            graph: ProcessGraph to enhance
+            
+        Returns:
+            Updated ProcessGraph with synthetic start/end nodes
+        """
+        # Check if explicit START/END nodes exist
+        has_start = any(n.type == NodeType.START for n in graph.nodes)
+        has_end = any(n.type == NodeType.END for n in graph.nodes)
+        
+        if has_start and has_end:
+            # Already has proper start/end nodes
+            return graph
+        
+        # Find implicit start and end nodes
+        implicit_start_nodes = [n for n in graph.get_start_nodes() if n.type != NodeType.START]
+        implicit_end_nodes = [n for n in graph.get_end_nodes() if n.type != NodeType.END]
+        
+        nodes_to_add = []
+        edges_to_add = []
+        
+        # Create synthetic START node if needed
+        if implicit_start_nodes:
+            start_node = GraphNode(
+                id=f"synthetic_start_{uuid.uuid4().hex[:8]}",
+                type=NodeType.START,
+                label="Start",
+                bpmn_type="StartEvent",
+                confidence=1.0,
+                metadata={"synthetic": True},
+            )
+            nodes_to_add.append(start_node)
+            
+            # Connect synthetic start to all implicit start nodes
+            for implicit_start in implicit_start_nodes:
+                edge = GraphEdge(
+                    id=f"edge_{uuid.uuid4().hex[:8]}",
+                    source_id=start_node.id,
+                    target_id=implicit_start.id,
+                    type=EdgeType.CONTROL_FLOW,
+                    label="",
+                    confidence=1.0,
+                    metadata={"synthetic": True},
+                )
+                edges_to_add.append(edge)
+        
+        # Create synthetic END node if needed
+        if implicit_end_nodes:
+            end_node = GraphNode(
+                id=f"synthetic_end_{uuid.uuid4().hex[:8]}",
+                type=NodeType.END,
+                label="End",
+                bpmn_type="EndEvent",
+                confidence=1.0,
+                metadata={"synthetic": True},
+            )
+            nodes_to_add.append(end_node)
+            
+            # Connect all implicit end nodes to synthetic end
+            for implicit_end in implicit_end_nodes:
+                edge = GraphEdge(
+                    id=f"edge_{uuid.uuid4().hex[:8]}",
+                    source_id=implicit_end.id,
+                    target_id=end_node.id,
+                    type=EdgeType.CONTROL_FLOW,
+                    label="",
+                    confidence=1.0,
+                    metadata={"synthetic": True},
+                )
+                edges_to_add.append(edge)
+        
+        # Add synthetic nodes and edges to graph
+        if nodes_to_add or edges_to_add:
+            graph.nodes.extend(nodes_to_add)
+            graph.edges.extend(edges_to_add)
+            graph._build_indexes()
+            logger.debug(f"Injected {len(nodes_to_add)} synthetic nodes and {len(edges_to_add)} synthetic edges")
+        
         return graph
 
     def _entity_to_node(self, entity: ExtractedEntity) -> GraphNode:
@@ -729,7 +870,7 @@ class GraphValidator:
 
     @staticmethod
     def _find_unreachable_nodes(graph: ProcessGraph) -> List[str]:
-        """Find nodes unreachable from start nodes."""
+        """Find nodes unreachable from start nodes via control flow edges."""
         if not graph.get_start_nodes():
             return [n.id for n in graph.nodes]
 
@@ -743,7 +884,12 @@ class GraphValidator:
                 current_id = queue.pop(0)
                 reachable.add(current_id)
 
-                for edge in graph.get_outgoing_edges(current_id):
+                # Only traverse control flow edges for reachability
+                control_flow_edges = [
+                    e for e in graph.get_outgoing_edges(current_id)
+                    if e.type == EdgeType.CONTROL_FLOW
+                ]
+                for edge in control_flow_edges:
                     if edge.target_id not in visited:
                         visited.add(edge.target_id)
                         queue.append(edge.target_id)

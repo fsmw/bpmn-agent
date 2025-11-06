@@ -45,6 +45,9 @@ dependencies = [
     "lxml>=4.9.3",
     "xmlschema>=2.4.0",
     
+    # CLI
+    "click>=8.1.0",
+    
     # Utilities
     "python-dotenv>=1.0.0",
     "loguru>=0.7.0",
@@ -76,6 +79,9 @@ docs = [
 ollama = [
     "ollama>=0.1.0",
 ]
+
+[project.scripts]
+bpmn-agent = "bpmn_agent.tools.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/example/bpmn-agent"

@@ -422,9 +422,9 @@ class TextPreprocessor:
                 result.metadata['pattern_hints'] = [
                     {
                         'pattern_id': p.pattern_id,
-                        'pattern_name': p.pattern_name,
+                        'pattern_category': p.pattern_category.value,
                         'confidence': p.confidence,
-                        'locations': p.text_indices,
+                        'locations': p.text_indices if hasattr(p, 'text_indices') else [],
                     }
                     for p in pattern_results
                 ]

@@ -153,34 +153,38 @@ class BPMNXMLGenerator:
             ValueError: If graph structure is invalid
         """
         with Timer("xml_generation"):
-            # Validate graph
-            is_valid, errors = graph.validate_structure()
-            if not is_valid:
-                logger.warning(f"Graph validation warnings: {errors}")
-            
-            # Reset state
-            self.id_mappings = []
-            self.layout_info = {}
-            self.elements_by_id = {}
-            self.lanes_by_id = {}
-            self.graph_id_to_bpmn_id = {}
-            
-            # Create process
-            self.process = self._create_process(graph, process_name or graph.name)
-            
-            # Convert graph to BPMN elements
-            self._convert_nodes(graph)
-            self._convert_edges(graph)
-            self._organize_lanes(graph)
-            
-            # Generate XML
-            root = self._build_xml_root()
-            
-            # Validate against XSD (if available)
-            self._validate_xml(root)
-            
-            return etree.tostring(root, pretty_print=True, xml_declaration=True, 
-                                encoding="utf-8").decode("utf-8")
+            try:
+                # Validate graph
+                is_valid, errors = graph.validate_structure()
+                if not is_valid:
+                    logger.warning(f"Graph validation warnings: {errors}")
+                
+                # Reset state
+                self.id_mappings = []
+                self.layout_info = {}
+                self.elements_by_id = {}
+                self.lanes_by_id = {}
+                self.graph_id_to_bpmn_id = {}
+                
+                # Create process
+                self.process = self._create_process(graph, process_name or graph.name)
+                
+                # Convert graph to BPMN elements
+                self._convert_nodes(graph)
+                self._convert_edges(graph)
+                self._organize_lanes(graph)
+                
+                # Generate XML
+                root = self._build_xml_root()
+                
+                # Validate against XSD (if available)
+                self._validate_xml(root)
+                
+                return etree.tostring(root, pretty_print=True, xml_declaration=True, 
+                                    encoding="utf-8").decode("utf-8")
+            except Exception as e:
+                logger.error(f"Exception during XML generation: {e}", exc_info=True)
+                raise
     
     def _create_process(self, graph: ProcessGraph, name: str) -> Process:
         """Create BPMN Process element."""
@@ -213,6 +217,10 @@ class BPMNXMLGenerator:
                     x_pos = 50
                 else:
                     x_pos += HORIZONTAL_SPACING + DEFAULT_TASK_WIDTH
+            
+            # Skip ACTOR and DATA nodes (they're represented as swim lanes/data stores, not flow objects)
+            if node.type == NodeType.ACTOR or node.type == NodeType.DATA:
+                continue
             
             # Convert based on type
             if node.type == NodeType.START:
@@ -370,6 +378,15 @@ class BPMNXMLGenerator:
     
     def _create_sequence_flow(self, edge: GraphEdge, graph: ProcessGraph) -> None:
         """Create BPMN SequenceFlow from graph edge."""
+        # Skip flows involving ACTOR or DATA nodes (they're not in the BPMN flow)
+        source_node = next((n for n in graph.nodes if n.id == edge.source_id), None)
+        target_node = next((n for n in graph.nodes if n.id == edge.target_id), None)
+        
+        if source_node and source_node.type in (NodeType.ACTOR, NodeType.DATA):
+            return
+        if target_node and target_node.type in (NodeType.ACTOR, NodeType.DATA):
+            return
+        
         # Look up BPMN IDs using the reverse mapping
         source_bpmn_id = self.graph_id_to_bpmn_id.get(edge.source_id)
         target_bpmn_id = self.graph_id_to_bpmn_id.get(edge.target_id)

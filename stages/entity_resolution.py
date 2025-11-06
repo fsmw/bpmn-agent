@@ -498,7 +498,7 @@ class RelationshipValidator:
         """
         entity_ids = {e.id for e in entities}
         valid_relations: List[ExtractedRelation] = []
-        report = RelationshipValidationReport(total_relations=len(relations))
+        report = RelationshipValidationReport(total_relations=len(relations), valid_relations=0)
         
         # Track seen relations to detect duplicates
         seen_relations: Dict[Tuple[str, str, str], str] = {}

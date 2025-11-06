@@ -198,25 +198,34 @@ class ProcessGraph(BaseModel):
         return self._outgoing_edges.get(node_id, [])
     
     def get_start_nodes(self) -> List[GraphNode]:
-        """Get start nodes (no incoming edges)."""
+        """Get start nodes (no incoming control flow edges)."""
         start_ids = set()
         for node in self.nodes:
             if node.type == NodeType.START:
                 start_ids.add(node.id)
-            elif not self.get_incoming_edges(node.id):
-                # Nodes without incoming control flow edges
-                if node.type in (NodeType.TASK, NodeType.EVENT, NodeType.DECISION):
+            elif node.type in (NodeType.TASK, NodeType.EVENT, NodeType.DECISION):
+                # Check for incoming control flow edges only (not swimlane/data/association)
+                control_flow_incoming = [
+                    e for e in self.get_incoming_edges(node.id)
+                    if e.type == EdgeType.CONTROL_FLOW
+                ]
+                if not control_flow_incoming:
                     start_ids.add(node.id)
         return [n for n in self.nodes if n.id in start_ids]
     
     def get_end_nodes(self) -> List[GraphNode]:
-        """Get end nodes (no outgoing edges)."""
+        """Get end nodes (no outgoing control flow edges)."""
         end_ids = set()
         for node in self.nodes:
             if node.type == NodeType.END:
                 end_ids.add(node.id)
-            elif not self.get_outgoing_edges(node.id):
-                if node.type in (NodeType.TASK, NodeType.EVENT, NodeType.DECISION):
+            elif node.type in (NodeType.TASK, NodeType.EVENT, NodeType.DECISION):
+                # Check for outgoing control flow edges only (not swimlane/data/association)
+                control_flow_outgoing = [
+                    e for e in self.get_outgoing_edges(node.id)
+                    if e.type == EdgeType.CONTROL_FLOW
+                ]
+                if not control_flow_outgoing:
                     end_ids.add(node.id)
         return [n for n in self.nodes if n.id in end_ids]
     
@@ -364,7 +373,7 @@ class ProcessGraph(BaseModel):
         return False
     
     def _can_reach(self, from_id: str, to_id: str, visited: Set[str]) -> bool:
-        """Check if we can reach 'to_id' from 'from_id'."""
+        """Check if we can reach 'to_id' from 'from_id' via control flow edges."""
         if from_id == to_id:
             return True
         if from_id in visited:
@@ -372,7 +381,12 @@ class ProcessGraph(BaseModel):
         
         visited.add(from_id)
         
-        for edge in self.get_outgoing_edges(from_id):
+        # Only traverse control flow edges for reachability analysis
+        control_flow_edges = [
+            e for e in self.get_outgoing_edges(from_id)
+            if e.type == EdgeType.CONTROL_FLOW
+        ]
+        for edge in control_flow_edges:
             if self._can_reach(edge.target_id, to_id, visited):
                 return True
         

@@ -223,6 +223,7 @@ class EntityExtractor:
         
         # Initialize KB components (lazy loading)
         self._context_optimizer: Optional[ContextOptimizer] = None
+        self._context_selector: Optional[ContextSelector] = None
         self._pattern_recognizer: Optional[PatternRecognizer] = None
     
     def _ensure_kb_initialized(self) -> None:
@@ -232,6 +233,7 @@ class EntityExtractor:
         
         if self._context_optimizer is None:
             try:
+                self._context_selector = ContextSelector()
                 self._context_optimizer = ContextOptimizer()
                 self._pattern_recognizer = PatternRecognizer()
                 logger.debug("KB components initialized for entity extraction")
@@ -263,6 +265,7 @@ class EntityExtractor:
         entities: List[ExtractedEntity] = []
         relations: List[ExtractedRelation] = []
         context_package: Optional[ContextPackage] = None
+        extraction_warnings: List[str] = []
         
         try:
             # 1. Validate input
@@ -273,16 +276,22 @@ class EntityExtractor:
             if self.enable_kb and preprocessed:
                 try:
                     self._ensure_kb_initialized()
-                    if self._context_optimizer:
+                    if self._context_selector and self._context_optimizer:
                         # Extract KB metadata from preprocessing
                         detected_domain = preprocessed.metadata.get('detected_domain')
                         detected_complexity = preprocessed.metadata.get('detected_complexity')
                         
-                        # Build optimized context
-                        context_package = self._context_optimizer.optimize_context(
+                        # First select context, then optimize
+                        selected_context = self._context_selector.select_context(
                             text=text,
+                            max_tokens=3000,
                             domain=detected_domain,
                             complexity=detected_complexity,
+                        )
+                        
+                        # Then optimize to fit token budget
+                        context_package = self._context_optimizer.optimize_context(
+                            context=selected_context,
                             max_tokens=2000,  # Reserve token budget
                         )
                         logger.debug(
@@ -312,23 +321,24 @@ class EntityExtractor:
             for attempt in range(max_retries + 1):
                 try:
                     # Call LLM
-                    response = await self.llm_client.call_llm(
+                    from bpmn_agent.core.llm_client import LLMMessage
+                    response = await self.llm_client.call(
                         messages=[
-                            {
-                                "role": "system",
-                                "content": self.prompt_template.system_message,
-                            },
-                            {
-                                "role": "user",
-                                "content": full_prompt,
-                            }
+                            LLMMessage(
+                                role="system",
+                                content=self.prompt_template.system_message,
+                            ),
+                            LLMMessage(
+                                role="user",
+                                content=full_prompt,
+                            )
                         ],
                         temperature=llm_temperature,
                         max_tokens=4096,
                     )
                     
                     # Parse response
-                    success, data, error_msg = JSONParser.parse_extraction_response(response)
+                    success, data, error_msg = JSONParser.parse_extraction_response(response.content)
                     
                     if success:
                         parsed_data = data
