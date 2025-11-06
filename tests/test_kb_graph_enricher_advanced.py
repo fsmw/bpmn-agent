@@ -6,7 +6,7 @@ for process graph construction and enrichment.
 """
 
 import pytest
-from models.knowledge_base import (
+from bpmn_agent.models.knowledge_base import (
     BPMNPattern,
     ComplexityLevel,
     DomainType,
@@ -14,7 +14,7 @@ from models.knowledge_base import (
     KnowledgeBase,
     PatternCategory,
 )
-from stages.process_graph_builder import KBGraphEnricher
+from bpmn_agent.stages.process_graph_builder import KBGraphEnricher
 
 
 @pytest.fixture

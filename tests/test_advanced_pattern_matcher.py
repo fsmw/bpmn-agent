@@ -12,7 +12,7 @@ Tests cover:
 
 import pytest
 from typing import List
-from models.knowledge_base import (
+from bpmn_agent.models.knowledge_base import (
     BPMNPattern,
     ComplexityLevel,
     DomainType,
@@ -20,7 +20,7 @@ from models.knowledge_base import (
     KnowledgeBase,
     PatternCategory,
 )
-from knowledge.advanced_pattern_matcher import (
+from bpmn_agent.knowledge.advanced_pattern_matcher import (
     AdvancedPatternMatcher,
     MatchResult,
     PatternRecommendation,

@@ -7,7 +7,7 @@ import pytest
 from datetime import datetime
 from typing import List
 
-from stages.extraction_critique import (
+from bpmn_agent.stages.extraction_critique import (
     ValidationIssueSeverity,
     ValidationIssueType,
     ValidationIssue,
@@ -16,7 +16,7 @@ from stages.extraction_critique import (
     CritiqueAgent,
     ExtractionRefinementPipeline,
 )
-from models.extraction import (
+from bpmn_agent.models.extraction import (
     ExtractionResult,
     ExtractedEntity,
     ExtractedRelation,
