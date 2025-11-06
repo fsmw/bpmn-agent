@@ -28,13 +28,13 @@ jobs:
     - name: Run Bandit security tests
       run: |
         bandit -r bpmn_agent/ -f json -o bandit-report.json -c pyproject.toml || echo "Bandit found security issues (see report)"
-        bandit -r bpmn_agent/ -f sarif -o bandit-report.sarif || echo "Bandit SARIF generation completed with warnings"
+        # Note: Bandit doesn't support SARIF format, only: csv, custom, html, json, screen, txt, xml, yaml
       continue-on-error: true
     
     - name: Run Safety dependency check
       run: |
-        safety check --json --json-file safety-report.json || echo "Safety check completed with warnings"
-        safety check --short --text-file safety-report.txt || echo "Safety check completed with warnings"
+        safety check --json > safety-report.json || echo "Safety check completed with warnings"
+        safety check --short-report > safety-report.txt || echo "Safety check completed with warnings"
       continue-on-error: true
     
     - name: Generate SBOM
@@ -48,18 +48,13 @@ jobs:
         name: security-reports
         path: |
           bandit-report.json
-          bandit-report.sarif
           safety-report.json
           safety-report.txt
           sbom.json
         retention-days: 90
     
-    - name: Security scan report
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: bandit-report.sarif
-        wait-for-processing: false
+    # Note: CodeQL SARIF upload removed - Bandit doesn't support SARIF format
+    # If SARIF is needed, consider using a different security scanner or convert Bandit JSON to SARIF
 
   # Code quality metrics
   code-quality:
