@@ -57,6 +57,11 @@ class PipelineConfig:
     include_diagram_interchange: bool = True
     validate_xsd: bool = False
     preserve_kb_metadata: bool = True
+    
+    # Stage 6: Phase 4 Validation
+    enable_phase4_validation: bool = True
+    enable_rag_validation: bool = True  # Requires enable_kb=True
+    validation_fail_on_error: bool = False  # If True, fail pipeline on validation errors
 
 
 @dataclass
