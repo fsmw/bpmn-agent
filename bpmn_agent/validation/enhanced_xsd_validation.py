@@ -48,6 +48,7 @@ class ValidationErrorCategory(str, Enum):
     PATTERN_VIOLATION = "pattern_violation"
     SEMANTIC = "semantic"
     COMPLIANCE = "compliance"
+    DOMAIN_SPECIFIC = "domain_specific"  # Domain-specific validation errors
 
 
 @dataclass
@@ -617,8 +618,8 @@ class EnhancedXSDValidator:
                 suggestion="Add approval steps for financial transactions",
                 pattern_reference="finance_domain_patterns"
             ))
-            result.errors_by_level[XSDValidationErrorLevel.WARNING] += 1
-            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] += 1
+            result.errors_by_level[XSDValidationErrorLevel.WARNING] = result.errors_by_level.get(XSDValidationErrorLevel.WARNING, 0) + 1
+            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] = result.errors_by_category.get(ValidationErrorCategory.DOMAIN_SPECIFIC, 0) + 1
     
     def _validate_it_semantics(self, xml_content: str, result: XSDValidationResult) -> None:
         """Validate IT domain-specific BPMN semantics."""
@@ -643,8 +644,8 @@ class EnhancedXSDValidator:
                 suggestion="Add boundary error handling events and compensation flows",
                 pattern_reference="it_domain_patterns"
             ))
-            result.errors_by_level[XSDValidationErrorLevel.WARNING] += 1
-            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] += 1
+            result.errors_by_level[XSDValidationErrorLevel.WARNING] = result.errors_by_level.get(XSDValidationErrorLevel.WARNING, 0) + 1
+            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] = result.errors_by_category.get(ValidationErrorCategory.DOMAIN_SPECIFIC, 0) + 1
     
     def _validate_healthcare_semantics(self, xml_content: str, result: XSDValidationResult) -> None:
         """Validate healthcare domain-specific BPMN semantics."""
@@ -669,8 +670,8 @@ class EnhancedXSDValidator:
                 suggestion="Ensure process includes patient-centric elements",
                 pattern_reference="healthcare_domain_patterns"
             ))
-            result.errors_by_level[XSDValidationErrorLevel.WARNING] += 1
-            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] += 1
+            result.errors_by_level[XSDValidationErrorLevel.WARNING] = result.errors_by_level.get(XSDValidationErrorLevel.WARNING, 0) + 1
+            result.errors_by_category[ValidationErrorCategory.DOMAIN_SPECIFIC] = result.errors_by_category.get(ValidationErrorCategory.DOMAIN_SPECIFIC, 0) + 1
     
     def _validate_pattern_application(self, xml_content: str, result: XSDValidationResult, patterns_applied: List[str]) -> None:
         """Validate that applied patterns are properly reflected in the XML."""
