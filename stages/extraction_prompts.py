@@ -73,8 +73,8 @@ def create_extraction_prompt() -> ExtractionPrompt:
     system_message = """You are a BPMN 2.0 Process Analysis Expert with deep knowledge of business process modeling.
 
 Your task is to analyze process descriptions and extract:
-1. **Entities**: Activities (tasks), Events (start, end, intermediate), Gateways (decisions), and Actors (participants)
-2. **Relationships**: Connections between entities showing process flow, decision paths, and actor involvement
+1. **Entities**: Activities (tasks, subprocesses), Events (start, end, intermediate, boundary), Gateways (decisions), Actors (participants), and Data Objects (data inputs/outputs)
+2. **Relationships**: Connections between entities showing process flow, decision paths, actor involvement, and data flow
 
 You must:
 - Extract ONLY entities explicitly mentioned or strongly implied in the text
@@ -85,11 +85,45 @@ You must:
 
 Key BPMN concepts:
 - **Task/Activity**: Units of work performed by actors
+- **SubProcess**: Nested process containing multiple activities (keywords: sub-process, subprocess, nested process, decomposed process, detailed steps)
 - **Event**: Start/end points or intermediate occurrences (messages, timers, conditions)
-- **Gateway**: Decision points (XOR exclusive, AND parallel) or join points
-- **Lane/Actor**: Participant or role performing activities
+  - **Start Events**: Process initiation (keywords: start, begin, initiate, trigger)
+  - **End Events**: Process completion (keywords: end, complete, finish, terminate)
+  - **Intermediate Events**: Occur during process execution
+    - **Timer Events**: Time-based triggers (keywords: wait, delay, timeout, after X minutes/hours, schedule, periodic)
+    - **Signal Events**: External notifications (keywords: signal, alert, notification, broadcast, message received)
+    - **Message Events**: Message reception/sending (keywords: message, receive, send, incoming message, outgoing message)
+    - **Error Events**: Exception handling (keywords: error, exception, failure, fault, catch)
+  - **Boundary Events**: Attached to tasks, triggered during task execution (keywords: occurs during, interrupts, catches, while task is running, exception handler)
+- **Gateway**: Decision points (XOR exclusive, AND parallel) or join points (keywords: decide, choice, split, join, merge, branch)
+- **Lane/Actor**: Participant or role performing activities (keywords: responsible, department, team, person, system)
+- **Data Object**: Represents data used or produced by activities (keywords: data, document, record, information, input, output, order, invoice, report, form, file, database, table)
+  - Can be inputs consumed by tasks: "task receives order data"
+  - Can be outputs produced by tasks: "task generates report"
+  - Can be used between tasks: "order data flows from order entry to fulfillment"
+  - Examples: orders, invoices, reports, customer records, payment details, confirmations, documents
 - **Sequence Flow**: Ordering between activities
-- **Decision Path**: Conditional branches (if/then/else)
+- **Decision Path**: Conditional branches (if/then/else, based on condition, depending on)
+- **Data Flow**: Movement of data between activities or data objects (relations: uses, produces, consumes)
+
+Data Object Detection Guide:
+- Look for nouns that represent business objects or information: order, invoice, document, record, data, form, request, confirmation
+- Activities typically use data: "process the order" → activity "process order" + data object "order"
+- Activities typically produce data: "generate a report" → activity "generate report" + data object "report"
+- Data can flow between activities: if text mentions "the order data" or "order information", extract as data object
+- Common data objects: customer data, order details, payment info, confirmation message, invoice, receipt
+- If uncertain whether something is data, err on the side of inclusion
+
+Event Trigger Detection Guide:
+- Timer events typically follow patterns like "wait N time units", "timeout", "schedule", "repeat"
+- Boundary events are described as happening "while a task is running" or "if a task fails"
+- Signal/Message events mention "notification", "alert", "message arrives"
+- Error events involve "catches exception" or "handles error"
+
+Subprocess Detection:
+- If text mentions "process steps", "detailed workflow", "contains", "includes", "consists of": mark as subprocess
+- If text describes phases or stages that are broken down: these are subprocesses
+- If multiple related activities are grouped: consider as subprocess candidate
 """
     
     # 2. Few-shot examples
@@ -137,8 +171,77 @@ Key BPMN concepts:
                     {"id": "r5", "type": "involves", "source_id": "actor_2", "target_id": "act_2", "confidence": "high"},
                 ]
             }
+         },
+        {
+            "input": "The order fulfillment process consists of order validation (check inventory, verify customer data, check payment) and fulfillment (pick items, pack order, arrange shipping). Both phases are executed in sequence.",
+            "output": {
+                "entities": [
+                    {"id": "act_1", "type": "activity", "name": "order fulfillment", "confidence": "high", "attributes": {"activity_type": "subprocess"}},
+                    {"id": "act_2", "type": "activity", "name": "order validation", "confidence": "high", "attributes": {"activity_type": "subprocess"}},
+                    {"id": "act_3", "type": "activity", "name": "check inventory", "confidence": "high"},
+                    {"id": "act_4", "type": "activity", "name": "verify customer data", "confidence": "high"},
+                    {"id": "act_5", "type": "activity", "name": "check payment", "confidence": "high"},
+                    {"id": "act_6", "type": "activity", "name": "fulfillment", "confidence": "high", "attributes": {"activity_type": "subprocess"}},
+                    {"id": "act_7", "type": "activity", "name": "pick items", "confidence": "high"},
+                    {"id": "act_8", "type": "activity", "name": "pack order", "confidence": "high"},
+                    {"id": "act_9", "type": "activity", "name": "arrange shipping", "confidence": "high"}
+                ],
+                "relations": [
+                    {"id": "r1", "type": "precedes", "source_id": "act_2", "target_id": "act_6", "confidence": "high"},
+                    {"id": "r2", "type": "precedes", "source_id": "act_3", "target_id": "act_4", "confidence": "medium"},
+                    {"id": "r3", "type": "precedes", "source_id": "act_7", "target_id": "act_8", "confidence": "medium"}
+                ]
+            }
+        },
+        {
+             "input": "A payment processing task is performed by the accountant. If the payment fails, an error notification is sent immediately. Additionally, if the task takes longer than 30 minutes, a timeout alert is triggered. Once payment is confirmed, the system sends a confirmation message.",
+             "output": {
+                 "entities": [
+                     {"id": "actor_1", "type": "actor", "name": "accountant", "confidence": "high"},
+                     {"id": "act_1", "type": "activity", "name": "payment processing", "confidence": "high"},
+                     {"id": "evt_1", "type": "event", "name": "payment fails", "confidence": "high", "attributes": {"event_type": "boundary_event", "trigger": "error"}},
+                     {"id": "evt_2", "type": "event", "name": "timeout alert", "confidence": "high", "attributes": {"event_type": "boundary_event", "trigger": "timer"}},
+                     {"id": "evt_3", "type": "event", "name": "confirmation message", "confidence": "high", "attributes": {"event_type": "intermediate_event", "trigger": "message"}},
+                     {"id": "act_2", "type": "activity", "name": "send error notification", "confidence": "high"},
+                     {"id": "act_3", "type": "activity", "name": "send timeout notification", "confidence": "medium"}
+                 ],
+                 "relations": [
+                     {"id": "r1", "type": "involves", "source_id": "actor_1", "target_id": "act_1", "confidence": "high"},
+                     {"id": "r2", "type": "precedes", "source_id": "evt_1", "target_id": "act_2", "confidence": "high"},
+                     {"id": "r3", "type": "precedes", "source_id": "evt_2", "target_id": "act_3", "confidence": "high"}
+                 ]
+             }
+         },
+        {
+            "input": "The customer submits their invoice through the online portal. The finance department reviews the invoice details. If the invoice is approved, the accountant processes the payment and generates a receipt. The customer receives the receipt via email.",
+            "output": {
+                "entities": [
+                    {"id": "actor_1", "type": "actor", "name": "customer", "confidence": "high"},
+                    {"id": "actor_2", "type": "actor", "name": "finance department", "confidence": "high"},
+                    {"id": "actor_3", "type": "actor", "name": "accountant", "confidence": "high"},
+                    {"id": "act_1", "type": "activity", "name": "submit invoice", "confidence": "high"},
+                    {"id": "act_2", "type": "activity", "name": "review invoice", "confidence": "high"},
+                    {"id": "act_3", "type": "activity", "name": "process payment", "confidence": "high"},
+                    {"id": "act_4", "type": "activity", "name": "generate receipt", "confidence": "high"},
+                    {"id": "gw_1", "type": "gateway", "name": "invoice approved", "confidence": "high"},
+                    {"id": "data_1", "type": "data", "name": "invoice", "confidence": "high"},
+                    {"id": "data_2", "type": "data", "name": "receipt", "confidence": "high"}
+                ],
+                "relations": [
+                    {"id": "r1", "type": "involves", "source_id": "actor_1", "target_id": "act_1", "confidence": "high"},
+                    {"id": "r2", "type": "produces", "source_id": "act_1", "target_id": "data_1", "confidence": "high"},
+                    {"id": "r3", "type": "involves", "source_id": "actor_2", "target_id": "act_2", "confidence": "high"},
+                    {"id": "r4", "type": "uses", "source_id": "act_2", "target_id": "data_1", "confidence": "high"},
+                    {"id": "r5", "type": "conditional", "source_id": "gw_1", "target_id": "act_3", "condition": "approved", "confidence": "high"},
+                    {"id": "r6", "type": "involves", "source_id": "actor_3", "target_id": "act_3", "confidence": "high"},
+                    {"id": "r7", "type": "uses", "source_id": "act_3", "target_id": "data_1", "confidence": "high"},
+                    {"id": "r8", "type": "precedes", "source_id": "act_3", "target_id": "act_4", "confidence": "high"},
+                    {"id": "r9", "type": "produces", "source_id": "act_4", "target_id": "data_2", "confidence": "high"},
+                    {"id": "r10", "type": "involves", "source_id": "actor_1", "target_id": "act_4", "confidence": "medium"}
+                ]
+            }
         }
-    ]
+      ]
     
     # 3. Output schema - JSON schema for structured extraction
     output_schema = {

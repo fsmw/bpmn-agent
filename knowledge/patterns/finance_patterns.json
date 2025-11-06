@@ -1,319 +1,754 @@
 {
   "pattern_finance_invoice_001": {
-    "name": "Invoice Processing",
-    "description": "End-to-end invoice processing workflow including receipt, validation, approval, and payment",
+    "name": "Invoice Processing & Approval",
+    "description": "Complete invoice-to-payment workflow with validation and approval routing",
     "domain": "finance",
-    "category": "exclusive_choice",
+    "category": "payment",
     "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["receive_invoice", "validate", "route", "approve_gateway", "approved", "rejected", "process_payment", "reconcile", "end"],
-      "edges": ["receive->validate", "validate->route", "route->approve", "approve->approved", "approve->rejected", "approved->process", "process->reconcile", "reconcile->end"],
-      "node_types": {
-        "receive_invoice": "start_event",
-        "validate": "activity",
-        "route": "activity",
-        "approve_gateway": "exclusive_gateway",
-        "approved": "activity",
-        "rejected": "activity",
-        "process_payment": "activity",
-        "reconcile": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Invoice received, line items validated against PO, routed to appropriate approver based on amount, approved or rejected, then payment processed",
-      "Vendor invoice submitted, matched against purchase order, approval workflow based on invoice amount, payment executed"
+    "keywords": [
+      "invoice",
+      "vendor",
+      "payment",
+      "approval",
+      "three-way match"
     ],
-    "validation_rules": [
-      "Invoice must match purchase order",
-      "Amount validation required",
+    "workflow_steps": [
+      "Receive invoice from vendor",
+      "Validate against purchase order",
+      "Check invoice amount and terms",
+      "Route to appropriate approver based on amount",
+      "Execute approval or rejection",
+      "Process payment if approved",
+      "Reconcile with accounting records"
+    ],
+    "actors": [
+      "Accounts Payable",
+      "Manager",
+      "Finance Director",
+      "Vendor"
+    ],
+    "business_rules": [
+      "Invoice must match PO (three-way match: PO, invoice, receipt)",
       "Approval authority depends on invoice amount",
-      "Three-way match enforcement (PO, invoice, receipt)"
+      "Duplicate invoice detection required",
+      "Payment terms must be honored"
     ],
     "anti_patterns": [
-      "Approval without validation",
-      "Missing PO reference",
-      "Duplicate invoice processing",
-      "Bypassing approval chain"
+      "Payment without approval",
+      "Approval bypass",
+      "Duplicate processing"
     ],
-    "tags": ["invoice", "accounts-payable", "approval", "payment"],
-    "confidence": 0.94,
-    "version": "1.0"
-  },
-  "pattern_finance_budget_001": {
-    "name": "Budget Approval Cycle",
-    "description": "Annual budget planning, review, approval, and monitoring process",
-    "domain": "finance",
-    "category": "sequential",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["initiate", "prepare", "review", "approve_gate", "approved", "rejected", "allocate", "monitor"],
-      "edges": ["initiate->prepare", "prepare->review", "review->approve", "approve->approved", "approve->rejected", "approved->allocate", "allocate->monitor"],
-      "node_types": {
-        "initiate": "start_event",
-        "prepare": "activity",
-        "review": "activity",
-        "approve_gate": "exclusive_gateway",
-        "approved": "activity",
-        "rejected": "activity",
-        "allocate": "activity",
-        "monitor": "activity"
-      }
-    },
-    "examples": [
-      "Budget cycle initiated, departments prepare proposals, finance reviews and consolidates, executive approval, allocates budget, tracks quarterly",
-      "Budget planning, departmental submissions, consolidation review, board approval, distribution to cost centers, monthly monitoring"
+    "tags": [
+      "accounts-payable",
+      "invoice",
+      "payment",
+      "approval"
     ],
-    "validation_rules": [
-      "All departments must submit budgets",
-      "Budget cannot exceed available funds",
-      "Executive approval required for final budget",
-      "Quarterly reviews mandatory"
-    ],
-    "anti_patterns": [
-      "Skipping review phase",
-      "Budgets exceeding organizational capacity",
-      "No monitoring after approval",
-      "Missing departmental input"
-    ],
-    "tags": ["budget", "planning", "approval", "finance-planning"],
-    "confidence": 0.92,
+    "confidence": 0.95,
     "version": "1.0"
   },
   "pattern_finance_expense_001": {
-    "name": "Expense Reimbursement",
-    "description": "Employee expense submission, validation, approval, and reimbursement process",
+    "name": "Expense Report & Reimbursement",
+    "description": "Employee expense submission, review, approval, and reimbursement process",
     "domain": "finance",
-    "category": "exclusive_choice",
+    "category": "expense",
     "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["submit", "validate", "check_gateway", "compliant", "non_compliant", "approve", "reimburse", "end"],
-      "edges": ["submit->validate", "validate->check", "check->compliant", "check->non_compliant", "compliant->approve", "non_compliant->end", "approve->reimburse", "reimburse->end"],
-      "node_types": {
-        "submit": "start_event",
-        "validate": "activity",
-        "check_gateway": "exclusive_gateway",
-        "compliant": "activity",
-        "non_compliant": "activity",
-        "approve": "activity",
-        "reimburse": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Employee submits expense report with receipts, finance validates against policy, approves if compliant or requests clarification, processes reimbursement",
-      "Travel expense submission, documentation check, policy compliance review, manager approval, payment processing"
+    "keywords": [
+      "expense",
+      "reimbursement",
+      "claim",
+      "approval"
     ],
-    "validation_rules": [
-      "All expenses must have receipts",
-      "Expenses must comply with policy",
-      "Manager approval required",
-      "Reimbursement within 30 days"
+    "workflow_steps": [
+      "Employee submits expense report with receipts",
+      "Automated validation of receipt amounts",
+      "Manager reviews and approves/rejects",
+      "Compliance check for policy violations",
+      "Finance processes reimbursement",
+      "Payment to employee bank account"
+    ],
+    "actors": [
+      "Employee",
+      "Manager",
+      "Compliance Officer",
+      "Finance"
+    ],
+    "business_rules": [
+      "All expenses must have receipt",
+      "Certain expense categories need pre-approval",
+      "Daily limits apply to specific categories",
+      "Manager must be approver"
     ],
     "anti_patterns": [
       "Missing receipts",
-      "Non-compliant expenses approved",
-      "Policy violations ignored",
-      "No manager sign-off"
+      "Unauthorized categories",
+      "Self-approval"
     ],
-    "tags": ["expense", "reimbursement", "approval", "finance"],
-    "confidence": 0.91,
-    "version": "1.0"
-  },
-  "pattern_finance_payment_001": {
-    "name": "Payment Processing",
-    "description": "Payment order creation, validation, scheduling, and execution workflow",
-    "domain": "finance",
-    "category": "sequential",
-    "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["create_order", "validate", "dual_check", "schedule", "execute", "reconcile", "end"],
-      "edges": ["create->validate", "validate->dual", "dual->schedule", "schedule->execute", "execute->reconcile", "reconcile->end"],
-      "node_types": {
-        "create_order": "start_event",
-        "validate": "activity",
-        "dual_check": "activity",
-        "schedule": "activity",
-        "execute": "activity",
-        "reconcile": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Payment order created, amount validated against invoice, dual authorized by two signers, scheduled for due date, executed, then reconciled against bank statement",
-      "Create payment, verify amount and vendor, dual approval, schedule payment, process, reconcile with ledger"
+    "tags": [
+      "expense",
+      "reimbursement",
+      "approval"
     ],
-    "validation_rules": [
-      "Dual authorization required for payments above threshold",
-      "Bank account must have sufficient funds",
-      "Payment due date respected",
-      "Bank reconciliation mandatory"
-    ],
-    "anti_patterns": [
-      "Single authorization for large payments",
-      "Payments without verification",
-      "Scheduled payments without funds",
-      "No reconciliation"
-    ],
-    "tags": ["payment", "bank", "authorization", "execution"],
     "confidence": 0.93,
     "version": "1.0"
   },
-  "pattern_finance_reconciliation_001": {
-    "name": "Bank Reconciliation",
-    "description": "Monthly bank statement reconciliation matching transactions and identifying discrepancies",
+  "pattern_finance_budget_001": {
+    "name": "Annual Budget Cycle",
+    "description": "Budget planning, consolidation, review, approval, and distribution",
     "domain": "finance",
-    "category": "exclusive_choice",
-    "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["receive_statement", "match", "discrepancy_check", "match_found", "investigate", "resolve", "approve", "end"],
-      "edges": ["receive->match", "match->check", "check->found", "check->investigate", "found->approve", "investigate->resolve", "resolve->approve", "approve->end"],
-      "node_types": {
-        "receive_statement": "start_event",
-        "match": "activity",
-        "discrepancy_check": "exclusive_gateway",
-        "match_found": "activity",
-        "investigate": "activity",
-        "resolve": "activity",
-        "approve": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Bank statement received, transactions matched to ledger, discrepancies identified and investigated, resolved by adjusting entries or bank corrections, reconciliation approved",
-      "Monthly statement arrives, matching process, reconciliation of differences, investigation of timing issues, finalization"
-    ],
-    "validation_rules": [
-      "All transactions must be accounted for",
-      "Timing differences acceptable",
-      "Large discrepancies require investigation",
-      "Monthly reconciliation mandatory"
-    ],
-    "anti_patterns": [
-      "Unresolved discrepancies",
-      "Missing transactions from ledger",
-      "Reconciliation skipped",
-      "No documentation of differences"
-    ],
-    "tags": ["reconciliation", "bank", "ledger", "matching"],
-    "confidence": 0.90,
-    "version": "1.0"
-  },
-  "pattern_finance_audit_001": {
-    "name": "Financial Audit Preparation",
-    "description": "Preparation for internal or external audit including documentation gathering and review",
-    "domain": "finance",
-    "category": "sequential",
+    "category": "planning",
     "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["initiate", "gather_docs", "review", "identify_issues", "remediate", "audit_ready", "end"],
-      "edges": ["initiate->gather", "gather->review", "review->identify", "identify->remediate", "remediate->audit", "audit->end"],
-      "node_types": {
-        "initiate": "start_event",
-        "gather_docs": "activity",
-        "review": "activity",
-        "identify_issues": "activity",
-        "remediate": "activity",
-        "audit_ready": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Audit initiated, financial records gathered, reviewed for completeness, issues identified and documented, corrective actions taken, audit trail prepared",
-      "Audit scheduling, documentation collection, compliance check, findings documentation, remediation tracking, audit readiness confirmation"
+    "keywords": [
+      "budget",
+      "planning",
+      "approval",
+      "forecast"
     ],
-    "validation_rules": [
-      "All required documentation collected",
-      "Issues documented and tracked",
-      "Remediation evidence provided",
-      "Audit trail maintained"
+    "workflow_steps": [
+      "Budget planning kick-off announcement",
+      "Department budget submissions",
+      "Finance consolidation and analysis",
+      "Executive review and adjustments",
+      "Final approval by CFO",
+      "Distribution to cost centers",
+      "Monthly monitoring and variance analysis"
+    ],
+    "actors": [
+      "Department Managers",
+      "Finance Manager",
+      "CFO",
+      "Controller"
+    ],
+    "business_rules": [
+      "Budget must be submitted by deadline",
+      "Total cannot exceed allocation",
+      "Variance > 10% requires explanation",
+      "Capital requests need separate approval"
     ],
     "anti_patterns": [
-      "Missing documentation",
-      "Unaddressed audit findings",
-      "Poor record keeping",
-      "No audit trail"
+      "Missing departments",
+      "Over-budget submissions"
     ],
-    "tags": ["audit", "compliance", "documentation", "finance"],
-    "confidence": 0.88,
+    "tags": [
+      "budget",
+      "planning",
+      "approval",
+      "forecast"
+    ],
+    "confidence": 0.92,
     "version": "1.0"
   },
-  "pattern_finance_accrual_001": {
-    "name": "Accrual and Cutoff",
-    "description": "Period-end accrual processing and transaction cutoff for accurate financial reporting",
+  "pattern_finance_bank_reconciliation_001": {
+    "name": "Bank Account Reconciliation",
+    "description": "Monthly bank reconciliation process identifying and resolving discrepancies",
     "domain": "finance",
-    "category": "sequential",
+    "category": "accounting",
     "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["identify", "accrue", "calculate", "record", "verify", "report", "end"],
-      "edges": ["identify->accrue", "accrue->calculate", "calculate->record", "record->verify", "verify->report", "report->end"],
-      "node_types": {
-        "identify": "start_event",
-        "accrue": "activity",
-        "calculate": "activity",
-        "record": "activity",
-        "verify": "activity",
-        "report": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Period-end cutoff identified, accruals for unpaid expenses, revenue calculated, journal entries recorded, accruals verified, reflected in financial statements",
-      "End of period, accrual items identified, amounts calculated, entries journalized, validation performed, reporting included"
+    "keywords": [
+      "reconciliation",
+      "bank",
+      "accounting",
+      "variance"
     ],
-    "validation_rules": [
-      "All accruals properly documented",
-      "Calculations verified",
-      "Cutoff date strictly observed",
-      "Supporting documentation maintained"
+    "workflow_steps": [
+      "Download bank statement",
+      "Compare with GL records",
+      "Identify outstanding items",
+      "Investigate variances",
+      "Make adjusting entries if needed",
+      "Manager approval",
+      "Reconciliation close"
+    ],
+    "actors": [
+      "Accountant",
+      "Manager",
+      "Bank"
+    ],
+    "business_rules": [
+      "Must reconcile within 10 days of month-end",
+      "Variances > $5000 need investigation",
+      "All reconciling items must have supporting docs"
     ],
     "anti_patterns": [
-      "Missing accruals",
-      "Incorrect cutoff",
-      "Lack of supporting documentation",
-      "Inadequate verification"
+      "Unreconciled items left open",
+      "Manual adjustments without documentation"
     ],
-    "tags": ["accrual", "cutoff", "period-end", "accounting"],
-    "confidence": 0.89,
+    "tags": [
+      "reconciliation",
+      "accounting",
+      "month-end"
+    ],
+    "confidence": 0.91,
     "version": "1.0"
   },
-  "pattern_finance_cash_flow_001": {
-    "name": "Cash Flow Forecasting",
-    "description": "Rolling cash flow forecasting and analysis for liquidity management",
+  "pattern_finance_loan_approval_001": {
+    "name": "Loan Application & Approval",
+    "description": "Loan application intake, credit analysis, approval decision, and funding",
     "domain": "finance",
-    "category": "sequential",
+    "category": "lending",
     "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["collect_data", "forecast", "analyze", "identify_risks", "plan_mitigation", "report", "monitor"],
-      "edges": ["collect->forecast", "forecast->analyze", "analyze->risks", "risks->plan", "plan->report", "report->monitor"],
-      "node_types": {
-        "collect_data": "start_event",
-        "forecast": "activity",
-        "analyze": "activity",
-        "identify_risks": "activity",
-        "plan_mitigation": "activity",
-        "report": "activity",
-        "monitor": "activity"
-      }
-    },
-    "examples": [
-      "Cash data collected, 12-month forecast prepared, variance analysis performed, liquidity risks identified, mitigation strategies planned, reported to leadership, monitored weekly",
-      "Collection of cash projections, forecasting, scenario analysis, risk assessment, action planning, executive reporting, ongoing tracking"
+    "keywords": [
+      "loan",
+      "credit",
+      "approval",
+      "lending",
+      "underwriting"
     ],
-    "validation_rules": [
-      "Forecasts based on historical data",
-      "Risk scenarios considered",
-      "Contingency plans in place",
-      "Weekly monitoring of actuals vs forecast"
+    "workflow_steps": [
+      "Customer submits application",
+      "Initial completeness check",
+      "Credit report and score analysis",
+      "Income and asset verification",
+      "Decision: fast-track approval, manual review, or rejection",
+      "Documentation and approval",
+      "Fund disbursement"
+    ],
+    "actors": [
+      "Customer",
+      "Loan Officer",
+      "Credit Analyst",
+      "Manager"
+    ],
+    "business_rules": [
+      "Credit score > 700: auto-approve",
+      "500-700: manual review",
+      "< 500: auto-reject",
+      "Debt-to-income ratio must be < 43%"
     ],
     "anti_patterns": [
-      "Overly optimistic forecasts",
-      "No risk considerations",
-      "Missing contingency plans",
-      "Infrequent monitoring"
+      "Approval without documentation",
+      "Skipping verification steps"
     ],
-    "tags": ["cash-flow", "forecasting", "liquidity", "planning"],
-    "confidence": 0.87,
+    "tags": [
+      "lending",
+      "credit",
+      "approval"
+    ],
+    "confidence": 0.9,
     "version": "1.0"
-  }
+  },
+  "pattern_finance_purchase_order_001": {
+    "name": "Purchase Order Generation & Approval",
+    "description": "Creation, approval routing, and issuance of purchase orders",
+    "domain": "finance",
+    "category": "procurement",
+    "complexity": "moderate",
+    "keywords": [
+      "purchase order",
+      "PO",
+      "approval",
+      "procurement"
+    ],
+    "workflow_steps": [
+      "Purchase request submitted",
+      "Vendor selection and quote approval",
+      "PO generation",
+      "Routing to approvers based on amount",
+      "Approval or rejection",
+      "PO issuance to vendor"
+    ],
+    "actors": [
+      "Requestor",
+      "Procurement",
+      "Manager",
+      "Finance"
+    ],
+    "business_rules": [
+      "Amount < $1000: Manager approval",
+      "$1000-$10000: Director approval",
+      "> $10000: CFO approval",
+      "Must use approved vendors"
+    ],
+    "anti_patterns": [
+      "Purchase without PO",
+      "Split purchases to avoid approval"
+    ],
+    "tags": [
+      "procurement",
+      "approval",
+      "purchase"
+    ],
+    "confidence": 0.93,
+    "version": "1.0"
+  },
+  "pattern_finance_close_process_001": {
+    "name": "Month-End Close Process",
+    "description": "Complete financial close including reconciliations, accruals, and reporting",
+    "domain": "finance",
+    "category": "accounting",
+    "complexity": "complex",
+    "keywords": [
+      "close",
+      "close-out",
+      "financial",
+      "accrual",
+      "reconciliation"
+    ],
+    "workflow_steps": [
+      "Stop new transaction posting",
+      "Reconcile all accounts",
+      "Accrue expenses and revenues",
+      "Review for unusual items",
+      "Prepare trial balance",
+      "Generate financial statements",
+      "Manager review and sign-off"
+    ],
+    "actors": [
+      "Accountant",
+      "Manager",
+      "CFO"
+    ],
+    "business_rules": [
+      "All reconciliations must be complete",
+      "Variances > $10000 require explanation",
+      "Close must complete by 5 business days after month-end"
+    ],
+    "anti_patterns": [
+      "Incomplete reconciliations",
+      "Manual journal entries without approval"
+    ],
+    "tags": [
+      "close",
+      "accounting",
+      "month-end"
+    ],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_finance_investment_001": {
+    "name": "Investment Decision & Management",
+    "description": "Proposal evaluation, approval, execution, and monitoring of investments",
+    "domain": "finance",
+    "category": "investment",
+    "complexity": "complex",
+    "keywords": [
+      "investment",
+      "capital",
+      "allocation",
+      "return"
+    ],
+    "workflow_steps": [
+      "Investment proposal submission",
+      "Financial analysis and ROI calculation",
+      "Risk assessment",
+      "Committee presentation",
+      "Approval decision",
+      "Fund allocation",
+      "Quarterly performance monitoring"
+    ],
+    "actors": [
+      "Proposer",
+      "Finance Analyst",
+      "Investment Committee",
+      "CFO"
+    ],
+    "business_rules": [
+      "Minimum ROI threshold: 15%",
+      "Payback period: < 5 years",
+      "Committee approval for > $100000"
+    ],
+    "anti_patterns": [
+      "Underestimated risks",
+      "Missing ROI analysis"
+    ],
+    "tags": [
+      "investment",
+      "capital",
+      "allocation"
+    ],
+     "confidence": 0.88,
+     "version": "1.0"
+   },
+   "pattern_finance_tax_filing_001": {
+     "name": "Tax Filing & Compliance",
+     "description": "Annual tax preparation, documentation gathering, filing, and audit preparation",
+     "domain": "finance",
+     "category": "compliance",
+     "complexity": "complex",
+     "keywords": [
+       "tax",
+       "filing",
+       "compliance",
+       "audit",
+       "deductions"
+     ],
+     "workflow_steps": [
+       "Gather supporting documentation",
+       "Calculate tax liability",
+       "Prepare tax schedules",
+       "Review for accuracy",
+       "File tax return",
+       "Track payment",
+       "Maintain audit trail"
+     ],
+     "actors": [
+       "Tax Accountant",
+       "Manager",
+       "CFO",
+       "Tax Authority"
+     ],
+     "business_rules": [
+       "Filing deadline: specific date per jurisdiction",
+       "All deductions must be documented",
+       "Estimated tax payments must be current"
+     ],
+     "anti_patterns": [
+       "Missing documentation",
+       "Late filing"
+     ],
+     "tags": [
+       "tax",
+       "compliance",
+       "filing"
+     ],
+     "confidence": 0.92,
+     "version": "1.0"
+   },
+   "pattern_finance_asset_management_001": {
+     "name": "Fixed Asset Management",
+     "description": "Asset acquisition, capitalization, depreciation tracking, and disposal",
+     "domain": "finance",
+     "category": "accounting",
+     "complexity": "moderate",
+     "keywords": [
+       "asset",
+       "depreciation",
+       "disposal",
+       "capitalization"
+     ],
+     "workflow_steps": [
+       "Asset acquisition request",
+       "Approval and purchase",
+       "Asset registration and tagging",
+       "Monthly depreciation calculation",
+       "Periodic asset verification",
+       "Asset disposal or retirement",
+       "Gain/loss calculation"
+     ],
+     "actors": [
+       "Finance",
+       "Operations",
+       "Manager"
+     ],
+     "business_rules": [
+       "Assets > $5000 must be capitalized",
+       "Depreciation method defined per asset class",
+       "Salvage value must be estimated"
+     ],
+     "anti_patterns": [
+       "Unregistered assets",
+       "Incorrect depreciation"
+     ],
+     "tags": [
+       "assets",
+       "depreciation",
+       "accounting"
+     ],
+     "confidence": 0.89,
+     "version": "1.0"
+   },
+   "pattern_finance_credit_limit_001": {
+     "name": "Customer Credit Limit Management",
+     "description": "Establishing, monitoring, and adjusting customer credit limits",
+     "domain": "finance",
+     "category": "credit_management",
+     "complexity": "moderate",
+     "keywords": [
+       "credit",
+       "limit",
+       "customer",
+       "approval"
+     ],
+     "workflow_steps": [
+       "Credit application received",
+       "Credit assessment and analysis",
+       "Limit recommendation",
+       "Management approval",
+       "Ongoing balance monitoring",
+       "Limit adjustment as needed",
+       "Delinquency escalation if required"
+     ],
+     "actors": [
+       "Credit Analyst",
+       "Manager",
+       "Collections"
+     ],
+     "business_rules": [
+       "Credit score > 700: auto-approve limit",
+       "Limit must not exceed 90% of annual sales",
+       "Quarterly review required"
+     ],
+     "anti_patterns": [
+       "Expired credit assessments",
+       "Missed delinquencies"
+     ],
+     "tags": [
+       "credit",
+       "customer",
+       "risk"
+     ],
+     "confidence": 0.87,
+     "version": "1.0"
+   },
+   "pattern_finance_audit_001": {
+     "name": "Internal Audit Process",
+     "description": "Audit planning, execution, findings documentation, and remediation tracking",
+     "domain": "finance",
+     "category": "control",
+     "complexity": "complex",
+     "keywords": [
+       "audit",
+       "internal control",
+       "compliance",
+       "findings"
+     ],
+     "workflow_steps": [
+       "Audit plan development",
+       "Scope and risk assessment",
+       "Audit fieldwork",
+       "Findings documentation",
+       "Management response",
+       "Remediation action plan",
+       "Follow-up verification"
+     ],
+     "actors": [
+       "Internal Auditor",
+       "Process Owner",
+       "Management",
+       "Audit Committee"
+     ],
+     "business_rules": [
+       "All findings must be rated by severity",
+       "High-severity items must have 30-day action plan",
+       "Remediation must be verified by auditor"
+     ],
+     "anti_patterns": [
+       "Unresolved findings",
+       "Overdue remediation"
+     ],
+     "tags": [
+       "audit",
+       "control",
+       "compliance"
+     ],
+     "confidence": 0.91,
+     "version": "1.0"
+   },
+   "pattern_finance_payroll_001": {
+     "name": "Payroll Processing",
+     "description": "Employee data validation, compensation calculation, deductions, and payment",
+     "domain": "finance",
+     "category": "human_capital",
+     "complexity": "moderate",
+     "keywords": [
+       "payroll",
+       "salary",
+       "deduction",
+       "payment"
+     ],
+     "workflow_steps": [
+       "Collect hours worked or salary data",
+       "Apply deductions and withholdings",
+       "Calculate gross and net pay",
+       "Tax withholding calculation",
+       "Approval by payroll manager",
+       "Process payment",
+       "Reconcile with GL"
+     ],
+     "actors": [
+       "HR",
+       "Payroll Manager",
+       "Finance",
+       "Employee"
+     ],
+     "business_rules": [
+       "Overtime must be flagged and reviewed",
+       "Tax rates must be current",
+       "Payment must occur on schedule"
+     ],
+     "anti_patterns": [
+       "Overpayments",
+       "Missed deductions"
+     ],
+     "tags": [
+       "payroll",
+       "compensation",
+       "human-capital"
+     ],
+     "confidence": 0.94,
+     "version": "1.0"
+   },
+   "pattern_finance_debt_management_001": {
+     "name": "Debt Management & Repayment",
+     "description": "Loan tracking, payment scheduling, interest calculation, and debt reduction",
+     "domain": "finance",
+     "category": "liabilities",
+     "complexity": "moderate",
+     "keywords": [
+       "debt",
+       "loan",
+       "repayment",
+       "interest"
+     ],
+     "workflow_steps": [
+       "Loan origination and registration",
+       "Payment schedule generation",
+       "Monthly payment processing",
+       "Interest and principal allocation",
+       "Covenant monitoring",
+       "Prepayment handling",
+       "Loan payoff"
+     ],
+     "actors": [
+       "Finance",
+       "Treasurer",
+       "Lender"
+     ],
+     "business_rules": [
+       "All payments must be on schedule",
+       "Interest must be accrued monthly",
+       "Covenants must be monitored and reported"
+     ],
+     "anti_patterns": [
+       "Missed payments",
+       "Incorrect interest calculation"
+     ],
+     "tags": [
+       "debt",
+       "liabilities",
+       "repayment"
+     ],
+     "confidence": 0.9,
+     "version": "1.0"
+   },
+   "pattern_finance_revenue_recognition_001": {
+     "name": "Revenue Recognition & Recording",
+     "description": "Revenue event tracking, recognition determination, and GL posting",
+     "domain": "finance",
+     "category": "accounting",
+     "complexity": "complex",
+     "keywords": [
+       "revenue",
+       "recognition",
+       "accounting",
+       "posting"
+     ],
+     "workflow_steps": [
+       "Revenue event trigger (invoice/delivery)",
+       "Performance obligation assessment",
+       "Recognition criteria evaluation",
+       "Revenue amount calculation",
+       "Journal entry preparation",
+       "Manager review",
+       "GL posting",
+       "Financial statement inclusion"
+     ],
+     "actors": [
+       "Revenue Accountant",
+       "Controller",
+       "Manager"
+     ],
+     "business_rules": [
+       "Revenue recognized when performance obligation met",
+       "Amount must be determinable",
+       "Collection must be probable"
+     ],
+     "anti_patterns": [
+       "Premature recognition",
+       "Unrecorded revenue"
+     ],
+     "tags": [
+       "revenue",
+       "accounting",
+       "gaap"
+     ],
+     "confidence": 0.91,
+     "version": "1.0"
+   },
+   "pattern_finance_cash_forecasting_001": {
+     "name": "Cash Flow Forecasting",
+     "description": "Collection of inflows/outflows, forecasting, and liquidity management",
+     "domain": "finance",
+     "category": "planning",
+     "complexity": "moderate",
+     "keywords": [
+       "cash",
+       "forecasting",
+       "liquidity",
+       "flow"
+     ],
+     "workflow_steps": [
+       "Collect payment schedules",
+       "Estimate receipts",
+       "Identify planned expenditures",
+       "Apply seasonal factors",
+       "Generate forecast",
+       "Review with stakeholders",
+       "Update weekly/monthly"
+     ],
+     "actors": [
+       "Treasurer",
+       "Finance Manager",
+       "Operations"
+     ],
+     "business_rules": [
+       "Forecast must cover 90-day horizon minimum",
+       "Updated weekly for near-term decisions",
+       "Variance > 10% requires investigation"
+     ],
+     "anti_patterns": [
+       "Stale forecasts",
+       "Missing categories"
+     ],
+     "tags": [
+       "cash",
+       "forecasting",
+       "liquidity"
+     ],
+     "confidence": 0.88,
+     "version": "1.0"
+   },
+   "pattern_finance_supplier_payment_001": {
+     "name": "Supplier Payment & Settlement",
+     "description": "Vendor invoice validation, discount optimization, and payment execution",
+     "domain": "finance",
+     "category": "procurement",
+     "complexity": "moderate",
+     "keywords": [
+       "supplier",
+       "vendor",
+       "payment",
+       "settlement"
+     ],
+     "workflow_steps": [
+       "Receive vendor invoice",
+       "Match to PO and receipt",
+       "Verify amount and terms",
+       "Calculate early payment discount opportunity",
+       "Schedule payment",
+       "Process payment",
+       "Reconcile to records"
+     ],
+     "actors": [
+       "Accounts Payable",
+       "Procurement",
+       "Finance"
+     ],
+     "business_rules": [
+       "Early payment discount must be > 0.5% annual benefit",
+       "Payment terms must be honored",
+       "Never pay without PO match"
+     ],
+     "anti_patterns": [
+       "Duplicate payments",
+       "Missed discounts"
+     ],
+     "tags": [
+       "supplier",
+       "vendor",
+       "payment"
+     ],
+     "confidence": 0.92,
+     "version": "1.0"
+   }
 }

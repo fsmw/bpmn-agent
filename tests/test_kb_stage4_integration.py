@@ -798,6 +798,222 @@ class TestFullPipelineIntegration:
         assert graph is not None
         assert report is not None
 
+    def test_data_object_extraction_and_flow(self):
+        """Test data object extraction and data flow edge creation."""
+        # Create extraction with data objects and data flows
+        entities = [
+            ExtractedEntity(
+                id="act_1",
+                type=EntityType.ACTIVITY,
+                name="submit invoice",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="submit invoice",
+            ),
+            ExtractedEntity(
+                id="act_2",
+                type=EntityType.ACTIVITY,
+                name="review invoice",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="review invoice",
+            ),
+            ExtractedEntity(
+                id="act_3",
+                type=EntityType.ACTIVITY,
+                name="process payment",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="process payment",
+            ),
+            ExtractedEntity(
+                id="data_1",
+                type=EntityType.DATA,
+                name="invoice",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="invoice",
+            ),
+            ExtractedEntity(
+                id="data_2",
+                type=EntityType.DATA,
+                name="receipt",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="receipt",
+            ),
+            ExtractedEntity(
+                id="actor_1",
+                type=EntityType.ACTOR,
+                name="accountant",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="accountant",
+            ),
+        ]
 
-if __name__ == "__main__":
+        relations = [
+            # Activity relations
+            ExtractedRelation(
+                id="r1",
+                source_id="act_1",
+                target_id="act_2",
+                type=RelationType.PRECEDES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="precedes",
+            ),
+            ExtractedRelation(
+                id="r2",
+                source_id="act_2",
+                target_id="act_3",
+                type=RelationType.PRECEDES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="precedes",
+            ),
+            # Data flow relations
+            ExtractedRelation(
+                id="r3",
+                source_id="act_1",
+                target_id="data_1",
+                type=RelationType.PRODUCES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="produces",
+            ),
+            ExtractedRelation(
+                id="r4",
+                source_id="act_2",
+                target_id="data_1",
+                type=RelationType.USES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="uses",
+            ),
+            ExtractedRelation(
+                id="r5",
+                source_id="act_3",
+                target_id="data_1",
+                type=RelationType.CONSUMES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="consumes",
+            ),
+            ExtractedRelation(
+                id="r6",
+                source_id="act_3",
+                target_id="data_2",
+                type=RelationType.PRODUCES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="produces",
+            ),
+            # Actor involvement
+            ExtractedRelation(
+                id="r7",
+                source_id="actor_1",
+                target_id="act_2",
+                type=RelationType.INVOLVES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="involves",
+            ),
+        ]
+
+        extraction = ExtractionResult(
+            entities=entities,
+            relations=relations,
+            metadata=ExtractionMetadata(
+                input_text="Data flow test",
+                input_length=10,
+                extraction_timestamp=datetime.now().isoformat(),
+                extraction_duration_ms=50.0,
+                llm_model="test",
+                llm_temperature=0.7,
+            ),
+        )
+
+        actor_profiles = {
+            "actor_1": ActorProfile(
+                actor_id="actor_1",
+                actor_name="accountant",
+                activity_ids=["act_2"],
+                confidence=ConfidenceLevel.HIGH,
+            )
+        }
+
+        # Build graph
+        builder = ProcessGraphBuilder(enable_kb=False)
+        graph = builder.build_from_extraction(extraction, actor_profiles)
+
+        # Verify data nodes are created
+        data_nodes = [n for n in graph.nodes if n.type == NodeType.DATA]
+        assert len(data_nodes) >= 2, "Should have at least 2 data nodes"
+
+        # Verify data node properties
+        invoice_nodes = [n for n in data_nodes if "invoice" in n.label.lower()]
+        assert len(invoice_nodes) > 0, "Should have invoice data node"
+        
+        # Verify data flow edges are created
+        data_edges = [e for e in graph.edges if e.type == EdgeType.DATA_FLOW]
+        assert len(data_edges) >= 3, "Should have at least 3 data flow edges"
+
+        # Verify data edges connect to data nodes
+        data_node_ids = {n.id for n in data_nodes}
+        for edge in data_edges:
+            assert edge.source_id in data_node_ids or edge.target_id in data_node_ids, \
+                f"Data flow edge should connect to data node: {edge}"
+
+    def test_data_object_with_attributes(self):
+        """Test data objects can have additional attributes."""
+        from bpmn_agent.models.extraction import EntityAttribute
+        
+        entities = [
+            ExtractedEntity(
+                id="data_1",
+                type=EntityType.DATA,
+                name="order",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="order",
+                attributes={
+                    "data_type": EntityAttribute(key="data_type", value="document"),
+                    "format": EntityAttribute(key="format", value="JSON")
+                }
+            ),
+            ExtractedEntity(
+                id="act_1",
+                type=EntityType.ACTIVITY,
+                name="process order",
+                confidence=ConfidenceLevel.HIGH,
+                source_text="process order",
+            ),
+        ]
+
+        relations = [
+            ExtractedRelation(
+                id="r1",
+                source_id="act_1",
+                target_id="data_1",
+                type=RelationType.USES,
+                confidence=ConfidenceLevel.HIGH,
+                source_text="uses",
+            )
+        ]
+
+        extraction = ExtractionResult(
+            entities=entities,
+            relations=relations,
+            metadata=ExtractionMetadata(
+                input_text="Test",
+                input_length=4,
+                extraction_timestamp=datetime.now().isoformat(),
+                extraction_duration_ms=50.0,
+                llm_model="test",
+                llm_temperature=0.7,
+            ),
+        )
+
+        actor_profiles = {}
+
+        # Build graph
+        builder = ProcessGraphBuilder(enable_kb=False)
+        graph = builder.build_from_extraction(extraction, actor_profiles)
+
+        # Verify data node exists
+        data_nodes = [n for n in graph.nodes if n.type == NodeType.DATA]
+        assert len(data_nodes) > 0, "Should have data node"
+
+        # Verify attributes are preserved
+        order_node = [n for n in data_nodes if "order" in n.label.lower()][0]
+        assert order_node.properties is not None, "Data node should have properties"
+
+
     pytest.main([__file__, "-v"])

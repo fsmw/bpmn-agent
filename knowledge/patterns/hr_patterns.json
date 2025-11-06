@@ -1,219 +1,643 @@
 {
   "pattern_hr_recruitment_001": {
-    "name": "Recruitment Funnel",
-    "description": "Multi-stage recruitment process with screening and approval gates",
+    "name": "Recruitment & Hiring Process",
+    "description": "End-to-end recruitment from job posting to onboarding",
     "domain": "hr",
-    "category": "exclusive_choice",
+    "category": "recruitment",
     "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["receive_resume", "screen", "interview", "decision", "offer", "accept"],
-      "edges": ["receive->screen", "screen->interview", "interview->decision", "decision->offer", "offer->accept"],
-      "node_types": {
-        "receive_resume": "start_event",
-        "screen": "activity",
-        "interview": "activity",
-        "decision": "exclusive_gateway",
-        "offer": "activity",
-        "accept": "end_event"
-      }
-    },
-    "examples": [
-      "Applicant submits resume, HR screens, conducts interview, then decides to proceed with offer or rejection",
-      "Job posting receives applications, qualify candidates, interview selected, make hiring decision"
+    "keywords": [
+      "recruitment",
+      "hiring",
+      "application",
+      "interview",
+      "offer"
     ],
-    "validation_rules": [
-      "Each stage must qualify candidates",
-      "Decision point required before offer",
-      "Clear rejection paths"
+    "workflow_steps": [
+      "Job posting creation and approval",
+      "Application collection",
+      "Resume screening",
+      "Phone interview selection",
+      "Phone interview execution",
+      "In-person interview",
+      "Hiring decision and offer",
+      "Reference checks",
+      "Offer acceptance",
+      "Onboarding initiation"
+    ],
+    "actors": [
+      "HR",
+      "Hiring Manager",
+      "Recruiter",
+      "Candidate"
+    ],
+    "business_rules": [
+      "Minimum 3 candidates for phone interviews",
+      "Minimum 2 candidates for on-site",
+      "Background check before offer",
+      "Salary must be within band"
     ],
     "anti_patterns": [
-      "Multiple simultaneous offers",
-      "Missing screening stage",
-      "No rejection path"
+      "Hiring without process",
+      "Insufficient interview rounds"
     ],
-    "tags": ["recruitment", "hiring", "interview", "selection"],
-    "confidence": 0.92,
+    "tags": [
+      "recruitment",
+      "hiring",
+      "talent"
+    ],
+    "confidence": 0.94,
     "version": "1.0"
   },
   "pattern_hr_onboarding_001": {
     "name": "Employee Onboarding",
-    "description": "Multi-step employee onboarding with parallel setup tasks",
+    "description": "New employee setup including IT, HR, and facilities coordination",
     "domain": "hr",
-    "category": "parallel",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["start", "fork", "it_setup", "hr_setup", "office_setup", "join", "training", "end"],
-      "edges": ["start->fork", "fork->it", "fork->hr", "fork->office", "it->join", "hr->join", "office->join", "join->training", "training->end"],
-      "node_types": {
-        "start": "start_event",
-        "fork": "parallel_gateway",
-        "it_setup": "activity",
-        "hr_setup": "activity",
-        "office_setup": "activity",
-        "join": "parallel_gateway",
-        "training": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "New hire starts; IT sets up computer and accounts, HR sets up payroll, office prepares desk - all in parallel; then training",
-      "Onboarding includes parallel: IT provisioning, facilities setup, paperwork processing, then orientation training"
+    "category": "onboarding",
+    "complexity": "moderate",
+    "keywords": [
+      "onboarding",
+      "new hire",
+      "setup",
+      "training"
     ],
-    "validation_rules": [
-      "All parallel tasks must complete before training",
-      "Required IT, HR, and office tasks",
-      "Training is mandatory final step"
+    "workflow_steps": [
+      "Pre-boarding package sent",
+      "Day 1: IT account and equipment setup",
+      "Day 1: HR paperwork and orientation",
+      "Day 1: Facilities desk and office setup",
+      "Week 1: Security training",
+      "Week 1: Department orientation",
+      "Month 1: Manager check-ins",
+      "Month 3: 90-day review"
+    ],
+    "actors": [
+      "HR",
+      "IT",
+      "Manager",
+      "Facilities",
+      "Employee"
+    ],
+    "business_rules": [
+      "IT and HR parallel tasks on day 1",
+      "Security training before system access",
+      "Manager orientation within first week"
     ],
     "anti_patterns": [
-      "Sequential setup when tasks can be parallel",
-      "Missing any required setup",
-      "Training before all setup complete"
+      "Missing IT setup",
+      "Incomplete orientation"
     ],
-    "tags": ["onboarding", "employee", "setup", "training"],
+    "tags": [
+      "onboarding",
+      "new-hire",
+      "training"
+    ],
     "confidence": 0.93,
     "version": "1.0"
   },
-  "pattern_hr_timeoff_001": {
-    "name": "Time Off Request",
-    "description": "Employee time off request with approval workflow",
+  "pattern_hr_performance_review_001": {
+    "name": "Performance Review Cycle",
+    "description": "Annual performance evaluation, rating, and compensation adjustment",
     "domain": "hr",
-    "category": "exclusive_choice",
+    "category": "performance",
     "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["request", "check", "approve_gateway", "approved", "rejected", "end"],
-      "edges": ["request->check", "check->approve_gateway", "approve_gateway->approved", "approve_gateway->rejected", "approved->end", "rejected->end"],
-      "node_types": {
-        "request": "start_event",
-        "check": "activity",
-        "approve_gateway": "exclusive_gateway",
-        "approved": "activity",
-        "rejected": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Employee requests time off, manager checks availability and approves or denies",
-      "Leave request submitted, HR validates dates and manager decides approval"
+    "keywords": [
+      "performance",
+      "review",
+      "rating",
+      "goals",
+      "compensation"
     ],
-    "validation_rules": [
-      "Manager approval is required",
-      "Date conflict detection mandatory",
-      "Both approval and rejection paths needed"
+    "workflow_steps": [
+      "Goal setting (annual)",
+      "Mid-year check-in",
+      "Performance evaluation period",
+      "Self-assessment submission",
+      "Manager evaluation and rating",
+      "Calibration session",
+      "Compensation adjustment decision",
+      "Review discussion with employee",
+      "Documentation and archival"
+    ],
+    "actors": [
+      "Employee",
+      "Manager",
+      "HR",
+      "HR Director"
+    ],
+    "business_rules": [
+      "Goals must be SMART",
+      "Rating scale: 1-5",
+      "Calibration to maintain consistency",
+      "Compensation range by rating"
     ],
     "anti_patterns": [
-      "Auto-approval without checking",
-      "Missing rejection reason",
-      "No manager involvement"
+      "Skipped calibration",
+      "Inconsistent ratings"
     ],
-    "tags": ["time-off", "leave", "approval", "vacation"],
-    "confidence": 0.91,
+    "tags": [
+      "performance",
+      "review",
+      "rating"
+    ],
+    "confidence": 0.92,
     "version": "1.0"
   },
   "pattern_hr_promotion_001": {
-    "name": "Employee Promotion",
-    "description": "Promotion workflow with review and approval stages",
+    "name": "Employee Promotion Process",
+    "description": "Promotion eligibility review, approval, and transition",
     "domain": "hr",
-    "category": "exclusive_choice",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["nominate", "review", "evaluate", "decision", "promote", "notify"],
-      "edges": ["nominate->review", "review->evaluate", "evaluate->decision", "decision->promote", "promote->notify"],
-      "node_types": {
-        "nominate": "start_event",
-        "review": "activity",
-        "evaluate": "activity",
-        "decision": "exclusive_gateway",
-        "promote": "activity",
-        "notify": "end_event"
-      }
-    },
-    "examples": [
-      "Manager nominates employee for promotion, HR reviews qualifications, management evaluates, decides, and processes if approved",
-      "Promotion initiated with performance review, skill assessment, approval, and salary adjustment"
+    "category": "career",
+    "complexity": "moderate",
+    "keywords": [
+      "promotion",
+      "career",
+      "advancement",
+      "eligibility"
     ],
-    "validation_rules": [
-      "Review and evaluation required",
-      "Clear approval criteria",
-      "Notification process"
+    "workflow_steps": [
+      "Employee expresses promotion interest",
+      "Eligibility review (tenure, performance)",
+      "Manager recommendation",
+      "Committee review",
+      "Approval decision",
+      "Compensation adjustment",
+      "Role transition planning",
+      "Announcement"
+    ],
+    "actors": [
+      "Employee",
+      "Current Manager",
+      "New Manager",
+      "HR",
+      "Leadership"
+    ],
+    "business_rules": [
+      "Minimum 1 year in current role",
+      "Performance rating >= 3",
+      "Budget availability for new level",
+      "Skill assessment required"
     ],
     "anti_patterns": [
-      "Skipping evaluation stage",
-      "No clear criteria",
-      "Missing notification"
+      "Promotion without qualifications",
+      "Budget overrun"
     ],
-    "tags": ["promotion", "career", "advancement", "review"],
-    "confidence": 0.90,
+    "tags": [
+      "promotion",
+      "career",
+      "advancement"
+    ],
+    "confidence": 0.91,
+    "version": "1.0"
+  },
+  "pattern_hr_leave_request_001": {
+    "name": "Leave Request & Approval",
+    "description": "Employee leave request submission, approval, and tracking",
+    "domain": "hr",
+    "category": "time-off",
+    "complexity": "simple",
+    "keywords": [
+      "leave",
+      "vacation",
+      "sick",
+      "time-off",
+      "approval"
+    ],
+    "workflow_steps": [
+      "Employee submits leave request",
+      "System checks leave balance",
+      "Manager reviews and approves/denies",
+      "HR updates leave records",
+      "Team notified of absence"
+    ],
+    "actors": [
+      "Employee",
+      "Manager",
+      "HR"
+    ],
+    "business_rules": [
+      "Balance must be sufficient",
+      "Request minimum 2 days in advance",
+      "Manager approval required",
+      "Maximum 5 consecutive days without director approval"
+    ],
+    "anti_patterns": [
+      "Negative balance",
+      "Unapproved absence"
+    ],
+    "tags": [
+      "leave",
+      "vacation",
+      "time-off"
+    ],
+    "confidence": 0.95,
+    "version": "1.0"
+  },
+  "pattern_hr_termination_001": {
+    "name": "Employee Offboarding & Termination",
+    "description": "Employee separation including exit process and asset recovery",
+    "domain": "hr",
+    "category": "offboarding",
+    "complexity": "moderate",
+    "keywords": [
+      "offboarding",
+      "termination",
+      "exit",
+      "separation"
+    ],
+    "workflow_steps": [
+      "Termination notice and documentation",
+      "Exit interview scheduling",
+      "IT asset collection",
+      "Access removal",
+      "Final paycheck processing",
+      "Benefits termination",
+      "Knowledge transfer",
+      "Exit interview",
+      "Final documentation"
+    ],
+    "actors": [
+      "HR",
+      "Manager",
+      "IT",
+      "Finance",
+      "Employee"
+    ],
+    "business_rules": [
+      "Notice period must be honored",
+      "All assets must be collected",
+      "Access removed on last day",
+      "Final paycheck includes accruals"
+    ],
+    "anti_patterns": [
+      "Premature access removal",
+      "Missing asset collection"
+    ],
+    "tags": [
+      "offboarding",
+      "termination",
+      "exit"
+    ],
+    "confidence": 0.92,
     "version": "1.0"
   },
   "pattern_hr_training_001": {
-    "name": "Training Program",
-    "description": "Employee training enrollment and tracking",
+    "name": "Employee Training & Development",
+    "description": "Training request, approval, execution, and completion tracking",
     "domain": "hr",
-    "category": "sequential",
+    "category": "development",
     "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["request", "enroll", "attend", "exam", "complete"],
-      "edges": ["request->enroll", "enroll->attend", "attend->exam", "exam->complete"],
-      "node_types": {
-        "request": "start_event",
-        "enroll": "activity",
-        "attend": "activity",
-        "exam": "activity",
-        "complete": "end_event"
-      }
-    },
-    "examples": [
-      "Employee requests training, enrolls in course, attends sessions, takes exam, completes program",
-      "Training workflow: enrollment, course attendance, assessment, completion"
+    "keywords": [
+      "training",
+      "development",
+      "learning",
+      "certification"
     ],
-    "validation_rules": [
-      "Enrollment verification",
-      "Attendance tracking",
-      "Assessment required"
+    "workflow_steps": [
+      "Training need identification",
+      "Course selection and proposal",
+      "Budget and manager approval",
+      "Registration and enrollment",
+      "Training execution",
+      "Completion verification",
+      "Certification recording",
+      "Knowledge sharing with team"
     ],
-    "anti_patterns": [
-      "Skipping assessment",
-      "No attendance tracking",
-      "Completion without verification"
+    "actors": [
+      "Employee",
+      "Manager",
+      "Training Provider",
+      "HR"
     ],
-    "tags": ["training", "development", "enrollment", "learning"],
-    "confidence": 0.89,
-    "version": "1.0"
-  },
-  "pattern_hr_performance_001": {
-    "name": "Performance Review Cycle",
-    "description": "Annual performance review process with goal setting and evaluation",
-    "domain": "hr",
-    "category": "sequential",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["set_goals", "mid_review", "eval", "discuss", "feedback", "end"],
-      "edges": ["set->mid", "mid->eval", "eval->discuss", "discuss->feedback", "feedback->end"],
-      "node_types": {
-        "set_goals": "start_event",
-        "mid_review": "activity",
-        "eval": "activity",
-        "discuss": "activity",
-        "feedback": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Goals set, mid-year check-in, performance evaluation, manager discussion, feedback provided",
-      "Yearly cycle: goal planning, progress tracking, evaluation, review meeting, development plan"
-    ],
-    "validation_rules": [
-      "Goals must be set at start",
-      "Mid-year checkpoint required",
-      "Manager-employee discussion required"
+    "business_rules": [
+      "Budget approval required",
+      "Manager approval required",
+      "Course must be job-related",
+      "Completion must be verified"
     ],
     "anti_patterns": [
-      "Skipping mid-year review",
-      "No feedback discussion",
-      "Goals set after evaluation"
+      "Training without approval",
+      "Budget overrun"
     ],
-    "tags": ["review", "performance", "goals", "feedback"],
-    "confidence": 0.91,
-    "version": "1.0"
-  }
+    "tags": [
+      "training",
+      "development",
+      "learning"
+    ],
+     "confidence": 0.9,
+     "version": "1.0"
+   },
+   "pattern_hr_disciplinary_001": {
+     "name": "Disciplinary & Performance Improvement",
+     "description": "Documentation of performance issues and structured improvement plan",
+     "domain": "hr",
+     "category": "performance",
+     "complexity": "moderate",
+     "keywords": [
+       "discipline",
+       "performance",
+       "pip",
+       "warning"
+     ],
+     "workflow_steps": [
+       "Issue identification and documentation",
+       "Employee meeting and notification",
+       "Performance Improvement Plan creation",
+       "Regular check-ins and monitoring",
+       "Progress evaluation",
+       "Continuation or conclusion decision"
+     ],
+     "actors": [
+       "Manager",
+       "HR",
+       "Employee"
+     ],
+     "business_rules": [
+       "Documentation required for all issues",
+       "Verbal then written warning",
+       "PIP duration typically 30/60/90 days",
+       "HR involvement required"
+     ],
+     "anti_patterns": [
+       "Undocumented issues",
+       "Surprise termination"
+     ],
+     "tags": [
+       "discipline",
+       "performance",
+       "improvement"
+     ],
+     "confidence": 0.88,
+     "version": "1.0"
+   },
+   "pattern_hr_compensation_review_001": {
+     "name": "Compensation Planning & Adjustment",
+     "description": "Annual compensation review, market benchmarking, and merit increase process",
+     "domain": "hr",
+     "category": "compensation",
+     "complexity": "moderate",
+     "keywords": [
+       "compensation",
+       "salary",
+       "merit",
+       "increase",
+       "benchmarking"
+     ],
+     "workflow_steps": [
+       "Market benchmarking study",
+       "Current salary analysis",
+       "Equity and competitiveness review",
+       "Adjustment recommendations",
+       "Manager review and approval",
+       "Executive approval",
+       "Implementation and communication"
+     ],
+     "actors": [
+       "HR Compensation Specialist",
+       "Manager",
+       "Finance",
+       "HR Director"
+     ],
+     "business_rules": [
+       "Merit budget must be defined",
+       "Market data >= 1 year old",
+       "50th percentile target for competitiveness",
+       "Increase cannot exceed budget"
+     ],
+     "anti_patterns": [
+       "No market benchmarking",
+       "Inconsistent adjustments"
+     ],
+     "tags": [
+       "compensation",
+       "salary",
+       "benchmarking"
+     ],
+     "confidence": 0.89,
+     "version": "1.0"
+   },
+   "pattern_hr_benefits_enrollment_001": {
+     "name": "Benefits Enrollment & Management",
+     "description": "Open enrollment, benefits selection, and ongoing benefits administration",
+     "domain": "hr",
+     "category": "benefits",
+     "complexity": "moderate",
+     "keywords": [
+       "benefits",
+       "enrollment",
+       "health",
+       "insurance"
+     ],
+     "workflow_steps": [
+       "Open enrollment announcement",
+       "Benefits information distribution",
+       "Employee selection period",
+       "Vendor data upload",
+       "Reconciliation",
+       "Benefit changes effective date",
+       "Ongoing support and claims"
+     ],
+     "actors": [
+       "Employee",
+       "HR",
+       "Benefits Administrator",
+       "Vendors"
+     ],
+     "business_rules": [
+       "Enrollment window: fixed period annually",
+       "New hires: 30-day enrollment window",
+       "Life event changes allowed outside open enrollment",
+       "Coverage changes effective specific dates"
+     ],
+     "anti_patterns": [
+       "Missed enrollment deadline",
+       "Data reconciliation errors"
+     ],
+     "tags": [
+       "benefits",
+       "enrollment",
+       "health"
+     ],
+     "confidence": 0.91,
+     "version": "1.0"
+   },
+   "pattern_hr_succession_planning_001": {
+     "name": "Succession Planning & Development",
+     "description": "Leadership identification, development, and transition planning",
+     "domain": "hr",
+     "category": "career",
+     "complexity": "complex",
+     "keywords": [
+       "succession",
+       "planning",
+       "leadership",
+       "development",
+       "pipeline"
+     ],
+     "workflow_steps": [
+       "Key role identification",
+       "High-potential talent identification",
+       "Development plan creation",
+       "Mentor assignment",
+       "Experience rotation",
+       "Readiness assessment",
+       "Promotion or external hire decision"
+     ],
+     "actors": [
+       "HR",
+       "Leadership",
+       "Mentor",
+       "Candidate"
+     ],
+     "business_rules": [
+       "Plan for 3-5 year horizon",
+       "Identify 2+ candidates per key role",
+       "Annual readiness assessment",
+       "Development goals must be tracked"
+     ],
+     "anti_patterns": [
+       "No succession plan",
+       "Single point of failure"
+     ],
+     "tags": [
+       "succession",
+       "planning",
+       "leadership"
+     ],
+     "confidence": 0.85,
+     "version": "1.0"
+   },
+   "pattern_hr_transfer_001": {
+     "name": "Employee Transfer Request",
+     "description": "Internal transfer request, approval, and role transition",
+     "domain": "hr",
+     "category": "career",
+     "complexity": "moderate",
+     "keywords": [
+       "transfer",
+       "internal move",
+       "lateral move",
+       "department change"
+     ],
+     "workflow_steps": [
+       "Transfer request submission",
+       "Current manager notification and feedback",
+       "Eligibility review",
+       "Target manager interview",
+       "HR coordination",
+       "Approval decision",
+       "Transition planning"
+     ],
+     "actors": [
+       "Employee",
+       "Current Manager",
+       "New Manager",
+       "HR"
+     ],
+     "business_rules": [
+       "Minimum 12 months in current role",
+       "Performance rating >= 3",
+       "Current manager approval not required for approval",
+       "No compensation decrease without discussion"
+     ],
+     "anti_patterns": [
+       "Forced transfers",
+       "Retaliatory denials"
+     ],
+     "tags": [
+       "transfer",
+       "internal-move",
+       "career"
+     ],
+     "confidence": 0.87,
+     "version": "1.0"
+   },
+   "pattern_hr_compliance_001": {
+     "name": "HR Compliance & Policy Audit",
+     "description": "Regular audits for HR policy compliance, legal requirements, and documentation",
+     "domain": "hr",
+     "category": "compliance",
+     "complexity": "moderate",
+     "keywords": [
+       "compliance",
+       "audit",
+       "policy",
+       "legal"
+     ],
+     "workflow_steps": [
+       "Compliance audit plan development",
+       "Policy review",
+       "Documentation verification",
+       "Employee records audit",
+       "Findings documentation",
+       "Remediation action plan",
+       "Follow-up audit"
+     ],
+     "actors": [
+       "HR Compliance Officer",
+       "Legal",
+       "HR Manager"
+     ],
+     "business_rules": [
+       "Annual compliance audit minimum",
+       "All personnel files must have required docs",
+       "Policies must be current",
+       "Documentation retention per legal requirements"
+     ],
+     "anti_patterns": [
+       "No audit trails",
+       "Missing documentation"
+     ],
+     "tags": [
+       "compliance",
+       "audit",
+       "legal"
+     ],
+     "confidence": 0.89,
+     "version": "1.0"
+   },
+   "pattern_hr_conflict_resolution_001": {
+     "name": "Conflict Resolution & Mediation",
+     "description": "Workplace conflict escalation, mediation, and resolution process",
+     "domain": "hr",
+     "category": "relations",
+     "complexity": "moderate",
+     "keywords": [
+       "conflict",
+       "resolution",
+       "mediation",
+       "dispute"
+     ],
+     "workflow_steps": [
+       "Complaint filing and initial assessment",
+       "Investigation initiation",
+       "Interviews and evidence collection",
+       "Mediation attempt",
+       "Findings and recommendations",
+       "Resolution implementation",
+       "Follow-up monitoring"
+     ],
+     "actors": [
+       "Employee",
+       "HR",
+       "Mediator",
+       "Managers"
+     ],
+     "business_rules": [
+       "Investigation must be impartial",
+       "Confidentiality must be maintained",
+       "Resolution within 30 days target",
+       "Documentation required"
+     ],
+     "anti_patterns": [
+       "Biased investigation",
+       "Retaliation"
+     ],
+     "tags": [
+       "conflict",
+       "mediation",
+       "relations"
+     ],
+     "confidence": 0.84,
+     "version": "1.0"
+   }
 }

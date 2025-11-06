@@ -1,321 +1,655 @@
 {
-  "pattern_healthcare_admission_001": {
-    "name": "Patient Admission Workflow",
-    "description": "Patient registration, pre-screening, admission approval, and room assignment process",
+  "pattern_healthcare_patient_admission_001": {
+    "name": "Patient Admission & Registration",
+    "description": "Patient registration, insurance verification, and admission processing",
     "domain": "healthcare",
-    "category": "sequential",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["register", "verify", "prescreen", "screen_gate", "cleared", "quarantine", "assign_room", "admit", "end"],
-      "edges": ["register->verify", "verify->prescreen", "prescreen->gate", "gate->cleared", "gate->quarantine", "cleared->assign", "quarantine->assign", "assign->admit", "admit->end"],
-      "node_types": {
-        "register": "start_event",
-        "verify": "activity",
-        "prescreen": "activity",
-        "screen_gate": "exclusive_gateway",
-        "cleared": "activity",
-        "quarantine": "activity",
-        "assign_room": "activity",
-        "admit": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Patient registers, insurance verified, health history reviewed, infectious disease screening completed, cleared for regular ward or quarantined, room assigned, admitted",
-      "Registration, verification of insurance and records, pre-admission screening, isolation assessment, room assignment based on medical needs, official admission"
-    ],
-    "validation_rules": [
-      "Patient identity verified",
-      "Insurance coverage confirmed",
-      "Medical history reviewed",
-      "Contagion risk assessment performed"
-    ],
-    "anti_patterns": [
-      "Admission without verification",
-      "Missing insurance validation",
-      "Incomplete health history",
-      "No infectious disease screening"
-    ],
-    "tags": ["admission", "registration", "screening", "patient-care"],
-    "confidence": 0.91,
-    "version": "1.0"
-  },
-  "pattern_healthcare_treatment_001": {
-    "name": "Treatment Planning Workflow",
-    "description": "Diagnosis, treatment planning, multi-specialist review, approval, and execution",
-    "domain": "healthcare",
-    "category": "exclusive_choice",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["diagnose", "plan_treatment", "review_panel", "gate", "approved", "rejected", "prescribe", "execute", "monitor"],
-      "edges": ["diagnose->plan", "plan->review", "review->gate", "gate->approved", "gate->rejected", "approved->prescribe", "prescribe->execute", "execute->monitor"],
-      "node_types": {
-        "diagnose": "start_event",
-        "plan_treatment": "activity",
-        "review_panel": "activity",
-        "gate": "exclusive_gateway",
-        "approved": "activity",
-        "rejected": "activity",
-        "prescribe": "activity",
-        "execute": "activity",
-        "monitor": "activity"
-      }
-    },
-    "examples": [
-      "Patient diagnosed, treatment plan developed, reviewed by specialist panel, approved or modified, medications prescribed, treatment executed, patient monitored for progress",
-      "Clinical diagnosis, treatment protocol development, multidisciplinary team review, treatment authorization, prescription issuance, therapy execution, follow-up monitoring"
-    ],
-    "validation_rules": [
-      "Diagnosis documented by attending physician",
-      "Treatment plan reviewed by specialists",
-      "Approval required before execution",
-      "Patient consent obtained"
-    ],
-    "anti_patterns": [
-      "Treatment without diagnosis",
-      "Single physician decision for complex cases",
-      "Missing patient consent",
-      "No monitoring of outcomes"
-    ],
-    "tags": ["treatment", "diagnosis", "planning", "care-coordination"],
-    "confidence": 0.92,
-    "version": "1.0"
-  },
-  "pattern_healthcare_appointment_001": {
-    "name": "Appointment Booking",
-    "description": "Appointment request, availability check, booking, reminder, and completion workflow",
-    "domain": "healthcare",
-    "category": "sequential",
+    "category": "admission",
     "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["request", "check_availability", "book", "send_reminder", "patient_arrival", "complete", "end"],
-      "edges": ["request->check", "check->book", "book->reminder", "reminder->arrival", "arrival->complete", "complete->end"],
-      "node_types": {
-        "request": "start_event",
-        "check_availability": "activity",
-        "book": "activity",
-        "send_reminder": "activity",
-        "patient_arrival": "activity",
-        "complete": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Patient requests appointment, availability checked with provider, appointment booked, reminder sent 24 hours before, patient arrives, appointment completed and documented",
-      "Scheduling request, provider availability verification, booking confirmation, pre-appointment reminder, patient check-in, appointment completion"
+    "keywords": [
+      "admission",
+      "registration",
+      "insurance",
+      "patient"
     ],
-    "validation_rules": [
-      "Provider availability must be checked",
-      "Patient identity verified",
-      "Appointment confirmed to patient",
-      "Reminder sent before appointment"
+    "workflow_steps": [
+      "Patient arrival and check-in",
+      "Demographics collection",
+      "Insurance verification",
+      "Pre-authorization check",
+      "Medical history review",
+      "Admission documentation",
+      "Room assignment",
+      "Orientation"
+    ],
+    "actors": [
+      "Receptionist",
+      "Admissions",
+      "Billing",
+      "Nurse"
+    ],
+    "business_rules": [
+      "Insurance verification required",
+      "Pre-authorization mandatory for non-emergency",
+      "All demographics must be complete",
+      "Medical history required"
     ],
     "anti_patterns": [
-      "Overbooking appointments",
-      "No reminder system",
-      "Missing patient confirmation",
-      "Double booking"
+      "Missing insurance verification",
+      "Incomplete demographics"
     ],
-    "tags": ["appointment", "scheduling", "booking", "patient-management"],
-    "confidence": 0.90,
+    "tags": [
+      "admission",
+      "registration",
+      "patient"
+    ],
+    "confidence": 0.93,
     "version": "1.0"
   },
-  "pattern_healthcare_billing_001": {
-    "name": "Patient Billing and Claims",
-    "description": "Treatment billing, insurance claim submission, processing, and payment collection",
+  "pattern_healthcare_treatment_plan_001": {
+    "name": "Treatment Planning & Execution",
+    "description": "Diagnosis, treatment plan creation, execution, and monitoring",
     "domain": "healthcare",
-    "category": "exclusive_choice",
+    "category": "treatment",
     "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["generate_bill", "verify", "submit_claim", "claim_gate", "approved", "denied", "collect_payment", "reconcile", "end"],
-      "edges": ["generate->verify", "verify->submit", "submit->gate", "gate->approved", "gate->denied", "approved->collect", "collect->reconcile", "reconcile->end"],
-      "node_types": {
-        "generate_bill": "start_event",
-        "verify": "activity",
-        "submit_claim": "activity",
-        "claim_gate": "exclusive_gateway",
-        "approved": "activity",
-        "denied": "activity",
-        "collect_payment": "activity",
-        "reconcile": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Medical charges generated, codes verified for correctness, insurance claim submitted, claim approved or denied, payment collected from patient/insurance, accounts reconciled",
-      "Service charges itemized, medical coding verification, insurance submission, claim adjudication, patient billing for copay/deductible, reconciliation"
+    "keywords": [
+      "treatment",
+      "diagnosis",
+      "plan",
+      "execution"
     ],
-    "validation_rules": [
-      "Medical codes correct and billable",
-      "Insurance coverage verified",
-      "Claim submitted within deadline",
-      "Payment reconciled within 30 days"
+    "workflow_steps": [
+      "Patient assessment and diagnosis",
+      "Treatment plan creation",
+      "Physician review and approval",
+      "Patient consent",
+      "Treatment execution",
+      "Monitoring and follow-up",
+      "Results documentation",
+      "Plan adjustment if needed"
+    ],
+    "actors": [
+      "Physician",
+      "Nurse",
+      "Patient",
+      "Specialist"
+    ],
+    "business_rules": [
+      "Physician approval required",
+      "Patient informed consent mandatory",
+      "Treatment per clinical guidelines",
+      "Regular monitoring required"
     ],
     "anti_patterns": [
-      "Incorrect medical coding",
-      "Missing insurance verification",
-      "Claim submitted after deadline",
-      "Unreconciled payments"
+      "Treatment without approval",
+      "Missing consent"
     ],
-    "tags": ["billing", "insurance", "claims", "payment"],
-    "confidence": 0.88,
+    "tags": [
+      "treatment",
+      "care",
+      "plan"
+    ],
+    "confidence": 0.94,
+    "version": "1.0"
+  },
+  "pattern_healthcare_medication_management_001": {
+    "name": "Medication Management",
+    "description": "Medication prescription, dispensing, administration, and monitoring",
+    "domain": "healthcare",
+    "category": "medication",
+    "complexity": "moderate",
+    "keywords": [
+      "medication",
+      "prescription",
+      "dispensing",
+      "administration"
+    ],
+    "workflow_steps": [
+      "Medication prescription",
+      "Pharmacist review and verification",
+      "Medication dispensing",
+      "Patient education",
+      "Administration scheduling",
+      "Nurse administration",
+      "Response monitoring",
+      "Adverse event reporting"
+    ],
+    "actors": [
+      "Physician",
+      "Pharmacist",
+      "Nurse",
+      "Patient"
+    ],
+    "business_rules": [
+      "Prescription validation required",
+      "Pharmacist approval required",
+      "Right drug, right dose, right patient",
+      "Allergy check mandatory"
+    ],
+    "anti_patterns": [
+      "Prescription without review",
+      "Missing allergy check"
+    ],
+    "tags": [
+      "medication",
+      "pharmacy",
+      "safety"
+    ],
+    "confidence": 0.95,
     "version": "1.0"
   },
   "pattern_healthcare_discharge_001": {
-    "name": "Patient Discharge Planning",
-    "description": "Discharge decision, medication reconciliation, home care planning, and follow-up scheduling",
+    "name": "Patient Discharge & Follow-up",
+    "description": "Discharge planning, patient education, billing, and follow-up scheduling",
     "domain": "healthcare",
-    "category": "sequential",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["discharge_ready", "med_reconcile", "home_plan", "educate", "schedule_followup", "discharge", "confirm"],
-      "edges": ["ready->med", "med->home", "home->educate", "educate->schedule", "schedule->discharge", "discharge->confirm"],
-      "node_types": {
-        "discharge_ready": "start_event",
-        "med_reconcile": "activity",
-        "home_plan": "activity",
-        "educate": "activity",
-        "schedule_followup": "activity",
-        "discharge": "activity",
-        "confirm": "activity"
-      }
-    },
-    "examples": [
-      "Patient clinically ready for discharge, medications reconciled and list prepared, home care arranged, patient education provided, follow-up appointment scheduled, patient discharged and confirmation sent",
-      "Discharge decision, medication review and preparation, home health coordination, patient instructions, specialist follow-up booking, discharge finalization"
+    "category": "discharge",
+    "complexity": "moderate",
+    "keywords": [
+      "discharge",
+      "follow-up",
+      "education",
+      "billing"
     ],
-    "validation_rules": [
-      "Clinical discharge criteria met",
-      "Medication list prepared and reviewed",
-      "Home care services arranged if needed",
-      "Patient education documented"
+    "workflow_steps": [
+      "Discharge readiness assessment",
+      "Discharge planning",
+      "Patient education",
+      "Medication reconciliation",
+      "Discharge documentation",
+      "Follow-up appointment scheduling",
+      "Billing and coding",
+      "Discharge summary to PCP"
+    ],
+    "actors": [
+      "Physician",
+      "Nurse",
+      "Case Manager",
+      "Billing"
+    ],
+    "business_rules": [
+      "Discharge summary required",
+      "Follow-up appointment within 1 week",
+      "Medication reconciliation complete",
+      "Coding accurate and complete"
     ],
     "anti_patterns": [
-      "Discharge without medication reconciliation",
-      "No home care planning",
-      "Missing follow-up appointment",
-      "Inadequate patient education"
+      "No follow-up scheduled",
+      "Missing discharge summary"
     ],
-    "tags": ["discharge", "care-transition", "follow-up", "medication"],
+    "tags": [
+      "discharge",
+      "follow-up",
+      "billing"
+    ],
+    "confidence": 0.92,
+    "version": "1.0"
+  },
+  "pattern_healthcare_lab_order_001": {
+    "name": "Laboratory Order & Results",
+    "description": "Lab order placement, sample collection, testing, and result reporting",
+    "domain": "healthcare",
+    "category": "diagnostics",
+    "complexity": "moderate",
+    "keywords": [
+      "laboratory",
+      "lab",
+      "test",
+      "results",
+      "specimen"
+    ],
+    "workflow_steps": [
+      "Physician orders lab tests",
+      "Order verification",
+      "Patient preparation instructions",
+      "Sample collection",
+      "Sample processing",
+      "Test execution",
+      "Quality control check",
+      "Results reporting",
+      "Physician notification"
+    ],
+    "actors": [
+      "Physician",
+      "Nurse",
+      "Lab Tech",
+      "Lab Director"
+    ],
+    "business_rules": [
+      "Order must specify test type",
+      "Sample collection per protocol",
+      "QC checks mandatory",
+      "Results within 24-48 hours"
+    ],
+    "anti_patterns": [
+      "Invalid samples",
+      "Result delays"
+    ],
+    "tags": [
+      "laboratory",
+      "diagnostics",
+      "testing"
+    ],
+    "confidence": 0.93,
+    "version": "1.0"
+  },
+  "pattern_healthcare_billing_001": {
+    "name": "Healthcare Billing & Claims",
+    "description": "Charge capture, claim generation, submission, and payment reconciliation",
+    "domain": "healthcare",
+    "category": "billing",
+    "complexity": "complex",
+    "keywords": [
+      "billing",
+      "claims",
+      "insurance",
+      "payment"
+    ],
+    "workflow_steps": [
+      "Service delivery and charge capture",
+      "Medical coding verification",
+      "Claim generation",
+      "Insurance verification",
+      "Claim submission",
+      "Payer processing",
+      "Denial management",
+      "Payment reconciliation"
+    ],
+    "actors": [
+      "Coder",
+      "Biller",
+      "Insurance",
+      "AR"
+    ],
+    "business_rules": [
+      "All charges must be coded",
+      "Codes must be valid and current",
+      "Claims submitted within 30 days",
+      "Denials addressed within 60 days"
+    ],
+    "anti_patterns": [
+      "Missing charges",
+      "Invalid coding",
+      "Missed deadlines"
+    ],
+    "tags": [
+      "billing",
+      "claims",
+      "revenue"
+    ],
     "confidence": 0.91,
     "version": "1.0"
   },
-  "pattern_healthcare_surgery_001": {
-    "name": "Surgical Procedure Workflow",
-    "description": "Pre-op assessment, surgical scheduling, intra-op execution, recovery monitoring, and post-op care",
-    "domain": "healthcare",
-    "category": "sequential",
-    "complexity": "complex",
-    "graph_structure": {
-      "nodes": ["preop_assess", "schedule", "consent", "intra_op", "recovery", "postop_monitoring", "postop_care", "end"],
-      "edges": ["assess->schedule", "schedule->consent", "consent->intra", "intra->recovery", "recovery->monitor", "monitor->postop", "postop->end"],
-      "node_types": {
-        "preop_assess": "start_event",
-        "schedule": "activity",
-        "consent": "activity",
-        "intra_op": "activity",
-        "recovery": "activity",
-        "postop_monitoring": "activity",
-        "postop_care": "activity",
-        "end": "end_event"
-      }
-    },
-    "examples": [
-      "Pre-op evaluation, surgery scheduled, informed consent obtained, surgery performed, recovery in PACU, post-op monitoring, discharge to ward with care plan",
-      "Pre-operative assessment, operating room scheduling, patient consent process, surgical procedure, immediate recovery, clinical monitoring, ongoing post-operative care"
-    ],
-    "validation_rules": [
-      "Pre-op clearance required",
-      "Informed consent documented",
-      "Anesthesia evaluation completed",
-      "Post-op monitoring protocols followed"
-    ],
-    "anti_patterns": [
-      "Surgery without pre-op assessment",
-      "Missing patient consent",
-      "No anesthesia evaluation",
-      "Inadequate post-op monitoring"
-    ],
-    "tags": ["surgery", "procedure", "anesthesia", "recovery"],
-    "confidence": 0.90,
-    "version": "1.0"
-  },
-  "pattern_healthcare_referral_001": {
-    "name": "Specialist Referral Process",
-    "description": "Specialist referral request, authorization, appointment scheduling, and findings return",
-    "domain": "healthcare",
-    "category": "sequential",
-    "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["create_referral", "verify_auth", "send_referral", "schedule_appt", "specialist_eval", "return_findings", "integrate"],
-      "edges": ["create->verify", "verify->send", "send->schedule", "schedule->eval", "eval->return", "return->integrate"],
-      "node_types": {
-        "create_referral": "start_event",
-        "verify_auth": "activity",
-        "send_referral": "activity",
-        "schedule_appt": "activity",
-        "specialist_eval": "activity",
-        "return_findings": "activity",
-        "integrate": "activity"
-      }
-    },
-    "examples": [
-      "Primary care creates referral, insurance authorization verified and obtained, referral sent to specialist, specialist schedules appointment, evaluation completed, findings returned to PCP, integrated into care plan",
-      "Referral generation, insurance authorization process, specialist notification, appointment coordination, specialist evaluation, report generation, findings communication"
-    ],
-    "validation_rules": [
-      "Insurance prior authorization obtained",
-      "Clear referral reason documented",
-      "Specialist credentials verified",
-      "Findings documented and communicated"
-    ],
-    "anti_patterns": [
-      "No insurance authorization",
-      "Missing referral details",
-      "No appointment coordination",
-      "Findings not communicated back"
-    ],
-    "tags": ["referral", "specialist", "coordination", "authorization"],
-    "confidence": 0.89,
-    "version": "1.0"
-  },
-  "pattern_healthcare_compliance_001": {
-    "name": "HIPAA Compliance and Auditing",
-    "description": "Privacy training, access logging, breach investigation, and compliance documentation",
-    "domain": "healthcare",
-    "category": "sequential",
-    "complexity": "moderate",
-    "graph_structure": {
-      "nodes": ["training", "access_control", "monitor_logs", "breach_check", "investigate", "document", "audit"],
-      "edges": ["training->control", "control->logs", "logs->check", "check->investigate", "investigate->document", "document->audit"],
-      "node_types": {
-        "training": "start_event",
-        "access_control": "activity",
-        "monitor_logs": "activity",
-        "breach_check": "activity",
-        "investigate": "activity",
-        "document": "activity",
-        "audit": "activity"
-      }
-    },
-    "examples": [
-      "HIPAA training conducted, access controls implemented, access logs monitored, breach detection checks run, investigations documented, compliance audit performed",
-      "Employee privacy training, system access restrictions, activity log monitoring, breach investigation protocols, incident documentation, compliance verification"
-    ],
-    "validation_rules": [
-      "Annual training mandatory",
-      "Role-based access control enforced",
-      "Access logs retained for 6 years",
-      "Breach investigation documented"
-    ],
-    "anti_patterns": [
-      "Missing privacy training",
-      "Excessive access permissions",
-      "No breach investigation",
-      "Inadequate documentation"
-    ],
-    "tags": ["hipaa", "compliance", "privacy", "audit"],
-    "confidence": 0.87,
-    "version": "1.0"
-  }
+   "pattern_healthcare_quality_review_001": {
+     "name": "Quality & Safety Review",
+     "description": "Incident reporting, investigation, corrective action, and monitoring",
+     "domain": "healthcare",
+     "category": "quality",
+     "complexity": "moderate",
+     "keywords": [
+       "quality",
+       "safety",
+       "incident",
+       "review"
+     ],
+     "workflow_steps": [
+       "Incident identification and reporting",
+       "Initial triage and assessment",
+       "Investigation and root cause analysis",
+       "Corrective action plan development",
+       "Implementation of corrections",
+       "Effectiveness monitoring",
+       "Trending and analysis",
+       "Leadership reporting"
+     ],
+     "actors": [
+       "Nurse",
+       "Physician",
+       "QA",
+       "Leadership"
+     ],
+     "business_rules": [
+       "Patient safety incidents: immediate report",
+       "RCA within 72 hours for serious events",
+       "Corrective actions tracked",
+       "Quarterly trending analysis"
+     ],
+     "anti_patterns": [
+       "Unreported incidents",
+       "No corrective action"
+     ],
+     "tags": [
+       "quality",
+       "safety",
+       "incident"
+     ],
+     "confidence": 0.92,
+     "version": "1.0"
+   },
+   "pattern_healthcare_patient_consent_001": {
+     "name": "Patient Consent & Advance Directives",
+     "description": "Informed consent collection, advance directive documentation, and DNR management",
+     "domain": "healthcare",
+     "category": "compliance",
+     "complexity": "moderate",
+     "keywords": [
+       "consent",
+       "advance directive",
+       "DNR",
+       "informed"
+     ],
+     "workflow_steps": [
+       "Patient rights disclosure",
+       "Treatment options explanation",
+       "Risk and benefit discussion",
+       "Consent form preparation",
+       "Patient signature and witness",
+       "Advance directive review",
+       "DNR order processing",
+       "Documentation in medical record"
+     ],
+     "actors": [
+       "Physician",
+       "Nurse",
+       "Patient",
+       "Witness"
+     ],
+     "business_rules": [
+       "Consent obtained before treatment",
+       "Patient capacity assessed",
+       "Advance directives reviewed on admission",
+       "DNR orders honored per policy"
+     ],
+     "anti_patterns": [
+       "Treating without consent",
+       "Missing advance directive"
+     ],
+     "tags": [
+       "consent",
+       "compliance",
+       "patient-rights"
+     ],
+     "confidence": 0.94,
+     "version": "1.0"
+   },
+   "pattern_healthcare_appointment_scheduling_001": {
+     "name": "Appointment Scheduling & Management",
+     "description": "Appointment booking, reminders, confirmation, and rescheduling",
+     "domain": "healthcare",
+     "category": "scheduling",
+     "complexity": "low",
+     "keywords": [
+       "appointment",
+       "scheduling",
+       "booking",
+       "reminder"
+     ],
+     "workflow_steps": [
+       "Appointment request received",
+       "Availability checking",
+       "Appointment confirmation",
+       "Reminder scheduling",
+       "Patient confirmation",
+       "No-show tracking",
+       "Rescheduling if cancelled",
+       "Completion documentation"
+     ],
+     "actors": [
+       "Receptionist",
+       "Scheduler",
+       "Patient",
+       "Provider"
+     ],
+     "business_rules": [
+       "Provider availability verified",
+       "No overbooking allowed",
+       "Reminder sent 24 hours prior",
+       "No-show policy applied"
+     ],
+     "anti_patterns": [
+       "Double booking",
+       "Missed reminders"
+     ],
+     "tags": [
+       "scheduling",
+       "appointment",
+       "customer-service"
+     ],
+     "confidence": 0.91,
+     "version": "1.0"
+   },
+   "pattern_healthcare_imaging_diagnostics_001": {
+     "name": "Medical Imaging & Diagnostics",
+     "description": "Imaging order, scheduling, scan execution, and radiologist interpretation",
+     "domain": "healthcare",
+     "category": "diagnostics",
+     "complexity": "complex",
+     "keywords": [
+       "imaging",
+       "diagnostics",
+       "radiology",
+       "scan"
+     ],
+     "workflow_steps": [
+       "Imaging order creation",
+       "Clinical indication documentation",
+       "Scheduling and patient notification",
+       "Pre-scan preparation instructions",
+       "Patient check-in",
+       "Imaging procedure execution",
+       "Image quality control",
+       "Radiologist interpretation",
+       "Report generation",
+       "Physician notification"
+     ],
+     "actors": [
+       "Physician",
+       "Radiologist",
+       "Technician",
+       "Patient"
+     ],
+     "business_rules": [
+       "Clinical indication documented",
+       "Radiation safety standards followed",
+       "Quality check before report",
+       "Report finalized within 24 hours"
+     ],
+     "anti_patterns": [
+       "Missing clinical indication",
+       "Delayed reports"
+     ],
+     "tags": [
+       "imaging",
+       "diagnostics",
+       "radiology"
+     ],
+     "confidence": 0.93,
+     "version": "1.0"
+   },
+   "pattern_healthcare_surgical_scheduling_001": {
+     "name": "Surgical Scheduling & Procedures",
+     "description": "OR scheduling, pre-op assessment, surgical execution, and post-op care",
+     "domain": "healthcare",
+     "category": "surgery",
+     "complexity": "complex",
+     "keywords": [
+       "surgery",
+       "surgical",
+       "operating room",
+       "procedure"
+     ],
+     "workflow_steps": [
+       "Surgical consultation and planning",
+       "OR scheduling request",
+       "Pre-op clearance and testing",
+       "NPO status confirmation",
+       "Pre-operative verification",
+       "Surgical team briefing",
+       "Surgical timeout procedure",
+       "Procedure execution",
+       "Swab and instrument count",
+       "Post-op recovery initiation",
+       "Post-op documentation"
+     ],
+     "actors": [
+       "Surgeon",
+       "Anesthesiologist",
+       "Surgical Nurse",
+       "OR Coordinator"
+     ],
+     "business_rules": [
+       "Pre-op clearance required",
+       "Surgical timeout mandatory",
+       "Count verification mandatory",
+       "Informed consent documented"
+     ],
+     "anti_patterns": [
+       "Skipped timeout",
+       "Missing counts"
+     ],
+     "tags": [
+       "surgery",
+       "operating-room",
+       "procedure"
+     ],
+     "confidence": 0.95,
+     "version": "1.0"
+   },
+   "pattern_healthcare_compliance_reporting_001": {
+     "name": "Compliance & Regulatory Reporting",
+     "description": "Regulatory requirement tracking, reporting, and audit documentation",
+     "domain": "healthcare",
+     "category": "compliance",
+     "complexity": "moderate",
+     "keywords": [
+       "compliance",
+       "regulatory",
+       "reporting",
+       "audit"
+     ],
+     "workflow_steps": [
+       "Requirement identification",
+       "Compliance assessment",
+       "Data gathering and validation",
+       "Report preparation",
+       "Internal review and approval",
+       "Regulatory submission",
+       "Confirmation of receipt",
+       "Audit file documentation"
+     ],
+     "actors": [
+       "Compliance Officer",
+       "Department Head",
+       "Data Analyst",
+       "Leadership"
+     ],
+     "business_rules": [
+       "All requirements tracked",
+       "Deadlines monitored",
+       "Data accuracy verified",
+       "Audit trail maintained"
+     ],
+     "anti_patterns": [
+       "Missed deadlines",
+       "Inaccurate data"
+     ],
+     "tags": [
+       "compliance",
+       "regulatory",
+       "audit"
+     ],
+     "confidence": 0.92,
+     "version": "1.0"
+   },
+   "pattern_healthcare_medical_records_001": {
+     "name": "Medical Records Management",
+     "description": "Record creation, updates, retrieval, release, and retention",
+     "domain": "healthcare",
+     "category": "records",
+     "complexity": "moderate",
+     "keywords": [
+       "records",
+       "medical records",
+       "documentation",
+       "release"
+     ],
+     "workflow_steps": [
+       "Chart creation for new patient",
+       "Documentation of encounters",
+       "Record updates and corrections",
+       "Authorization assignment",
+       "Record access logging",
+       "Retrieval requests processing",
+       "Records release with authorization",
+       "Retention schedule compliance",
+       "Records archival or destruction"
+     ],
+     "actors": [
+       "HIM Manager",
+       "Coder",
+       "Clinician",
+       "Patient"
+     ],
+     "business_rules": [
+       "Records created at admission",
+       "Updates documented timely",
+       "Access per authorization",
+       "Retention per legal requirements"
+     ],
+     "anti_patterns": [
+       "Unauthorized access",
+       "Missing documentation"
+     ],
+     "tags": [
+       "records",
+       "documentation",
+       "compliance"
+     ],
+     "confidence": 0.91,
+     "version": "1.0"
+   },
+   "pattern_healthcare_patient_education_001": {
+     "name": "Patient Education & Wellness",
+     "description": "Health education delivery, patient materials, and wellness tracking",
+     "domain": "healthcare",
+     "category": "education",
+     "complexity": "moderate",
+     "keywords": [
+       "education",
+       "wellness",
+       "health",
+       "patient-education"
+     ],
+     "workflow_steps": [
+       "Education needs assessment",
+       "Educational material selection",
+       "Provider education delivery",
+       "Patient comprehension verification",
+       "Documentation of teaching",
+       "Resource provision",
+       "Follow-up education reinforcement",
+       "Outcome tracking"
+     ],
+     "actors": [
+       "Nurse Educator",
+       "Physician",
+       "Patient",
+       "Family"
+     ],
+     "business_rules": [
+       "Education tailored to patient",
+       "Materials at appropriate literacy level",
+       "Comprehension verified",
+       "Teaching documented"
+     ],
+     "anti_patterns": [
+       "Generic education only",
+       "No verification"
+     ],
+     "tags": [
+       "education",
+       "wellness",
+       "patient-engagement"
+     ],
+     "confidence": 0.89,
+     "version": "1.0"
+   }
 }

@@ -27,6 +27,7 @@ class BPMNElementType(str, Enum):
     START_EVENT = "startEvent"
     END_EVENT = "endEvent"
     INTERMEDIATE_EVENT = "intermediateEvent"
+    BOUNDARY_EVENT = "boundaryEvent"
     GATEWAY = "gateway"
     EXCLUSIVE_GATEWAY = "exclusiveGateway"
     INCLUSIVE_GATEWAY = "inclusiveGateway"
@@ -204,6 +205,34 @@ class ReceiveTask(Task):
     instantiate: bool = Field(False, description="Whether this creates a new process instance")
 
 
+class SubProcess(Task):
+    """SubProcess (nested process container)."""
+    
+    element_type: str = Field(default=BPMNElementType.SUBPROCESS)
+    
+    # Nested process content
+    flow_nodes: List[Union[Task, 'ServiceTask', 'UserTask', 'ManualTask', 'ScriptTask',
+                           'Event', 'StartEvent', 'EndEvent', 'IntermediateEvent', 'BoundaryEvent',
+                           'Gateway', 'ExclusiveGateway', 'InclusiveGateway', 'ParallelGateway']] = Field(
+        default_factory=list,
+        description="Nested task and event elements"
+    )
+    sequence_flows: List['SequenceFlow'] = Field(default_factory=list, description="Nested control flows")
+    
+    # Subprocess-specific attributes
+    is_triggering: bool = Field(False, description="Whether subprocess is event-triggered")
+    trigger_event_ref: Optional[str] = Field(None, description="Triggering event ID for event subprocesses")
+    
+    # Data and structure
+    data_objects: List['DataObject'] = Field(default_factory=list, description="Data objects in subprocess")
+    lane_set: Optional['LaneSet'] = Field(None, description="Lane set for subprocess")
+    associations: List['Association'] = Field(default_factory=list, description="Associations in subprocess")
+    
+    # Execution context
+    is_independent: bool = Field(True, description="Whether subprocess is independent")
+    wait_for_completion: bool = Field(True, description="Whether parent waits for subprocess completion")
+
+
 class Event(BaseElement):
     """Base class for BPMN Events."""
     
@@ -235,6 +264,16 @@ class IntermediateEvent(Event):
     element_type: str = Field(default=BPMNElementType.INTERMEDIATE_EVENT)
     event_type: EventType = Field(default=EventType.INTERMEDIATE)
     is_interrupting: bool = Field(False, description="Whether it interrupts current flow")
+
+
+class BoundaryEvent(Event):
+    """Boundary Event (attached to a task, triggered during task execution)."""
+    
+    element_type: str = Field(default=BPMNElementType.BOUNDARY_EVENT)
+    event_type: EventType = Field(default=EventType.INTERMEDIATE)
+    attached_to_ref: Optional[str] = Field(None, description="Task ID this event is attached to")
+    is_interrupting: bool = Field(True, description="Whether it interrupts the attached task")
+    cancel_activity: bool = Field(True, description="Whether completion cancels the task")
 
 
 class Gateway(BaseElement):
@@ -361,11 +400,11 @@ class Process(BaseElement):
     process_type: str = Field("private", description="Process type: private/public/none")
     
     # Flow elements
-    flow_nodes: List[Union[Task, ServiceTask, UserTask, ManualTask, ScriptTask, 
-                           Event, StartEvent, EndEvent, IntermediateEvent,
+    flow_nodes: List[Union[Task, ServiceTask, UserTask, ManualTask, ScriptTask, SubProcess,
+                           Event, StartEvent, EndEvent, IntermediateEvent, BoundaryEvent,
                            Gateway, ExclusiveGateway, InclusiveGateway, ParallelGateway]] = Field(
         default_factory=list,
-        description="Task and Event elements"
+        description="Task, SubProcess, and Event elements"
     )
     sequence_flows: List[SequenceFlow] = Field(default_factory=list, description="Control flows")
     
@@ -665,10 +704,12 @@ __all__ = [
     "ScriptTask",
     "SendTask",
     "ReceiveTask",
+    "SubProcess",
     "Event",
     "StartEvent",
     "EndEvent",
     "IntermediateEvent",
+    "BoundaryEvent",
     "Gateway",
     "ExclusiveGateway",
     "InclusiveGateway",

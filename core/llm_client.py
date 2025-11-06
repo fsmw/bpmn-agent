@@ -30,6 +30,153 @@ class LLMProviderType(str, Enum):
     AZURE_OPENAI = "azure_openai"
 
 
+class ModelType(str, Enum):
+    """Supported specific model types with optimized configurations."""
+    GPT4 = "gpt-4"
+    GPT4_TURBO = "gpt-4-turbo"
+    GPT35_TURBO = "gpt-3.5-turbo"
+    CLAUDE_3_OPUS = "claude-3-opus"
+    CLAUDE_3_SONNET = "claude-3-sonnet"
+    CLAUDE_3_HAIKU = "claude-3-haiku"
+    LLAMA2_70B = "llama2-70b"
+    LLAMA2_13B = "llama2-13b"
+    MISTRAL = "mistral"
+    MIXTRAL = "mixtral"
+
+
+class ModelConfig:
+    """Model-specific configuration presets."""
+    
+    # GPT-4 Models - High quality, longer context
+    GPT4_CONFIG = {
+        "provider": LLMProviderType.OPENAI,
+        "model": "gpt-4",
+        "temperature": 0.5,  # Lower temperature for more consistent extraction
+        "top_p": 0.9,
+        "max_tokens": 4096,  # GPT-4 supports up to 8k context
+        "timeout": 120.0,
+        "base_url": "https://api.openai.com/v1"
+    }
+    
+    # GPT-3.5-Turbo - Fast and economical
+    GPT35_TURBO_CONFIG = {
+        "provider": LLMProviderType.OPENAI,
+        "model": "gpt-3.5-turbo",
+        "temperature": 0.5,
+        "top_p": 0.9,
+        "max_tokens": 2048,
+        "timeout": 60.0,
+        "base_url": "https://api.openai.com/v1"
+    }
+    
+    # Claude 3 Models - Strong reasoning and instruction following
+    CLAUDE_3_OPUS_CONFIG = {
+        "provider": LLMProviderType.OPENAI_COMPATIBLE,
+        "model": "claude-3-opus-20240229",
+        "temperature": 0.3,  # Claude works well with lower temperature
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "timeout": 120.0,
+        "base_url": "https://api.anthropic.com/v1"  # Claude API endpoint
+    }
+    
+    CLAUDE_3_SONNET_CONFIG = {
+        "provider": LLMProviderType.OPENAI_COMPATIBLE,
+        "model": "claude-3-sonnet-20240229",
+        "temperature": 0.3,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "timeout": 90.0,
+        "base_url": "https://api.anthropic.com/v1"
+    }
+    
+    CLAUDE_3_HAIKU_CONFIG = {
+        "provider": LLMProviderType.OPENAI_COMPATIBLE,
+        "model": "claude-3-haiku-20240307",
+        "temperature": 0.3,
+        "top_p": 0.9,
+        "max_tokens": 2048,
+        "timeout": 60.0,
+        "base_url": "https://api.anthropic.com/v1"
+    }
+    
+    # Llama2 Models - Open source, runs locally or via API
+    LLAMA2_70B_CONFIG = {
+        "provider": LLMProviderType.OLLAMA,
+        "model": "llama2:70b",
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "timeout": 180.0,  # Local inference can be slower
+        "base_url": "http://localhost:11434"
+    }
+    
+    LLAMA2_13B_CONFIG = {
+        "provider": LLMProviderType.OLLAMA,
+        "model": "llama2:13b",
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "max_tokens": 2048,
+        "timeout": 120.0,
+        "base_url": "http://localhost:11434"
+    }
+    
+    # Mistral - Fast and efficient
+    MISTRAL_CONFIG = {
+        "provider": LLMProviderType.OLLAMA,
+        "model": "mistral",
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "max_tokens": 2048,
+        "timeout": 90.0,
+        "base_url": "http://localhost:11434"
+    }
+    
+    MIXTRAL_CONFIG = {
+        "provider": LLMProviderType.OLLAMA,
+        "model": "mixtral",
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "timeout": 120.0,
+        "base_url": "http://localhost:11434"
+    }
+    
+    # Preset mappings
+    PRESETS = {
+        ModelType.GPT4: GPT4_CONFIG,
+        ModelType.GPT4_TURBO: {**GPT4_CONFIG, "model": "gpt-4-turbo"},
+        ModelType.GPT35_TURBO: GPT35_TURBO_CONFIG,
+        ModelType.CLAUDE_3_OPUS: CLAUDE_3_OPUS_CONFIG,
+        ModelType.CLAUDE_3_SONNET: CLAUDE_3_SONNET_CONFIG,
+        ModelType.CLAUDE_3_HAIKU: CLAUDE_3_HAIKU_CONFIG,
+        ModelType.LLAMA2_70B: LLAMA2_70B_CONFIG,
+        ModelType.LLAMA2_13B: LLAMA2_13B_CONFIG,
+        ModelType.MISTRAL: MISTRAL_CONFIG,
+        ModelType.MIXTRAL: MIXTRAL_CONFIG,
+    }
+    
+    @classmethod
+    def get_config_for_model(cls, model_type: Union[ModelType, str]) -> Dict[str, Any]:
+        """
+        Get configuration preset for a model.
+        
+        Args:
+            model_type: ModelType enum or string model name
+            
+        Returns:
+            Configuration dictionary
+        """
+        if isinstance(model_type, str):
+            try:
+                model_type = ModelType(model_type)
+            except ValueError:
+                logger.warning(f"Unknown model type: {model_type}, using default config")
+                return {}
+        
+        return cls.PRESETS.get(model_type, {})
+
+
 class LLMMessage(BaseModel):
     """Structured LLM message format."""
     role: str = Field(..., description="Role: 'system', 'user', or 'assistant'")
@@ -84,6 +231,10 @@ class LLMConfig(BaseModel):
     model: str = Field(
         default="mistral",
         description="Model name or ID"
+    )
+    model_type: Optional[ModelType] = Field(
+        default=None,
+        description="Specific model type for optimized configuration"
     )
     temperature: float = Field(
         default=0.7,
@@ -149,8 +300,63 @@ class LLMConfig(BaseModel):
         return v.rstrip("/")
     
     @classmethod
+    def from_model_type(cls, model_type: Union[ModelType, str]) -> "LLMConfig":
+        """
+        Create LLMConfig from a specific model type with optimized settings.
+        
+        Args:
+            model_type: ModelType enum or string model name
+            
+        Returns:
+            LLMConfig instance with optimized settings for the model
+        """
+        if isinstance(model_type, str):
+            try:
+                model_type = ModelType(model_type)
+            except ValueError:
+                raise ValueError(f"Unknown model type: {model_type}")
+        
+        config_dict = ModelConfig.get_config_for_model(model_type)
+        if not config_dict:
+            raise ValueError(f"No configuration found for model type: {model_type}")
+        
+        # Extract model-specific config
+        provider = config_dict.get("provider", LLMProviderType.OLLAMA)
+        model = config_dict.get("model", "mistral")
+        temperature = config_dict.get("temperature", 0.7)
+        top_p = config_dict.get("top_p", 0.95)
+        max_tokens = config_dict.get("max_tokens")
+        timeout = config_dict.get("timeout", 60.0)
+        base_url = config_dict.get("base_url", "http://localhost:11434")
+        
+        config = cls(
+            provider=provider,
+            model=model,
+            model_type=model_type,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            timeout=timeout,
+            base_url=base_url,
+        )
+        
+        return config
+    
+    @classmethod
     def from_env(cls) -> "LLMConfig":
         """Load configuration from environment variables."""
+        # Check if a specific model type is requested
+        model_type_env = os.getenv("LLM_MODEL_TYPE")
+        if model_type_env:
+            try:
+                config = cls.from_model_type(model_type_env)
+                # Allow environment variables to override model type config
+                if api_key := os.getenv("LLM_API_KEY"):
+                    config.api_key = api_key
+                return config
+            except ValueError as e:
+                logger.warning(f"Failed to load model type config: {e}, falling back to env vars")
+        
         provider = os.getenv("LLM_PROVIDER", "ollama").lower()
         
         config_data = {
@@ -828,6 +1034,8 @@ async def stream_llm(
 
 __all__ = [
     "LLMProviderType",
+    "ModelType",
+    "ModelConfig",
     "LLMMessage",
     "LLMConfig",
     "LLMResponse",

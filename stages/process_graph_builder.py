@@ -402,10 +402,10 @@ class ProcessGraphBuilder:
 
         Returns:
             GraphNode
-        """
+         """
         # Map entity type to node type
         node_type = self._map_entity_to_node_type(entity.type)
-        bpmn_type = self._map_entity_to_bpmn_type(entity.type)
+        bpmn_type = ProcessGraphBuilder._map_entity_to_bpmn_type_with_attributes(entity)
 
         # Convert confidence level to numeric score
         confidence_score = {
@@ -498,6 +498,61 @@ class ProcessGraphBuilder:
             EntityType.DATA: "DataObject",
         }
         return mapping.get(entity_type, "Task")
+    
+    @staticmethod
+    def _map_entity_to_bpmn_type_with_attributes(entity) -> str:
+        """
+        Map entity to BPMN element type, using entity attributes for refinement.
+        
+        For events, checks for event_type and trigger attributes to determine
+        the specific event kind (e.g., BoundaryEvent, TimerEvent, etc.)
+        """
+        from bpmn_agent.models.extraction import EntityType
+        
+        # Base type mapping
+        base_mapping = {
+            EntityType.ACTIVITY: "Task",
+            EntityType.EVENT: "IntermediateCatchEvent",
+            EntityType.GATEWAY: "ExclusiveGateway",
+            EntityType.ACTOR: "Lane",
+            EntityType.DATA: "DataObject",
+        }
+        
+        base_type = base_mapping.get(entity.type, "Task")
+        
+        # For events, check attributes for more specific type
+        if entity.type == EntityType.EVENT and entity.attributes:
+            # Check for event_type attribute
+            event_type_attr = entity.attributes.get("event_type")
+            if event_type_attr:
+                event_type_value = event_type_attr.value if hasattr(event_type_attr, "value") else event_type_attr
+                if "boundary" in str(event_type_value).lower():
+                    return "BoundaryEvent"
+            
+            # Check for trigger attribute to determine timer/signal/message events
+            trigger_attr = entity.attributes.get("trigger")
+            if trigger_attr:
+                trigger_value = trigger_attr.value if hasattr(trigger_attr, "value") else trigger_attr
+                trigger_str = str(trigger_value).lower()
+                
+                if "timer" in trigger_str:
+                    return "TimerIntermediateCatchEvent"
+                elif "signal" in trigger_str:
+                    return "SignalIntermediateCatchEvent"
+                elif "message" in trigger_str:
+                    return "MessageIntermediateCatchEvent"
+                elif "error" in trigger_str:
+                    return "ErrorIntermediateCatchEvent"
+        
+        # For activities, check for subprocess attribute
+        if entity.type == EntityType.ACTIVITY and entity.attributes:
+            activity_type_attr = entity.attributes.get("activity_type")
+            if activity_type_attr:
+                activity_type_value = activity_type_attr.value if hasattr(activity_type_attr, "value") else activity_type_attr
+                if "subprocess" in str(activity_type_value).lower():
+                    return "SubProcess"
+        
+        return base_type
 
     @staticmethod
     def _map_relation_to_edge_type(relation_type: RelationType) -> EdgeType:
