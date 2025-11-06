@@ -27,19 +27,19 @@ jobs:
     
     - name: Run Bandit security tests
       run: |
-        bandit -r bpmn_agent/ -f json -o bandit-report.json -c pyproject.toml
-        bandit -r bpmn_agent/ -f sarif -o bandit-report.sarif
+        bandit -r bpmn_agent/ -f json -o bandit-report.json -c pyproject.toml || echo "Bandit found security issues (see report)"
+        bandit -r bpmn_agent/ -f sarif -o bandit-report.sarif || echo "Bandit SARIF generation completed with warnings"
       continue-on-error: true
     
     - name: Run Safety dependency check
       run: |
-        safety check --json --output safety-report.json
-        safety check --short --output safety-report.txt
+        safety check --json --json-file safety-report.json || echo "Safety check completed with warnings"
+        safety check --short --text-file safety-report.txt || echo "Safety check completed with warnings"
       continue-on-error: true
     
     - name: Generate SBOM
       run: |
-        cyclonedx-py -r . -o sbom.json || echo "SBOM generation failed, continuing..."
+        cyclonedx-py requirements -o sbom.json || echo "SBOM generation failed, continuing..."
       continue-on-error: true
     
     - name: Upload security artifacts
@@ -55,10 +55,11 @@ jobs:
         retention-days: 90
     
     - name: Security scan report
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: bandit-report.sarif
+        wait-for-processing: false
 
   # Code quality metrics
   code-quality:
@@ -136,7 +137,7 @@ jobs:
     - name: Generate license report
       run: |
         pip-licenses --format=json --output-file=licenses.json
-        pip-licenses --format=table --output-file=licenses.txt
+        pip-licenses --format=markdown --output-file=licenses.txt || pip-licenses --format=plain --output-file=licenses.txt
     
     - name: Check for problematic licenses
       run: |
