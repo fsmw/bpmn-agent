@@ -1,5 +1,5 @@
 """API package for BPMN Agent."""
 
-from api.pattern_matching_routes import router as pattern_router
+from bpmn_agent.api.pattern_matching_routes import router as pattern_router
 
 __all__ = ["pattern_router"]

@@ -6,7 +6,7 @@ Tests the FastAPI REST endpoints for pattern matching functionality.
 
 import pytest
 from fastapi.testclient import TestClient
-from models.knowledge_base import (
+from bpmn_agent.models.knowledge_base import (
     BPMNPattern,
     ComplexityLevel,
     DomainType,
@@ -14,9 +14,9 @@ from models.knowledge_base import (
     KnowledgeBase,
     PatternCategory,
 )
-from api.app import app
+from bpmn_agent.api.app import app
 from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
-import api.pattern_matching_routes as pm_routes
+import bpmn_agent.api.pattern_matching_routes as pm_routes
 
 
 @pytest.fixture

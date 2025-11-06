@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, Path
 from pydantic import BaseModel, Field
 from enum import Enum
 
-from bpmn_agent.models.knowledge_base import DomainType, PatternCategory
+from bpmn_agent.models.knowledge_base import DomainType, PatternCategory, ComplexityLevel
 from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
 from bpmn_agent.models.knowledge_base import KnowledgeBase
 
@@ -148,12 +148,31 @@ async def search_patterns(
     """
     try:
         bridge = get_bridge()
-        domain_type = DomainType[domain.value.upper()] if domain else None
+        # Convert API enum values to model enum types using value-based mapping
+        domain_type = None
+        if domain:
+            domain_mapping = {d.value: d for d in DomainType}
+            domain_type = domain_mapping.get(domain.value.lower())
+            if domain_type is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                )
+        
+        category_type = None
+        if category:
+            category_mapping = {c.value: c for c in PatternCategory}
+            category_type = category_mapping.get(category.value.lower())
+            if category_type is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid category: {category.value}. Valid categories: {', '.join([c.value for c in PatternCategory])}"
+                )
         
         results = bridge.search_patterns(
             query,
             domain=domain_type,
-            category=category.value if category else None
+            category=category_type
         )
         
         pattern_results = [
@@ -189,7 +208,16 @@ async def find_patterns_for_process(
     """
     try:
         bridge = get_bridge()
-        domain_type = DomainType[domain.value.upper()] if domain else None
+        # Convert API enum value to model enum type using value-based mapping
+        domain_type = None
+        if domain:
+            domain_mapping = {d.value: d for d in DomainType}
+            domain_type = domain_mapping.get(domain.value.lower())
+            if domain_type is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                )
         
         recommendation = bridge.find_patterns_for_process(
             process_description,
@@ -215,6 +243,8 @@ async def find_patterns_for_process(
             confidence=recommendation.confidence,
             alternatives=alternatives
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Pattern finding failed: {str(e)}")
 
@@ -234,7 +264,16 @@ async def validate_activities(
             raise HTTPException(status_code=400, detail="Activities list cannot be empty")
         
         bridge = get_bridge()
-        domain_type = DomainType[domain.value.upper()] if domain else None
+        # Convert API enum value to model enum type using value-based mapping
+        domain_type = None
+        if domain:
+            domain_mapping = {d.value: d for d in DomainType}
+            domain_type = domain_mapping.get(domain.value.lower())
+            if domain_type is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                )
         
         results = bridge.validate_extracted_activities(
             activities,
@@ -271,12 +310,27 @@ async def get_patterns_by_domain(
     """
     try:
         bridge = get_bridge()
-        domain_type = DomainType[domain.upper()]
+        # Validate domain - map lowercase string to DomainType enum
+        domain_lower = domain.lower()
+        domain_mapping = {d.value: d for d in DomainType}
+        if domain_lower not in domain_mapping:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid domain: {domain}. Valid domains: {', '.join([d.value for d in DomainType])}"
+            )
+        domain_type = domain_mapping[domain_lower]
+        
         complexity_level = None
         if complexity:
             # Map complexity string to ComplexityLevel
-            from models.knowledge_base import ComplexityLevel
-            complexity_level = ComplexityLevel[complexity.upper()]
+            complexity_mapping = {c.value: c for c in ComplexityLevel}
+            complexity_lower = complexity.lower()
+            if complexity_lower not in complexity_mapping:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid complexity: {complexity}. Valid levels: {', '.join([c.value for c in ComplexityLevel])}"
+                )
+            complexity_level = complexity_mapping[complexity_lower]
         
         patterns = bridge.suggest_patterns_by_domain(
             domain_type,
@@ -298,10 +352,12 @@ async def get_patterns_by_domain(
         ]
         
         return DomainPatternsResult(
-            domain=domain.value,
+            domain=domain,
             patterns=pattern_results,
             total_count=len(pattern_results)
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Domain pattern retrieval failed: {str(e)}")
 
