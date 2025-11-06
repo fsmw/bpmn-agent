@@ -99,7 +99,7 @@ The CLI will refuse to run if system Python is used:
 │   └── api/                        # FastAPI routes (future)
 ├── tests/                          # Test suite
 ├── pyproject.toml                  # Package config
-├── VENV_USAGE.md                   # Usage instructions
+├── docs/development/venv-usage.md  # Usage instructions
 └── VENV_ENFORCEMENT_SETUP.md      # This file
 
 ## For OpenCode Agent

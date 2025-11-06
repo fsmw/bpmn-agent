@@ -54,7 +54,7 @@ echo "Testing CLI enforcement..."
 # Check 6: Configuration files
 echo ""
 echo "Configuration Files:"
-for file in .env .bashrc.local VENV_USAGE.md VENV_ENFORCEMENT_SETUP.md; do
+for file in .env .bashrc.local docs/development/venv-usage.md docs/development/venv-enforcement.md; do
     if [ -f "${PROJECT_ROOT}/$file" ]; then
         echo "  ✓ $file"
     else
