@@ -229,7 +229,7 @@ class TestPatternLibraryLoading:
     
     def test_healthcare_patterns_loaded(self):
         """Verify healthcare patterns are available."""
-        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/healthcare_patterns.json') as f:
+        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/healthcare_patterns.json') as f:
             patterns = json.load(f)
         assert len(patterns) >= 14, "Healthcare should have at least 14 patterns"
         assert any('patient' in k.lower() for k in patterns.keys())
@@ -237,14 +237,14 @@ class TestPatternLibraryLoading:
     
     def test_manufacturing_patterns_loaded(self):
         """Verify manufacturing patterns are available."""
-        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/manufacturing_patterns.json') as f:
+        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/manufacturing_patterns.json') as f:
             patterns = json.load(f)
         assert len(patterns) >= 14, "Manufacturing should have at least 14 patterns"
         assert any('production' in k.lower() for k in patterns.keys())
     
     def test_healthcare_patterns_have_required_fields(self):
         """Verify healthcare patterns have all required fields."""
-        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/healthcare_patterns.json') as f:
+        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/healthcare_patterns.json') as f:
             patterns = json.load(f)
         
         required_fields = ['name', 'description', 'domain', 'category', 'keywords', 'workflow_steps', 'actors', 'business_rules']
@@ -255,7 +255,7 @@ class TestPatternLibraryLoading:
     
     def test_manufacturing_patterns_have_required_fields(self):
         """Verify manufacturing patterns have all required fields."""
-        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/manufacturing_patterns.json') as f:
+        with open('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/manufacturing_patterns.json') as f:
             patterns = json.load(f)
         
         required_fields = ['name', 'description', 'domain', 'category', 'keywords', 'workflow_steps', 'actors', 'business_rules']
@@ -266,7 +266,7 @@ class TestPatternLibraryLoading:
     
     def test_all_pattern_files_valid_json(self):
         """Verify all pattern files are valid JSON."""
-        pattern_files = glob.glob('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/*_patterns.json')
+        pattern_files = glob.glob('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/*_patterns.json')
         
         for pattern_file in pattern_files:
             with open(pattern_file) as f:
@@ -290,12 +290,12 @@ class TestPatternCoverageAndQuality:
         """Verify each domain has minimum required pattern count."""
         min_patterns = 12
         domains = {
-            'generic': '/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/generic_patterns.json',
-            'finance': '/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/finance_patterns.json',
-            'healthcare': '/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/healthcare_patterns.json',
-            'hr': '/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/hr_patterns.json',
-            'it': '/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/it_patterns.json',
-            'manufacturing': '/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/manufacturing_patterns.json',
+            'generic': '/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/generic_patterns.json',
+            'finance': '/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/finance_patterns.json',
+            'healthcare': '/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/healthcare_patterns.json',
+            'hr': '/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/hr_patterns.json',
+            'it': '/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/it_patterns.json',
+            'manufacturing': '/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/manufacturing_patterns.json',
         }
         
         for domain, filepath in domains.items():
@@ -310,7 +310,7 @@ class TestPatternCoverageAndQuality:
     
     def test_pattern_descriptions_are_substantial(self):
         """Verify pattern descriptions are substantial and informative."""
-        pattern_files = glob.glob('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/*_patterns.json')
+        pattern_files = glob.glob('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/*_patterns.json')
         
         for pattern_file in pattern_files:
             with open(pattern_file) as f:
@@ -322,7 +322,7 @@ class TestPatternCoverageAndQuality:
     
     def test_patterns_have_meaningful_keywords(self):
         """Verify patterns have meaningful keywords for pattern matching."""
-        pattern_files = glob.glob('/home/fsmw/dev/bpmn/src/bpmn-agent/knowledge/patterns/*_patterns.json')
+        pattern_files = glob.glob('/home/fsmw/dev/bpmn/src/bpmn-agent/bpmn_agent/knowledge/patterns/*_patterns.json')
         
         for pattern_file in pattern_files:
             with open(pattern_file) as f:

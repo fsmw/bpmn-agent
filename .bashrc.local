@@ -1,0 +1,20 @@
+#!/bin/bash
+# Force local virtual environment usage for this project
+
+# Get the project root directory
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Set environment variables to use local venv
+export VIRTUAL_ENV="${PROJECT_ROOT}/.venv"
+export PATH="${PROJECT_ROOT}/.venv/bin:$PATH"
+export PYTHONPATH="${PROJECT_ROOT}:$PYTHONPATH"
+
+# Create aliases to prevent accidental use of system Python
+alias python="${PROJECT_ROOT}/.venv/bin/python"
+alias python3="${PROJECT_ROOT}/.venv/bin/python3"
+alias pip="${PROJECT_ROOT}/.venv/bin/pip"
+alias pip3="${PROJECT_ROOT}/.venv/bin/pip3"
+
+echo "✓ Local .venv activated for this project"
+echo "  Python: $(which python)"
+echo "  Pip: $(which pip)"

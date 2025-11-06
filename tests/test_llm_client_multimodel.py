@@ -8,7 +8,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from core.llm_client import (
+from bpmn_agent.core.llm_client import (
     LLMProviderType,
     ModelType,
     ModelConfig,

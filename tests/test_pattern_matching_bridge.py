@@ -5,7 +5,7 @@ Tests the bridge between advanced pattern matching and the extraction pipeline.
 """
 
 import pytest
-from models.knowledge_base import (
+from bpmn_agent.models.knowledge_base import (
     BPMNPattern,
     ComplexityLevel,
     DomainType,
@@ -13,7 +13,7 @@ from models.knowledge_base import (
     KnowledgeBase,
     PatternCategory,
 )
-from knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
+from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
 
 
 @pytest.fixture
