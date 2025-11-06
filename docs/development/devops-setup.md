@@ -66,20 +66,59 @@ For `main` branch:
 
 ## Development Workflow
 
-### Daily Development (Feature Work)
+### Formal Workflow: Issue → Branch → PR → CI → Merge
+
+We follow a structured workflow using GitHub Issues, Branches, and Pull Requests:
+
+```
+1. Create Issue          → Document what needs to be done
+2. Create Branch          → Work on a specific branch
+3. Develop Locally        → Pre-commit hooks ensure quality
+4. Create Pull Request    → Link PR to Issue
+5. CI/CD Automatic        → Tests, linting, coverage
+6. Code Review            → Review and approval
+7. Merge                  → Automatic issue closure
+```
+
+### Step-by-Step Workflow
+
+#### Step 1: Create an Issue
 
 ```bash
-# 1. Create feature branch from main
+# From terminal
+cd src/bpmn-agent
+gh issue create --title "Título descriptivo" --body "Descripción" --label "enhancement"
+
+# Or from GitHub web: https://github.com/fsmw/bpmn-agent/issues/new
+```
+
+**Why Issues First?**
+- ✅ Documents context and requirements
+- ✅ Enables discussion before implementation
+- ✅ Provides traceability (Issue → Branch → PR → Merge)
+- ✅ Automatically closes when PR is merged
+
+#### Step 2: Create Branch from Issue
+
+```bash
+# Recommended: Use GitHub CLI (automatically links branch to issue)
+gh issue develop <ISSUE_NUMBER>
+
+# Or manually
 git checkout main
 git pull origin main
-git checkout -b feature/your-feature-name
+git checkout -b feature/issue-<NUMBER>-descripcion-corta
+```
 
-# 2. Work on your changes
+#### Step 3: Develop Locally
+
+```bash
+# Work on your changes
 # ... edit files ...
 
-# 3. Pre-commit checks run automatically when you commit
+# Pre-commit checks run automatically when you commit
 git add .
-git commit -m "feat: add new entity extraction logic"
+git commit -m "feat: add new entity extraction logic (refs #<ISSUE_NUMBER>)"
 
 # Pre-commit will run:
 # - black (formatting)
@@ -87,14 +126,67 @@ git commit -m "feat: add new entity extraction logic"
 # - mypy (type checking)
 # - pytest-unit (fast tests)
 # - pytest-integration (component tests)
+# - coverage-check (warns if < 75%)
 
-# If any test fails, fix it and try again
+# If any check fails, fix it and try again
 git commit -m "feat: add new entity extraction logic (fixed tests)"
-
-# 4. Push and create PR
-git push origin feature/your-feature-name
-# Go to GitHub and create PR from your branch to main
 ```
+
+#### Step 4: Create Pull Request
+
+```bash
+# Push branch
+git push origin feature/issue-<NUMBER>-descripcion
+
+# Create PR linked to issue (use "Fixes #<NUMBER>" to auto-close issue)
+gh pr create --title "feat: Título descriptivo" --body "Fixes #<ISSUE_NUMBER>
+
+## Cambios
+- Cambio 1
+- Cambio 2
+
+## Testing
+- [x] Tests pasan
+- [x] Coverage > 75%
+
+Fixes #<ISSUE_NUMBER>"
+```
+
+**Important**: Include `Fixes #<ISSUE_NUMBER>` in PR description to automatically close the issue when merged.
+
+#### Step 5: CI/CD Runs Automatically
+
+When you create a PR, GitHub Actions automatically:
+- ✅ Runs tests on Python 3.10, 3.11, 3.12
+- ✅ Checks formatting, linting, type checking
+- ✅ Verifies coverage > 75%
+- ✅ Runs security scans
+
+**PR cannot be merged until all checks pass.**
+
+#### Step 6: Code Review
+
+- Wait for at least 1 approval (if branch protection is configured)
+- Address review comments
+- Push new commits if needed
+
+#### Step 7: Merge
+
+```bash
+# When ready, merge PR (squash recommended)
+gh pr merge <PR_NUMBER> --squash --delete-branch
+```
+
+**Result:**
+- ✅ Issue automatically closes (if PR had "Fixes #X")
+- ✅ Branch automatically deleted
+- ✅ All changes merged to `main`
+
+### See Also
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Complete contribution guide
+- **[GitHub Workflow Guide](github-workflow.md)** - Best practices
+- **[WORKFLOW_ISSUES_SETUP.md](../WORKFLOW_ISSUES_SETUP.md)** - Issues setup guide
 
 ### What Happens in CI
 
@@ -117,25 +209,44 @@ When you create PR, these GitHub Actions run:
    - Daily schedule (cron)
    - PR touches core LLM/stage files
 
-### PR Checklist (Required in your PR description)
+### PR Template (Use in PR Description)
 
 ```markdown
-## PR Checklist
+## Descripción
+Breve descripción de los cambios.
 
-- [ ] Code follows project style (pre-commit hooks pass)
-- [ ] All new features are tested
-- [ ] Documentation updated if needed
-- [ ] Tests pass locally (`pytest -m "unit and integration"`)
-- [ ] No breaking changes (or documented)
-- [ ] Environment variables documented if new
+Fixes #<ISSUE_NUMBER>
+
+## Cambios
+- Cambio 1
+- Cambio 2
+- Cambio 3
 
 ## Testing
+- [x] Tests unitarios pasan
+- [x] Tests de integración pasan
+- [x] Coverage > 75%
+- [x] Probado localmente
+
+## Checklist
+- [x] Código sigue estilo del proyecto (black, ruff)
+- [x] Type checking pasa (mypy)
+- [x] Documentación actualizada si es necesario
+- [x] Sin breaking changes (o documentados)
+- [x] Pre-commit hooks pasan
+
+## Testing Local
 
 ```bash
 # Quick test before pushing
 pytest -m "unit and integration and not llm and not slow"
+
+# Full test suite
+pytest --cov=bpmn_agent --cov-report=term
 ```
 ```
+
+**Important**: Always include `Fixes #<ISSUE_NUMBER>` to automatically close the issue when the PR is merged.
 
 ### Release Process
 

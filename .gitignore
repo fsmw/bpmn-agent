@@ -235,3 +235,6 @@ lerna-debug.log*
 # BPMN diagram editor temporary files
 *.bpmn.autosave
 *.bpmn.tmp
+
+# Local context (sesiones, estado temporal, etc.)
+local_context/

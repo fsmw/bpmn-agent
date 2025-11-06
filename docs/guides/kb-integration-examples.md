@@ -361,5 +361,5 @@ print(f"Pattern files found: {pattern_files}")
 - See [KB_INTEGRATION.md](KB_INTEGRATION.md) for technical details
 - See [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for advanced integration
 - See [README.md](README.md) for general project information
-- See [VENV_USAGE.md](VENV_USAGE.md) for virtual environment setup
+- See [VENV Usage](../development/venv-usage.md) for virtual environment setup
 

@@ -163,7 +163,7 @@ python -m bpmn_agent.tools.cli process "..."
 python3 script.py
 ```
 
-Read [VENV_USAGE.md](VENV_USAGE.md) for details.
+Read [VENV Usage](../development/venv-usage.md) for details.
 
 ## Documentation
 
@@ -217,7 +217,7 @@ print('✓ All imports working')
 1. ✅ Virtual environment verified
 2. ✅ CLI commands working
 3. ✅ Tests passing (397/397)
-4. 📖 Explore examples in [KB_INTEGRATION_EXAMPLES.md](KB_INTEGRATION_EXAMPLES.md)
+4. 📖 Explore examples in [KB Integration Examples](kb-integration-examples.md)
 5. 🔧 Build your own workflows
 6. 📚 Read full docs for advanced usage
 
