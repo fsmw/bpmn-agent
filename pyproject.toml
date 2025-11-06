@@ -158,6 +158,7 @@ addopts = "--strict-markers --tb=short"
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",
+    "e2e: End-to-end tests (may require LLM)",
     "llm: Tests requiring LLM connection",
     "slow: Slow tests",
     "asyncio: Async tests",
