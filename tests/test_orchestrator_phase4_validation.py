@@ -143,7 +143,6 @@ async def test_phase4_validation_executes_after_xml_generation(agent_config_with
             is_valid=True,
             quality_score=0.85,
             errors=[],
-            warnings=[],
             total_errors=0,
             total_warnings=0
         ),
@@ -188,7 +187,6 @@ async def test_phase4_validation_passes_rag_context(agent_config_with_phase4):
             is_valid=True,
             quality_score=0.85,
             errors=[],
-            warnings=[],
             total_errors=0,
             total_warnings=0
         ),
@@ -241,7 +239,6 @@ async def test_phase4_validation_records_feedback(agent_config_with_phase4):
             is_valid=True,
             quality_score=0.85,
             errors=[],
-            warnings=[],
             total_errors=0,
             total_warnings=0
         ),
