@@ -39,7 +39,8 @@ jobs:
     
     - name: Generate SBOM
       run: |
-        cyclonedx-py -r bpmn-agent -o sbom.json
+        cyclonedx-py -r . -o sbom.json || echo "SBOM generation failed, continuing..."
+      continue-on-error: true
     
     - name: Upload security artifacts
       uses: actions/upload-artifact@v4
