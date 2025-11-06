@@ -58,6 +58,7 @@ class KBGraphEnricher:
         """
         self.enable_kb = enable_kb
         self._pattern_recognizer: Optional[PatternRecognizer] = None
+        self._advanced_pattern_bridge: Optional["AdvancedPatternMatchingBridge"] = None
 
     def _get_pattern_recognizer(self) -> Optional[PatternRecognizer]:
         """Lazy load pattern recognizer."""
@@ -71,6 +72,22 @@ class KBGraphEnricher:
                 logger.warning(f"Failed to initialize pattern recognizer: {e}")
                 return None
         return self._pattern_recognizer
+
+    def _get_advanced_pattern_bridge(self) -> Optional["AdvancedPatternMatchingBridge"]:
+        """Lazy load advanced pattern matching bridge."""
+        if not self.enable_kb:
+            return None
+        if self._advanced_pattern_bridge is None:
+            try:
+                from knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
+                from models.knowledge_base import KnowledgeBase
+                kb = KnowledgeBase()
+                self._advanced_pattern_bridge = AdvancedPatternMatchingBridge(kb)
+                logger.info("Advanced pattern matching bridge initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize advanced pattern bridge: {e}")
+                return None
+        return self._advanced_pattern_bridge
 
     def get_relevant_patterns(self, domain: Optional[DomainType], max_patterns: int = 3) -> List[Dict]:
         """
@@ -169,6 +186,134 @@ class KBGraphEnricher:
                 suggestions.append((current_id, next_id))
 
         return suggestions
+
+    def find_patterns_for_process(self, process_description: str, domain: Optional[DomainType] = None) -> Optional[Dict]:
+        """
+        Find matching patterns for a process description using advanced matching.
+
+        Args:
+            process_description: Description of the process
+            domain: Optional domain hint for better matching
+
+        Returns:
+            Pattern recommendation or None
+        """
+        bridge = self._get_advanced_pattern_bridge()
+        if not bridge:
+            return None
+
+        try:
+            recommendation = bridge.find_patterns_for_process(process_description, domain_hint=domain)
+            return {
+                "pattern_id": recommendation.best_pattern.id if recommendation.best_pattern else None,
+                "pattern_name": recommendation.best_pattern.name if recommendation.best_pattern else None,
+                "confidence": recommendation.confidence,
+                "patterns": [
+                    {
+                        "id": p.pattern.id,
+                        "name": p.pattern.name,
+                        "category": p.pattern.category.value,
+                        "score": p.match_score,
+                    }
+                    for p in recommendation.patterns
+                ],
+            } if recommendation else None
+        except Exception as e:
+            logger.warning(f"Error finding patterns for process: {e}")
+            return None
+
+    def match_activities_to_patterns(self, activity_labels: List[str], domain: Optional[DomainType] = None) -> Dict[str, Dict]:
+        """
+        Match extracted activities to known patterns for validation.
+
+        Args:
+            activity_labels: List of activity labels from extraction
+            domain: Optional domain for domain-specific matching
+
+        Returns:
+            Dictionary mapping activity label to match info (valid, score, suggestions)
+        """
+        bridge = self._get_advanced_pattern_bridge()
+        if not bridge:
+            return {}
+
+        try:
+            results = bridge.validate_extracted_activities(activity_labels, domain_hint=domain)
+            return {
+                activity: {
+                    "is_valid": valid,
+                    "confidence": score,
+                    "suggestions": suggestions,
+                }
+                for activity, (valid, score, suggestions) in results.items()
+            }
+        except Exception as e:
+            logger.warning(f"Error validating activities: {e}")
+            return {}
+
+    def suggest_patterns_by_domain(self, domain: DomainType, max_patterns: int = 5) -> List[Dict]:
+        """
+        Get domain-specific pattern suggestions for graph construction.
+
+        Args:
+            domain: Domain type
+            max_patterns: Maximum patterns to return
+
+        Returns:
+            List of pattern suggestions with metadata
+        """
+        bridge = self._get_advanced_pattern_bridge()
+        if not bridge:
+            return []
+
+        try:
+            suggestions = bridge.suggest_patterns_by_domain(domain, max_patterns=max_patterns)
+            return [
+                {
+                    "id": p.get("id"),
+                    "name": p.get("name"),
+                    "category": p.get("category"),
+                    "complexity": p.get("complexity"),
+                    "confidence": p.get("confidence"),
+                    "tags": p.get("tags", []),
+                }
+                for p in suggestions
+            ]
+        except Exception as e:
+            logger.warning(f"Error getting domain patterns: {e}")
+            return []
+
+    def search_patterns(self, query: str, domain: Optional[DomainType] = None, category: Optional[str] = None) -> List[Dict]:
+        """
+        Search for patterns using advanced pattern matching.
+
+        Args:
+            query: Search query
+            domain: Optional domain filter
+            category: Optional category filter
+
+        Returns:
+            List of matching patterns
+        """
+        bridge = self._get_advanced_pattern_bridge()
+        if not bridge:
+            return []
+
+        try:
+            results = bridge.search_patterns(query, domain=domain, category=category)
+            return [
+                {
+                    "id": r.pattern.id,
+                    "name": r.pattern.name,
+                    "score": r.match_score,
+                    "match_type": r.match_type,
+                }
+                for r in results
+            ]
+        except Exception as e:
+            logger.warning(f"Error searching patterns: {e}")
+            return []
+
 
 
 # ===========================
