@@ -452,7 +452,7 @@ class EnhancedXSDValidator:
             ))
             result.is_valid = False
         
-        # 3. Validar estructura básica de cada proceso
+        # 3. Validate basic structure of each process
         for process in processes:
             process_id = process.get('id')
             if not process_id:
@@ -503,7 +503,7 @@ class EnhancedXSDValidator:
                 analyzer = GraphAnalyzer()
                 analysis_result = analyzer.analyze_graph_structure(graph, extraction_result)
                 
-                # Convertir anomalías a errores de validación
+                # Convert anomalies to validation errors
                 for anomaly in analysis_result.anomalies:
                     if anomaly.severity in ["high", "critical"]:
                         result.errors.append(XSDValidationError(
@@ -529,7 +529,7 @@ class EnhancedXSDValidator:
         if domain:
             self._validate_domain_semantics(xml_content, result, domain)
         
-        # 3. Validación de patrones aplicados
+        # 3. Validation of applied patterns
         if patterns_applied:
             self._validate_pattern_application(xml_content, result, patterns_applied)
     
