@@ -479,7 +479,7 @@ class EnhancedXSDValidator:
                     suggestion="Add at least one startEvent to the process"
                 ))
         
-        # Actualizar contadores
+        # Update counters
         if result.errors:
             for error in result.errors:
                 result.errors_by_level[error.level] = result.errors_by_level.get(error.level, 0) + 1
