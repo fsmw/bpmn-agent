@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, Path
 from pydantic import BaseModel, Field
 from enum import Enum
 
-from bpmn_agent.models.knowledge_base import DomainType, PatternCategory
+from bpmn_agent.models.knowledge_base import DomainType, PatternCategory, ComplexityLevel
 from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
 from bpmn_agent.models.knowledge_base import KnowledgeBase
 
@@ -149,11 +149,12 @@ async def search_patterns(
     try:
         bridge = get_bridge()
         domain_type = DomainType[domain.value.upper()] if domain else None
+        category_type = PatternCategory[category.value.upper()] if category else None
         
         results = bridge.search_patterns(
             query,
             domain=domain_type,
-            category=category.value if category else None
+            category=category_type
         )
         
         pattern_results = [
@@ -271,12 +272,25 @@ async def get_patterns_by_domain(
     """
     try:
         bridge = get_bridge()
-        domain_type = DomainType[domain.upper()]
+        # Validate domain
+        try:
+            domain_type = DomainType[domain.upper()]
+        except KeyError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid domain: {domain}. Valid domains: {', '.join([d.value for d in DomainType])}"
+            )
+        
         complexity_level = None
         if complexity:
             # Map complexity string to ComplexityLevel
-            from models.knowledge_base import ComplexityLevel
-            complexity_level = ComplexityLevel[complexity.upper()]
+            try:
+                complexity_level = ComplexityLevel[complexity.upper()]
+            except KeyError:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid complexity: {complexity}. Valid levels: {', '.join([c.value for c in ComplexityLevel])}"
+                )
         
         patterns = bridge.suggest_patterns_by_domain(
             domain_type,
@@ -298,7 +312,7 @@ async def get_patterns_by_domain(
         ]
         
         return DomainPatternsResult(
-            domain=domain.value,
+            domain=domain,
             patterns=pattern_results,
             total_count=len(pattern_results)
         )
