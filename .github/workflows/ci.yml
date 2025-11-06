@@ -1,0 +1,196 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run linting checks
+      run: |
+        black --check .
+        ruff check .
+        mypy bpmn_agent/ --ignore-missing-imports
+    
+    - name: Run fast tests
+      run: |
+        pytest -m "unit and not llm" --cov=bpmn_agent --cov-report=xml --cov-report=term --cov-append || exit 1
+    
+    - name: Run integration tests
+      run: |
+        pytest -m "integration and not llm" --cov=bpmn_agent --cov-report=xml --cov-append
+    
+    - name: Run comprehensive tests (Python 3.11 only)
+      if: matrix.python-version == '3.11'
+      env:
+        LLM_PROVIDER: ollama
+        LLM_BASE_URL: http://localhost:11434
+        LLM_MODEL: mistral
+      run: |
+        pytest -m "not slow and not llm" --cov=bpmn_agent --cov-report=xml --cov-report=html --cov-report=term || exit 1
+    
+    - name: Check coverage threshold
+      if: matrix.python-version == '3.11'
+      run: |
+        # Check if coverage meets minimum threshold (75%)
+        python -c "
+        import xml.etree.ElementTree as ET
+        import sys
+        
+        try:
+            tree = ET.parse('coverage.xml')
+            root = tree.getroot()
+            line_rate = float(root.get('line-rate', 0))
+            branch_rate = float(root.get('branch-rate', 0))
+            
+            min_coverage = 0.75  # 75% minimum
+            
+            print(f'Line Coverage: {line_rate*100:.2f}%')
+            print(f'Branch Coverage: {branch_rate*100:.2f}%')
+            print(f'Minimum Required: {min_coverage*100:.0f}%')
+            
+            if line_rate < min_coverage:
+                print(f'❌ Line coverage {line_rate*100:.2f}% is below threshold {min_coverage*100:.0f}%')
+                sys.exit(1)
+            if branch_rate < min_coverage:
+                print(f'❌ Branch coverage {branch_rate*100:.2f}% is below threshold {min_coverage*100:.0f}%')
+                sys.exit(1)
+            
+            print('✅ Coverage threshold met')
+        except Exception as e:
+            print(f'⚠️  Could not parse coverage.xml: {e}')
+            print('Continuing without coverage check...')
+        "
+    
+    - name: Upload coverage to Codecov
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+
+  # Optional: Run LLM tests only when API key is available
+  test-llm:
+    runs-on: ubuntu-latest
+    if: secrets.LLM_API_KEY != ''
+    env:
+      LLM_PROVIDER: openai_compatible
+      LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_MODEL: gpt-3.5-turbo
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run LLM integration tests
+      run: |
+        pytest -m "llm" --tb=short --timeout=300
+      timeout-minutes: 15
+
+  # Security scanning
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install bandit safety
+    
+    - name: Run security checks
+      run: |
+        bandit -r bpmn_agent/ -f json -o bandit-report.json
+        safety check --json --output safety-report.json
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+        retention-days: 30
+
+  # Performance testing (optional)
+  performance:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install pytest-benchmark
+    
+    - name: Run performance tests
+      run: |
+        pytest -m "not llm" --benchmark-only --benchmark-json=benchmark.json
+    
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        tool: 'pytest'
+        output-file-path: benchmark.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true

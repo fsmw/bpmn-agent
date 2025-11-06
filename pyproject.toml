@@ -90,7 +90,7 @@ Repository = "https://github.com/example/bpmn-agent.git"
 Issues = "https://github.com/example/bpmn-agent/issues"
 
 [tool.setuptools]
-packages = ["core", "knowledge", "models", "stages", "tools", "validators"]
+packages = ["bpmn_agent", "bpmn_agent.core", "bpmn_agent.knowledge", "bpmn_agent.models", "bpmn_agent.stages", "bpmn_agent.tools", "bpmn_agent.validators", "bpmn_agent.agent", "bpmn_agent.api"]
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
@@ -181,3 +181,10 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "if sys.version_info",
 ]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.report.fail_under]
+line = 75.0
+branch = 75.0

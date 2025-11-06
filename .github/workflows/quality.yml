@@ -1,0 +1,159 @@
+name: Code Quality and Security
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  # Enhanced security scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install bandit[toml] safety cyclonedx-bom
+    
+    - name: Run Bandit security tests
+      run: |
+        bandit -r bpmn_agent/ -f json -o bandit-report.json -c pyproject.toml
+        bandit -r bpmn_agent/ -f sarif -o bandit-report.sarif
+      continue-on-error: true
+    
+    - name: Run Safety dependency check
+      run: |
+        safety check --json --output safety-report.json
+        safety check --short --output safety-report.txt
+      continue-on-error: true
+    
+    - name: Generate SBOM
+      run: |
+        cyclonedx-py -r bpmn-agent -o sbom.json
+    
+    - name: Upload security artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          bandit-report.sarif
+          safety-report.json
+          safety-report.txt
+          sbom.json
+        retention-days: 90
+    
+    - name: Security scan report
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: bandit-report.sarif
+
+  # Code quality metrics
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install radon xenon
+    
+    - name: Calculate code metrics
+      run: |
+        # Maintainability index
+        radon mi bpmn_agent/ --json > mi-report.json
+        # Cyclomatic complexity
+        radon cc bpmn_agent/ --json > cc-report.json
+        # Halstead metrics
+        radon hal bpmn_agent/ --json > halstead-report.json
+    
+    - name: Check code quality thresholds
+      run: |
+        # Fail if complexity is too high
+        xenon -b B bpmn_agent/ -l C --max-absolute B --max-modules A --max-average A
+        # Check maintainability index threshold (>= C)
+        python -c "
+        import json
+        import sys
+        with open('mi-report.json') as f:
+            data = json.load(f)
+            for file, metrics in data.items():
+                if isinstance(metrics, dict) and 'mi' in metrics:
+                    if metrics['mi'] < 20:  # Grade C threshold
+                        print(f'Maintainability index too low for {file}: {metrics[\"mi\"]}')
+                        sys.exit(1)
+        "
+    
+    - name: Upload quality reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: quality-reports
+        path: |
+          mi-report.json
+          cc-report.json
+          halstead-report.json
+        retention-days: 30
+
+  # License compliance
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install pip-licenses
+    
+    - name: Generate license report
+      run: |
+        pip-licenses --format=json --output-file=licenses.json
+        pip-licenses --format=table --output-file=licenses.txt
+    
+    - name: Check for problematic licenses
+      run: |
+        python -c "
+        import json
+        problematic_licenses = {'GPL', 'LGPL', 'AGPL'}
+        with open('licenses.json') as f:
+            licenses = json.load(f)
+            for package in licenses:
+                if package.get('License') in problematic_licenses:
+                    print(f'Problematic license found: {package[\"Name\"]} - {package[\"License\"]}')
+                    # Don't fail, just warn
+        "
+    
+    - name: Upload license report
+      uses: actions/upload-artifact@v3
+      with:
+        name: license-reports
+        path: |
+          licenses.json
+          licenses.txt
+        retention-days: 90

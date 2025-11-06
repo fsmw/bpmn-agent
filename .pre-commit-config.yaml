@@ -1,0 +1,54 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-toml
+      - id: debug-statements
+      - id: name-tests-test
+        args: [--pytest-test-first]
+
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3
+        args: [--line-length=100, --check]
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.2
+    hooks:
+      - id: ruff
+        args: [--fix]
+        types_or: [python]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, types-python-dateutil]
+        args: [--ignore-missing-imports]
+        types_or: [python]
+
+  - repo: local
+    hooks:
+      - id: pytest-unit
+        name: pytest-unit
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [-m, "unit and not llm and not slow", --tb=short, --maxfail=3]
+
+      - id: pytest-integration
+        name: pytest-integration
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [-m, "integration and not llm and not slow", --tb=short, --maxfail=3]
