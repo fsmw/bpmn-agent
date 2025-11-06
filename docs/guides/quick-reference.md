@@ -59,7 +59,7 @@ category_type = PatternCategory[category.value.upper()] if category else None  #
 - `models/knowledge_base.py` - Defines PatternCategory, ComplexityLevel enums
 
 ## 🚀 Next Steps
-1. Read SESSION_SUMMARY.md for full context
+1. See [Documentation Index](../README.md) for full context
 2. Apply enum fixes to API routes
 3. Run tests and verify all pass
 4. Commit changes

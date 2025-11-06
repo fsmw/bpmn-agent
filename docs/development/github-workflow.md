@@ -390,7 +390,7 @@ For contributors from forks:
 
 - **GitHub Issues**: Report CI/CD problems
 - **Team Chat**: Quick help with workflow questions  
-- **Documentation**: Check `DEVOPS_SETUP.md` for technical details
+- **Documentation**: Check [DevOps Setup](devops-setup.md) for technical details
 
 ---
 

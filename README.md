@@ -255,7 +255,7 @@ rating is low, escalation to supervisor occurs."
 
 - **OpenCode Docs**: https://opencode.ai/docs
 - **Agent Configuration**: https://opencode.ai/docs/agents/
-- **KB Integration**: See `KB_INTEGRATION.md` in this project
+- **KB Integration**: See [KB Integration Guide](docs/guides/kb-integration.md)
 
 ## Architecture
 
@@ -619,12 +619,51 @@ logger.add(sys.stderr, level="DEBUG")
 
 ## Contributing
 
-1. Create a feature branch
-2. Make changes
-3. Run tests: `pytest`
-4. Format code: `black bpmn_agent`
-5. Lint: `ruff check bpmn_agent`
-6. Submit PR
+We welcome contributions! Please follow our development workflow:
+
+### Quick Start
+
+1. **Create an Issue** - Document what you want to work on
+2. **Create a Branch** - Use `gh issue develop <ISSUE_NUMBER>` or manually
+3. **Develop Locally** - Pre-commit hooks ensure quality
+4. **Create a PR** - Link PR to issue with `Fixes #<NUMBER>`
+5. **CI/CD** - Automated tests, linting, and coverage checks
+6. **Code Review** - Wait for approval
+7. **Merge** - Issue closes automatically
+
+### Detailed Guide
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for complete guidelines on:
+- Issue creation and templates
+- Branch naming conventions
+- Development workflow
+- Testing requirements
+- Code standards
+- PR process and CI/CD
+
+### Development Setup
+
+```bash
+# Automated setup (recommended)
+cd src/bpmn-agent
+bash scripts/setup-dev.sh
+
+# Or manually
+pip install -e ".[dev]"
+pre-commit install
+pre-commit install --hook-type pre-push
+```
+
+### Quality Gates
+
+All PRs must pass:
+- ✅ Tests (unit + integration)
+- ✅ Code coverage > 75%
+- ✅ Linting (black, ruff)
+- ✅ Type checking (mypy)
+- ✅ Security scanning (Bandit, Safety)
+
+See **[DEVOPS_SETUP.md](DEVOPS_SETUP.md)** for detailed CI/CD setup.
 
 ## License
 

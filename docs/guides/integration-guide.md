@@ -776,6 +776,6 @@ for result in state.stage_results:
 
 **For more information, see:**
 - `README.md` - Overview and quick start
-- `KB_INTEGRATION.md` - Knowledge base details
+- [KB Integration](kb-integration.md) - Knowledge base details
 - Tests in `tests/` - Usage examples
 
