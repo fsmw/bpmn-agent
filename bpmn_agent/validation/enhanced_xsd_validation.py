@@ -496,7 +496,7 @@ class EnhancedXSDValidator:
     ) -> None:
         """Validate semantic compliance with knowledge base enhancement."""
         
-        # 1. Validación semántica básica usando GraphAnalyzer si disponible
+        # 1. Basic semantic validation using GraphAnalyzer if available
         if graph:
             try:
                 from bpmn_agent.tools.graph_analysis import GraphAnalyzer
@@ -525,7 +525,7 @@ class EnhancedXSDValidator:
             except Exception as e:
                 self.logger.warning(f"Graph analysis failed during semantic validation: {e}")
         
-        # 2. Validación de dominio específica
+        # 2. Domain-specific validation
         if domain:
             self._validate_domain_semantics(xml_content, result, domain)
         
