@@ -525,7 +525,7 @@ class EnhancedXSDValidator:
             except Exception as e:
                 self.logger.warning(f"Graph analysis failed during semantic validation: {e}")
         
-        # 2. Validación de dominio específica
+        # 2. Domain-specific validation
         if domain:
             self._validate_domain_semantics(xml_content, result, domain)
         

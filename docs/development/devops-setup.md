@@ -107,7 +107,7 @@ gh issue develop <ISSUE_NUMBER>
 # Or manually
 git checkout main
 git pull origin main
-git checkout -b feature/issue-<NUMBER>-descripcion-corta
+git checkout -b feature/issue-<NUMBER>-short-description
 ```
 
 #### Step 3: Develop Locally
