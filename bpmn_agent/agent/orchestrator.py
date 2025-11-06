@@ -27,6 +27,8 @@ from bpmn_agent.stages import (
     SemanticGraphConstructionPipeline,
 )
 from bpmn_agent.stages.xml_generation import BPMNXMLGenerator
+from bpmn_agent.validation.integration_layer import ValidationIntegrationLayer
+from bpmn_agent.models.knowledge_base import DomainType
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,17 @@ class BPMNAgent:
         self.xml_generator = BPMNXMLGenerator(enable_kb=config.enable_kb)
         self.domain_classifier = DomainClassifier() if config.enable_kb else None
         self.token_counter = TokenCounter()
+        
+        # Initialize Phase 4 validation integration layer
+        # Enable RAG validation if KB is enabled and phase4 validation is enabled
+        enable_rag_validation = (
+            config.enable_kb and 
+            config.pipeline_config.enable_phase4_validation and
+            config.pipeline_config.enable_rag_validation
+        )
+        self.validation_layer = ValidationIntegrationLayer(
+            enable_rag=enable_rag_validation
+        ) if config.pipeline_config.enable_phase4_validation else None
         
         # Initialize observability
         if config.enable_logging:
@@ -154,6 +167,16 @@ class BPMNAgent:
             
             if xml_output:
                 self.state.output_xml = xml_output
+                
+                # Stage 6: Phase 4 Validation (after XML generation)
+                if self.validation_layer:
+                    await self._stage6_validate_phase4(
+                        xml_output=xml_output,
+                        graph=graph,
+                        extraction_result=resolved,
+                        domain=None,  # Standard mode doesn't use domain
+                        patterns_applied=None  # Standard mode doesn't track patterns
+                    )
             
             # End pipeline successfully
             self.observability_hooks.end_pipeline(success=True)
@@ -209,6 +232,19 @@ class BPMNAgent:
             
             if xml_output:
                 self.state.output_xml = xml_output
+                
+                # Stage 6: Phase 4 Validation (after XML generation)
+                # Get patterns applied from XML generator or context
+                patterns_applied = self._get_patterns_applied()
+                domain_enum = DomainType(detected_domain) if detected_domain else None
+                
+                await self._stage6_validate_phase4(
+                    xml_output=xml_output,
+                    graph=graph,
+                    extraction_result=resolved,
+                    domain=domain_enum,
+                    patterns_applied=patterns_applied
+                )
             
             # End pipeline successfully
             self.observability_hooks.end_pipeline(success=True)
@@ -642,6 +678,119 @@ class BPMNAgent:
         self.state.add_stage_result(result)
         
         return result.result
+    
+    async def _stage6_validate_phase4(
+        self,
+        xml_output: str,
+        graph: ProcessGraph,
+        extraction_result: ExtractionResultWithErrors,
+        domain: Optional[DomainType] = None,
+        patterns_applied: Optional[List[str]] = None
+    ) -> None:
+        """Stage 6: Phase 4 Validation (XSD + RAG Pattern Validation)."""
+        stage_name = "phase4_validation"
+        result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
+        result.start_time = datetime.now()
+        
+        with self.observability_hooks.track_stage(
+            stage_name,
+            attributes={
+                "domain": domain.value if domain else None,
+                "patterns_count": len(patterns_applied) if patterns_applied else 0
+            }
+        ) as stage_metrics:
+            try:
+                # Perform unified validation
+                validation_result = self.validation_layer.validate(
+                    xml_content=xml_output,
+                    graph=graph,
+                    extraction_result=extraction_result,
+                    domain=domain,
+                    patterns_applied=patterns_applied
+                )
+                
+                # Update state with validation results
+                if validation_result.overall_valid:
+                    self.state.warnings.extend(validation_result.combined_issues)
+                else:
+                    self.state.errors.extend(validation_result.combined_issues)
+                
+                # Add suggestions to state
+                if validation_result.combined_suggestions:
+                    self.state.warnings.extend([
+                        f"Suggestion: {s}" for s in validation_result.combined_suggestions[:5]
+                    ])
+                
+                result.result = validation_result
+                result.status = StageStatus.COMPLETED
+                result.metrics = {
+                    "valid": validation_result.overall_valid,
+                    "quality_score": validation_result.overall_quality_score,
+                    "xsd_errors": validation_result.xsd_result.total_errors,
+                    "xsd_warnings": validation_result.xsd_result.total_warnings,
+                    "rag_compliance": (
+                        validation_result.rag_result.overall_compliance_score
+                        if validation_result.rag_result else None
+                    ),
+                    "patterns_validated": (
+                        validation_result.rag_result.patterns_validated
+                        if validation_result.rag_result else 0
+                    )
+                }
+                
+                # Record stage metrics
+                stage_metrics.success = True
+                stage_metrics.add_attribute("valid", validation_result.overall_valid)
+                stage_metrics.add_attribute("quality_score", validation_result.overall_quality_score)
+                
+                logger.info(f"Stage 6 completed: {result.metrics}")
+                
+            except Exception as e:
+                logger.exception(f"Stage 6 failed: {e}")
+                result.status = StageStatus.FAILED
+                result.error = str(e)
+                
+                # Record error in observability
+                self.observability_hooks.record_error(
+                    str(e),
+                    error_type=type(e).__name__,
+                    stage_name=stage_name
+                )
+                stage_metrics.success = False
+                stage_metrics.error_count += 1
+                
+                # Handle validation failures based on configuration
+                if self.config.pipeline_config.validation_fail_on_error:
+                    # Fail pipeline if validation fails and fail_on_error is enabled
+                    self.state.add_stage_result(result)
+                    return
+                elif self.config.error_handling == ErrorHandlingStrategy.STRICT:
+                    # In strict mode, add result but don't fail pipeline
+                    self.state.add_stage_result(result)
+        
+        result.end_time = datetime.now()
+        result.duration_ms = (result.end_time - result.start_time).total_seconds() * 1000
+        self.state.add_stage_result(result)
+    
+    def _get_patterns_applied(self) -> Optional[List[str]]:
+        """
+        Extract patterns applied during XML generation.
+        
+        Returns:
+            List of pattern IDs that were applied, or None if not available
+        """
+        # Try to get patterns from XML generator's id_mappings
+        if hasattr(self.xml_generator, 'id_mappings'):
+            pattern_ids = set()
+            for mapping in self.xml_generator.id_mappings:
+                if mapping.pattern_reference:
+                    pattern_ids.add(mapping.pattern_reference.pattern_id)
+            if pattern_ids:
+                return list(pattern_ids)
+        
+        # If not available from XML generator, return None
+        # In the future, we could track patterns in state or context
+        return None
     
     # ==================
     # Utility Methods
