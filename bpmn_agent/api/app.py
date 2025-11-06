@@ -6,7 +6,7 @@ Provides REST API endpoints for pattern discovery, search, and validation.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.pattern_matching_routes import router as pattern_router
+from bpmn_agent.api.pattern_matching_routes import router as pattern_router
 
 # Create FastAPI app
 app = FastAPI(

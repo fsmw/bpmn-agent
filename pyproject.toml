@@ -45,6 +45,10 @@ dependencies = [
     "lxml>=4.9.3",
     "xmlschema>=2.4.0",
     
+    # API Framework
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    
     # CLI
     "click>=8.1.0",
     

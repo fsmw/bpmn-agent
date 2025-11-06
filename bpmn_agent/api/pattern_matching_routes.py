@@ -272,25 +272,27 @@ async def get_patterns_by_domain(
     """
     try:
         bridge = get_bridge()
-        # Validate domain
-        try:
-            domain_type = DomainType[domain.upper()]
-        except KeyError:
+        # Validate domain - map lowercase string to DomainType enum
+        domain_lower = domain.lower()
+        domain_mapping = {d.value: d for d in DomainType}
+        if domain_lower not in domain_mapping:
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid domain: {domain}. Valid domains: {', '.join([d.value for d in DomainType])}"
             )
+        domain_type = domain_mapping[domain_lower]
         
         complexity_level = None
         if complexity:
             # Map complexity string to ComplexityLevel
-            try:
-                complexity_level = ComplexityLevel[complexity.upper()]
-            except KeyError:
+            complexity_mapping = {c.value: c for c in ComplexityLevel}
+            complexity_lower = complexity.lower()
+            if complexity_lower not in complexity_mapping:
                 raise HTTPException(
                     status_code=400,
                     detail=f"Invalid complexity: {complexity}. Valid levels: {', '.join([c.value for c in ComplexityLevel])}"
                 )
+            complexity_level = complexity_mapping[complexity_lower]
         
         patterns = bridge.suggest_patterns_by_domain(
             domain_type,
@@ -316,6 +318,8 @@ async def get_patterns_by_domain(
             patterns=pattern_results,
             total_count=len(pattern_results)
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Domain pattern retrieval failed: {str(e)}")
 
