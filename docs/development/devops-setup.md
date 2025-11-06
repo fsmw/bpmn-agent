@@ -87,7 +87,7 @@ We follow a structured workflow using GitHub Issues, Branches, and Pull Requests
 ```bash
 # From terminal
 cd src/bpmn-agent
-gh issue create --title "Título descriptivo" --body "Descripción" --label "enhancement"
+gh issue create --title "Descriptive title" --body "Description" --label "enhancement"
 
 # Or from GitHub web: https://github.com/fsmw/bpmn-agent/issues/new
 ```

@@ -1,47 +1,47 @@
 ---
 name: Bug Report
-about: Reportar un bug o error
+about: Report a bug or error
 title: '[BUG] '
 labels: bug
 assignees: ''
 ---
 
-## 🐛 Descripción del Bug
-Descripción clara y concisa del bug.
+## 🐛 Bug Description
+Clear and concise description of the bug.
 
-## 🔄 Pasos para Reproducir
-1. Ir a '...'
-2. Ejecutar '...'
-3. Ver error
+## 🔄 Steps to Reproduce
+1. Go to '...'
+2. Run '...'
+3. See error
 
-## ✅ Comportamiento Esperado
-Qué debería pasar en lugar del bug.
+## ✅ Expected Behavior
+What should happen instead of the bug.
 
-## ❌ Comportamiento Actual
-Qué está pasando actualmente (el bug).
+## ❌ Current Behavior
+What is currently happening (the bug).
 
 ## 📸 Screenshots
-Si aplica, agregar screenshots o logs.
+If applicable, add screenshots or logs.
 
-## 🔧 Entorno
-- OS: [ej: Ubuntu 22.04, macOS 13.0]
-- Python: [ej: 3.11.5]
-- Versión de bpmn-agent: [ej: 0.1.0]
-- LLM Provider: [ej: Ollama, OpenAI]
+## 🔧 Environment
+- OS: [e.g., Ubuntu 22.04, macOS 13.0]
+- Python: [e.g., 3.11.5]
+- bpmn-agent version: [e.g., 0.1.0]
+- LLM Provider: [e.g., Ollama, OpenAI]
 
 ## 📋 Logs/Stack Trace
 ```
-Pegar logs o stack trace aquí
+Paste logs or stack trace here
 ```
 
-## 🔗 Relacionado
+## 🔗 Related
 - Issue: #<NUMBER>
-- Componente: `<componente>`
+- Component: `<component>`
 
-## 📝 Notas Adicionales
-Información adicional sobre el bug.
+## 📝 Additional Notes
+Additional information about the bug.
 
-## 🏷️ Labels Sugeridos
+## 🏷️ Suggested Labels
 - `bug`
-- `phase<X>` (si aplica)
+- `phase<X>` (if applicable)
 - `priority:high|medium|low`

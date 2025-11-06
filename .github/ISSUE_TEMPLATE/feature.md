@@ -1,41 +1,41 @@
 ---
 name: Feature Request
-about: Proponer una nueva funcionalidad o mejora
+about: Propose a new feature or improvement
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
 ---
 
-## 🎯 Objetivo
-Descripción clara del objetivo y contexto de la funcionalidad propuesta.
+## 🎯 Objective
+Clear description of the objective and context of the proposed functionality.
 
-## 📋 Descripción Detallada
-Explicación detallada de la funcionalidad, incluyendo:
-- Qué problema resuelve
-- Cómo debería funcionar
-- Casos de uso
+## 📋 Detailed Description
+Detailed explanation of the functionality, including:
+- What problem it solves
+- How it should work
+- Use cases
 
-## 📁 Archivos/Componentes Afectados
-- [ ] `ruta/al/archivo.py`
-- [ ] `tests/test_archivo.py`
-- [ ] Documentación
+## 📁 Affected Files/Components
+- [ ] `path/to/file.py`
+- [ ] `tests/test_file.py`
+- [ ] Documentation
 
-## ✅ Criterios de Éxito
-- [ ] Criterio 1
-- [ ] Criterio 2
-- [ ] Tests pasan
+## ✅ Success Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Tests pass
 - [ ] Coverage > 75%
-- [ ] Documentación actualizada
+- [ ] Documentation updated
 
-## 🔗 Relacionado
+## 🔗 Related
 - Issue: #<NUMBER>
-- Plan: `ARCHIVO.md`
-- Componente: `<componente>`
+- Plan: `FILE.md`
+- Component: `<component>`
 
-## 📝 Notas Adicionales
-Notas adicionales, consideraciones, alternativas consideradas, etc.
+## 📝 Additional Notes
+Additional notes, considerations, alternatives considered, etc.
 
-## 🏷️ Labels Sugeridos
+## 🏷️ Suggested Labels
 - `enhancement`
-- `phase<X>` (si aplica)
+- `phase<X>` (if applicable)
 - `priority:high|medium|low`
