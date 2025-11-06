@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 Enhanced BPMN 2.0 XSD Validation Framework with Knowledge Base Integration
 
@@ -420,7 +421,7 @@ class EnhancedXSDValidator:
     def _validate_xml_structure(self, xml_doc: ET.Element, result: XSDValidationResult) -> None:
         """Validate basic XML structure and BPMN requirements."""
         
-        # 1. Validar namespace BPMN
+        # 1. Validate BPMN namespace
         root_tag = xml_doc.tag
         if not any(ns in root_tag for ns in ['definitions', '{http://www.omg.org/spec/BPMN']):
             # Try to find definitions element
@@ -870,3 +871,5 @@ def validate_xml_with_enhanced_xsd(
 def validate_xml_against_xsd(xml_content: str) -> "XSDValidationResult":
     """Backward compatibility wrapper for enhanced validation."""
     return validate_xml_with_enhanced_xsd(xml_content)
+=======
+>>>>>>> 1ff62b5f5487f33b6a95c910d285cc29653628e9
