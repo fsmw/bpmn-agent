@@ -618,6 +618,8 @@ class BPMNAgent:
         domain: Optional[str] = None,
     ) -> Optional[str]:
         """Stage 5: BPMN XML Generation."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
         stage_name = "xml_generation"
         result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
         result.start_time = datetime.now()
@@ -683,6 +685,11 @@ class BPMNAgent:
         patterns_applied: Optional[List[str]] = None,
     ) -> None:
         """Stage 6: Phase 4 Validation (XSD + RAG Pattern Validation)."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
+        if self.validation_layer is None:
+            logger.warning("Validation layer not initialized, skipping validation")
+            return
         stage_name = "phase4_validation"
         result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
         result.start_time = datetime.now()
