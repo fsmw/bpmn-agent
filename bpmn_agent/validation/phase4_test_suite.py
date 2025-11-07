@@ -917,7 +917,7 @@ class Phase4TestSuite:
         )
         avg_improvements = (
             improvement_results.get("improvements_suggestions_generated", 0)
-            / improvement_results.get("total_tests", 1)
+            / improvement_results.get("total_tests", 0)
             if improvement_results.get("total_tests", 0) > 0
             else 0.0
         )
