@@ -17,9 +17,10 @@ Leverages Phase 3 tools for analysis and validation:
 import logging
 import time
 import xml.etree.ElementTree as ET
+import asyncio
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from bpmn_agent.knowledge.domain_classifier import DomainClassifier
 from bpmn_agent.models.extraction import (
@@ -829,34 +830,44 @@ class Phase4TestSuite:
         logger.info("🎯 Phase 4 Validation & Quality Assurance - Complete Results Summary")
         logger.info("=" * 80)
 
+        # Extract results from all_results dict
+        xsd_results = all_results.get("xsd_validation", {})
+        graph_results = all_results.get("graph_analysis", {})
+        improvement_results = all_results.get("improvement_suggestions", {})
+        domain_results = all_results.get("domain_classification", {})
+        workflow_results = all_results.get("workflow_compliance", {})
+        comprehensive_workflow = all_results.get("comprehensive_workflow", {})
+
         # Overall statistics
         total_tests = (
-            xsd_results["total_tests"]
-            + graph_results["total_tests"]
-            + improvement_results["total_tests"]
-            + domain_results["total_tests"]
-            + workflow_results["total_workflows"]
+            xsd_results.get("total_tests", 0)
+            + graph_results.get("total_tests", 0)
+            + improvement_results.get("total_tests", 0)
+            + domain_results.get("total_tests", 0)
+            + workflow_results.get("total_workflows", 0)
         )
 
         successful_tests = (
-            xsd_results["passed_tests"]
-            + graph_results["successful_analyses"]
-            + improvement_results["total_tests"]
-            + domain_results["correct_classifications"]
-            + workflow_results["successful_workflows"]
+            xsd_results.get("passed_tests", 0)
+            + graph_results.get("successful_analyses", 0)
+            + improvement_results.get("total_tests", 0)
+            + domain_results.get("correct_classifications", 0)
+            + workflow_results.get("successful_workflows", 0)
         )
 
-        logger.info(
-            f"\n📊 Overall Success Rate: {successful_tests}/{total_tests} ({successful_tests/total_tests*100:.1f}%)"
-        )
+        if total_tests > 0:
+            logger.info(
+                f"\n📊 Overall Success Rate: {successful_tests}/{total_tests} ({successful_tests/total_tests*100:.1f}%)"
+            )
+        else:
+            logger.info("\n📊 Overall Success Rate: N/A (no tests run)")
 
         # Phase 4 Success Criteria Check
         phase4_success = (
-            xsd_results["average_score"] >= 70.0  # 70% average XSD compliance
-            and workflow_results["average_compliance_score"]
-            >= 80.0  # 80% average workflow compliance
-            and len(results["comprehensive_workflow"]["test_results"]) > 0
-            and results["comprehensive_workflow"]["phase4_success_criteria_met"]
+            xsd_results.get("average_score", 0.0) >= 70.0  # 70% average XSD compliance
+            and workflow_results.get("average_compliance_score", 0.0) >= 80.0  # 80% average workflow compliance
+            and len(comprehensive_workflow.get("test_results", [])) > 0
+            and comprehensive_workflow.get("phase4_success_criteria_met", False)
         )
 
         logger.info(f"🎯 Phase 4 Success Criteria: {'✅' if phase4_success else '❌'}")
@@ -871,22 +882,22 @@ class Phase4TestSuite:
         self._log_test_category_summary("Comprehensive Workflow", workflow_results)
 
         # Quality metrics
-        avg_xsd_score = xsd_results["average_score"] if xsd_results["total_tests"] > 0 else 0
+        avg_xsd_score = xsd_results.get("average_score", 0.0) if xsd_results.get("total_tests", 0) > 0 else 0.0
         avg_graph_score = (
-            graph_results["average_quality_score"]
-            if graph_results["successful_analyses"] > 0
-            else 0
+            graph_results.get("average_quality_score", 0.0)
+            if graph_results.get("successful_analyses", 0) > 0
+            else 0.0
         )
         avg_improvements = (
-            improvement_results["improvements_suggestions_generated"]
-            / improvement_results["total_tests"]
-            if improvement_results["total_tests"] > 0
-            else 0
+            improvement_results.get("improvements_suggestions_generated", 0)
+            / improvement_results.get("total_tests", 1)
+            if improvement_results.get("total_tests", 0) > 0
+            else 0.0
         )
         avg_confidence = (
-            domain_results["confidence_average"] if domain_results["total_tests"] > 0 else 0
+            domain_results.get("confidence_average", 0.0) if domain_results.get("total_tests", 0) > 0 else 0.0
         )
-        avg_workflow_score = workflow_results["average_compliance_score"]
+        avg_workflow_score = workflow_results.get("average_compliance_score", 0.0)
 
         logger.info("\n⚡️ Quality Metrics:")
         logger.info(f"  - XSD Validation Score: {avg_xsd_score:.1f}/100")
