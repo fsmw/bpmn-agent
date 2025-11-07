@@ -65,7 +65,7 @@ class RAGPatternValidator:
 
         # Graceful degradation: funciona sin KB
         self.kb: Optional[KnowledgeBase] = None
-        self.pattern_bridge: Optional[AdvancedPatternMatchingBridge] = None
+        self.pattern_bridge: Optional["AdvancedPatternMatchingBridge"] = None
         try:
             if kb is None:
                 from bpmn_agent.knowledge.loader import PatternLibraryLoader
