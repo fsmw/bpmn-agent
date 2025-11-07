@@ -6,7 +6,7 @@ pattern matching capabilities for enhanced process understanding.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from bpmn_agent.knowledge.advanced_pattern_matcher import (
     AdvancedPatternMatcher,
@@ -162,13 +162,15 @@ class AdvancedPatternMatchingBridge:
         ]
 
         # Get explicit related patterns from KB
-        kb_related = [
-            {
-                "id": rel_id,
-                "name": self.kb.get_pattern(rel_id).name if self.kb.get_pattern(rel_id) else rel_id,
-            }
-            for rel_id in pattern.related_patterns
-        ]
+        kb_related = []
+        for rel_id in pattern.related_patterns:
+            rel_pattern = self.kb.get_pattern(rel_id)
+            kb_related.append(
+                {
+                    "id": rel_id,
+                    "name": rel_pattern.name if rel_pattern else rel_id,
+                }
+            )
 
         return {
             "pattern": {

@@ -49,7 +49,11 @@ class RAGPatternValidator:
     Implements Graceful Degradation (works without KB).
     """
 
-    def __init__(self, kb: Optional[KnowledgeBase] = None, pattern_bridge: Optional[object] = None):
+    def __init__(
+        self,
+        kb: Optional[KnowledgeBase] = None,
+        pattern_bridge: Optional[AdvancedPatternMatchingBridge] = None,
+    ):
         """
         Initialize RAG pattern validator.
 
@@ -60,6 +64,8 @@ class RAGPatternValidator:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Graceful degradation: funciona sin KB
+        self.kb: Optional[KnowledgeBase] = None
+        self.pattern_bridge: Optional[AdvancedPatternMatchingBridge] = None
         try:
             if kb is None:
                 from bpmn_agent.knowledge.loader import PatternLibraryLoader
@@ -290,11 +296,11 @@ class RAGPatternValidator:
         self, graph: ProcessGraph, pattern: BPMNPattern, issues: List[str], suggestions: List[str]
     ) -> float:
         """Validate pattern relations match graph structure."""
-        if not pattern.structure or not pattern.structure.edges:
+        if not pattern.graph_structure or not pattern.graph_structure.edges:
             return 1.0  # No relations to validate
 
         # Build graph structure from pattern
-        pattern_edges = set(pattern.structure.edges)
+        pattern_edges = set(pattern.graph_structure.edges)
 
         # Build actual graph edges
         actual_edges = set()
