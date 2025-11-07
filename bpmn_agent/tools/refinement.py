@@ -439,7 +439,7 @@ class ImprovementSuggester:
                     )
 
         # Suggest adding start/end events if missing
-        entities_by_type: dict[str, list[Any]] = {}
+        entities_by_type: Dict[str, List[Any]] = {}
         for entity in extraction_result.entities:
             entities_by_type.setdefault(entity.type.lower(), []).append(entity)
 
