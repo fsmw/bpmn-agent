@@ -532,7 +532,7 @@ class Phase4TestSuite:
                     )
                     workflow_result["workflow_steps"]["improvement_suggestions"] = "success"
                     workflow_result["suggestions_count"] = len(improvements)
-                except:
+                except Exception:
                     workflow_result["workflow_steps"]["improvement_suggestions"] = "failed"
 
                 # Test workflow success

@@ -549,7 +549,7 @@ class ImprovementSuggester:
                 domain = domain_result.domain
             else:
                 domain = DomainType.GENERIC
-        except:
+        except Exception:
             domain = DomainType.GENERIC
 
         # Domain-specific suggestions
