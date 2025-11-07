@@ -186,6 +186,9 @@ class BPMNXMLGenerator:
             id=process_id,
             name=name or graph.name,
             is_executable=True,
+            documentation=None,
+            process_type="private",
+            lane_set=None,
         )
         self.elements_by_id[process_id] = process
         return process
@@ -245,6 +248,7 @@ class BPMNXMLGenerator:
                     y=node.y,
                     width=self._get_element_width(node),
                     height=self._get_element_height(node),
+                    waypoints=None,
                 )
 
                 # Record ID mapping
@@ -257,6 +261,7 @@ class BPMNXMLGenerator:
             id=event_id,
             name=node.label,
             documentation=node.properties.get("description"),
+            is_interrupting=True,
         )
         return event
 
@@ -277,6 +282,7 @@ class BPMNXMLGenerator:
             id=event_id,
             name=node.label,
             documentation=node.properties.get("description"),
+            is_interrupting=False,
         )
         return event
 
@@ -321,18 +327,29 @@ class BPMNXMLGenerator:
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation="##unspecified",
+                rendering=None,
             )
         elif task_type == "servicetask":
             task = ServiceTask(
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation="##webService",
+                operation_ref=None,
             )
         elif task_type == "scripttask":
             task = ScriptTask(
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
                 script_language=node.properties.get("script_language"),
                 script=node.properties.get("script"),
             )
@@ -341,24 +358,39 @@ class BPMNXMLGenerator:
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
+                message_ref=None,
             )
         elif task_type == "receivetask":
             task = ReceiveTask(
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
+                message_ref=None,
+                instantiate=False,
             )
         elif task_type == "manualtask":
             task = ManualTask(
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
             )
         else:
             task = Task(
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
             )
 
         return task
@@ -402,6 +434,8 @@ class BPMNXMLGenerator:
             source_ref=source_elem.id,
             target_ref=target_elem.id,
             is_default=edge.is_default,
+            documentation=None,
+            condition_expression=edge.condition,
         )
 
         # Add condition if present
@@ -443,7 +477,12 @@ class BPMNXMLGenerator:
 
         # Create lane set
         if actor_tasks:
-            lane_set = LaneSet(id=self._generate_id("LaneSet", "LaneSet"))
+            lane_set = LaneSet(
+                id=self._generate_id("LaneSet", "LaneSet"),
+                name=None,
+                documentation=None,
+                parent_lane=None,
+            )
 
             for actor_id, task_ids in actor_tasks.items():
                 actor_node = next((n for n in graph.nodes if n.id == actor_id), None)
@@ -451,6 +490,9 @@ class BPMNXMLGenerator:
                     lane = Lane(
                         id=self._generate_id("Lane", actor_node.label),
                         name=actor_node.label,
+                        documentation=None,
+                        parent_lane=None,
+                        partition_element_ref=None,
                     )
 
                     # Add task references to lane
@@ -734,6 +776,7 @@ class BPMNXMLGenerator:
             graph_id=graph_id,
             bpmn_id=bpmn_id,
             element_type=element_type,
+            pattern_reference=None,
         )
         self.id_mappings.append(mapping)
 

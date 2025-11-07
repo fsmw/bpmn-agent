@@ -209,9 +209,7 @@ class KBGraphEnricher:
             return None
 
         try:
-            recommendation = bridge.find_patterns_for_process(
-                process_description, domain_hint=domain
-            )
+            recommendation = bridge.find_patterns_for_process(process_description, domain=domain)
             return (
                 {
                     "pattern_id": (
@@ -256,7 +254,7 @@ class KBGraphEnricher:
             return {}
 
         try:
-            results = bridge.validate_extracted_activities(activity_labels, domain_hint=domain)
+            results = bridge.validate_extracted_activities(activity_labels, domain=domain)
             return {
                 activity: {
                     "is_valid": valid,
@@ -515,6 +513,9 @@ class ProcessGraphBuilder:
                 bpmn_type="StartEvent",
                 confidence=1.0,
                 metadata={"synthetic": True},
+                x=None,
+                y=None,
+                is_abstract=False,
             )
             nodes_to_add.append(start_node)
 
@@ -528,6 +529,8 @@ class ProcessGraphBuilder:
                     label="",
                     confidence=1.0,
                     metadata={"synthetic": True},
+                    condition=None,
+                    is_default=False,
                 )
                 edges_to_add.append(edge)
 
@@ -540,6 +543,9 @@ class ProcessGraphBuilder:
                 bpmn_type="EndEvent",
                 confidence=1.0,
                 metadata={"synthetic": True},
+                x=None,
+                y=None,
+                is_abstract=False,
             )
             nodes_to_add.append(end_node)
 
@@ -553,6 +559,8 @@ class ProcessGraphBuilder:
                     label="",
                     confidence=1.0,
                     metadata={"synthetic": True},
+                    condition=None,
+                    is_default=False,
                 )
                 edges_to_add.append(edge)
 
@@ -603,6 +611,9 @@ class ProcessGraphBuilder:
                 "original_id": entity.id,
                 "source_text": entity.source_text,
             },
+            x=None,
+            y=None,
+            is_abstract=False,
         )
 
         return node
@@ -645,6 +656,8 @@ class ProcessGraphBuilder:
                 "original_relation_type": relation.type.value,
                 "source_text": relation.source_text,
             },
+            condition=relation.condition_expression,
+            is_default=False,
         )
 
         return edge
@@ -851,6 +864,8 @@ class LaneStructureBuilder:
                         label=f"Assigned to {actor_node.label}",
                         confidence=lane.confidence,
                         metadata={"lane_id": lane.lane_id},
+                        condition=None,
+                        is_default=False,
                     )
                     new_edges.append(edge)
 

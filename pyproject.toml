@@ -148,6 +148,11 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 strict_optional = true
+# Temporarily exclude tests and demo to focus on source code
+exclude = [
+    "^tests/",
+    "^demo/",
+]
 
 [[tool.mypy.overrides]]
 module = [

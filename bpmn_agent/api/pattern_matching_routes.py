@@ -227,7 +227,7 @@ async def find_patterns_for_process(
                 )
 
         recommendation = bridge.find_patterns_for_process(
-            process_description, domain_hint=domain_type
+            process_description, domain=domain_type
         )
 
         alternatives = [
@@ -283,7 +283,7 @@ async def validate_activities(
                     detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}",
                 )
 
-        results = bridge.validate_extracted_activities(activities, domain_hint=domain_type)
+        results = bridge.validate_extracted_activities(activities, domain=domain_type)
 
         validation_results = [
             ActivityValidationResult(
