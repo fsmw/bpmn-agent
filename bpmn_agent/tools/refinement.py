@@ -157,13 +157,13 @@ class ClarificationRequester:
                 ClarificationQuestion(
                     question_type=ClarificationType.ENTITY_IDENTIFICATION,
                     question=f"Is '{entity.name}' actually a {entity.type} in this process?",
-                    context=entity.source_context or "",
+                    context=entity.source_text or "",
                     possible_answers=[
                         "Yes",
                         "No, it's a different activity",
                         "No, it's not part of the process",
                     ],
-                    element_id=entity.identifier,
+                    element_id=entity.id,
                     element_type=entity.type,
                     priority="medium",
                     explanation="Entity has low confidence in extraction",
@@ -181,14 +181,14 @@ class ClarificationRequester:
                 ClarificationQuestion(
                     question_type=ClarificationType.ENTITY_IDENTIFICATION,
                     question=f"What specific type of activity is '{entity.name}'?",
-                    context=entity.source_context or "",
+                    context=entity.source_text or "",
                     possible_answers=[
                         "Human task",
                         "Automated task",
                         "Decision point",
                         "External system action",
                     ],
-                    element_id=entity.identifier,
+                    element_id=entity.id,
                     element_type=entity.type,
                     priority="high",
                     explanation="Specific entity type improves process accuracy",
@@ -205,10 +205,15 @@ class ClarificationRequester:
 
         # Check for disconnected entities
         entities = set(f"{e.name}_{e.type}" for e in extraction_result.entities)
+        entity_lookup_by_id = {e.id: e for e in extraction_result.entities}
         connected = set()
         for rel in extraction_result.relations:
-            connected.add(f"{rel.source_name}_{rel.source_type}")
-            connected.add(f"{rel.target_name}_{rel.target_type}")
+            source_entity = entity_lookup_by_id.get(rel.source_id)
+            target_entity = entity_lookup_by_id.get(rel.target_id)
+            if source_entity:
+                connected.add(f"{source_entity.name}_{source_entity.type}")
+            if target_entity:
+                connected.add(f"{target_entity.name}_{target_entity.type}")
 
         disconnected = entities - connected
         for entity_key in list(disconnected)[:3]:  # Limit to first 3
@@ -241,13 +246,16 @@ class ClarificationRequester:
 
         # Tasks without actors
         tasks = [e for e in extraction_result.entities if e.type.lower() in ["task", "activity"]]
+        # Build entity lookup for relation checking
+        entity_lookup_by_id = {e.id: e for e in extraction_result.entities}
         actorless_tasks = [
             t
             for t in tasks
             if not any(
                 "actor" in r.type.lower()
+                and entity_lookup_by_id.get(r.source_id)
+                and entity_lookup_by_id[r.source_id].name == t.name
                 for r in extraction_result.relations
-                if r.source_name == t.name
             )
         ]
 
@@ -256,9 +264,9 @@ class ClarificationRequester:
                 ClarificationQuestion(
                     question_type=ClarificationType.ACTOR_ASSIGNMENT,
                     question=f"Who performs the task '{task.name}'?",
-                    context=task.source_context or "",
+                    context=task.source_text or "",
                     possible_answers=["User", "System", "Manager", "Team", "Unknown"],
-                    element_id=task.identifier,
+                    element_id=task.id,
                     element_type=task.type,
                     priority="medium",
                     explanation="Actor assignment improves swimlane organization",
@@ -431,7 +439,7 @@ class ImprovementSuggester:
                     )
 
         # Suggest adding start/end events if missing
-        entities_by_type = {}
+        entities_by_type: Dict[str, List[Any]] = {}
         for entity in extraction_result.entities:
             entities_by_type.setdefault(entity.type.lower(), []).append(entity)
 
@@ -676,7 +684,7 @@ class StageRerunner:
         original_text: str,
     ) -> Dict[str, Any]:
         """Build enhanced context for stage re-execution."""
-        context = {
+        context: Dict[str, Any] = {
             "stage_name": stage_name,
             "original_text": original_text,
             "improvements_to_apply": [s.description for s in improvements],

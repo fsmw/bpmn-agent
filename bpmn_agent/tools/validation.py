@@ -555,18 +555,28 @@ class GraphValidator:
         entities = extraction_result.entities
         relations = extraction_result.relations
 
-        # Build entity lookup
+        # Build entity lookup by ID and by name+type
+        entity_lookup_by_id = {e.id: e for e in entities}
         entity_lookup = {f"{e.name}_{e.type}": e for e in entities}
 
         missing_entities = []
         for relation in relations:
-            source_key = f"{relation.source_name}_{relation.source_type}"
-            target_key = f"{relation.target_name}_{relation.target_type}"
-
-            if source_key not in entity_lookup:
-                missing_entities.append(relation.source_name)
-            if target_key not in entity_lookup:
-                missing_entities.append(relation.target_name)
+            source_entity = entity_lookup_by_id.get(relation.source_id)
+            target_entity = entity_lookup_by_id.get(relation.target_id)
+            
+            if source_entity:
+                source_key = f"{source_entity.name}_{source_entity.type}"
+                if source_key not in entity_lookup:
+                    missing_entities.append(source_entity.name)
+            else:
+                missing_entities.append(f"entity_{relation.source_id}")
+                
+            if target_entity:
+                target_key = f"{target_entity.name}_{target_entity.type}"
+                if target_key not in entity_lookup:
+                    missing_entities.append(target_entity.name)
+            else:
+                missing_entities.append(f"entity_{relation.target_id}")
 
         if missing_entities:
             result.issues.append(
@@ -586,7 +596,7 @@ class GraphValidator:
         reachable = set()
         to_visit = [start_id]
 
-        adjacency = self._build_adjacency(graph)
+        adjacency: dict[str, list[str]] = self._build_adjacency(graph)
 
         while to_visit:
             current = to_visit.pop()
@@ -598,7 +608,7 @@ class GraphValidator:
 
     def _build_adjacency(self, graph: ProcessGraph) -> Dict[str, List[str]]:
         """Build adjacency list from graph edges."""
-        adjacency = {}
+        adjacency: dict[str, list[str]] = {}
         for edge in graph.edges:
             if edge.source_id not in adjacency:
                 adjacency[edge.source_id] = []
@@ -736,17 +746,27 @@ class ExtractionValidator:
             )
 
         # Check relation validity against entities
+        entity_lookup_by_id = {e.id: e for e in entities}
         entity_names = {f"{e.name}_{e.type}": e for e in entities}
         missing_references = []
 
         for relation in relations:
-            source_key = f"{relation.source_name}_{relation.source_type}"
-            target_key = f"{relation.target_name}_{relation.target_type}"
-
-            if source_key not in entity_names:
-                missing_references.append(relation.source_name)
-            if target_key not in entity_names:
-                missing_references.append(relation.target_name)
+            source_entity = entity_lookup_by_id.get(relation.source_id)
+            target_entity = entity_lookup_by_id.get(relation.target_id)
+            
+            if source_entity:
+                source_key = f"{source_entity.name}_{source_entity.type}"
+                if source_key not in entity_names:
+                    missing_references.append(source_entity.name)
+            else:
+                missing_references.append(f"entity_{relation.source_id}")
+                
+            if target_entity:
+                target_key = f"{target_entity.name}_{target_entity.type}"
+                if target_key not in entity_names:
+                    missing_references.append(target_entity.name)
+            else:
+                missing_references.append(f"entity_{relation.target_id}")
 
         if missing_references:
             result.issues.append(

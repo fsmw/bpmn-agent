@@ -368,11 +368,11 @@ class GraphAnalyzer:
 
     def _calculate_basic_metrics(self, graph: ProcessGraph) -> Dict[str, Any]:
         """Calculate basic graph metrics."""
-        node_types = defaultdict(int)
+        node_types: dict[str, int] = defaultdict(int)
         for node in graph.nodes:
             node_types[node.type] += 1
 
-        edge_types = defaultdict(int)
+        edge_types: dict[str, int] = defaultdict(int)
         for edge in graph.edges:
             edge_types[edge.type] += 1
 
@@ -391,7 +391,10 @@ class GraphAnalyzer:
                 else 0
             ),
             "is_connected": len(graph.edges) > 0
-            and any(self._get_node(graph, n.id).type.lower() == "start" for n in graph.nodes),
+            and any(
+                n.type.lower() == "start"
+                for n in graph.nodes
+            ),
         }
 
     def _detect_anomalies(self, graph: ProcessGraph) -> List[GraphAnomaly]:
@@ -524,8 +527,8 @@ class GraphAnalyzer:
             return True
 
         # Count incoming/outgoing edges per node
-        incoming_count = defaultdict(int)
-        outgoing_count = defaultdict(int)
+        incoming_count: Dict[str, int] = defaultdict(int)
+        outgoing_count: Dict[str, int] = defaultdict(int)
 
         for edge in graph.edges:
             outgoing_count[edge.source_id] += 1
