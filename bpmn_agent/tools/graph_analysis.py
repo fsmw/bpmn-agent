@@ -392,8 +392,7 @@ class GraphAnalyzer:
             ),
             "is_connected": len(graph.edges) > 0
             and any(
-                self._get_node(graph, n.id) is not None
-                and self._get_node(graph, n.id).type.lower() == "start"  # type: ignore[union-attr]
+                n.type.lower() == "start"
                 for n in graph.nodes
             ),
         }
