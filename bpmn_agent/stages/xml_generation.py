@@ -186,6 +186,9 @@ class BPMNXMLGenerator:
             id=process_id,
             name=name or graph.name,
             is_executable=True,
+            documentation=None,
+            process_type="private",
+            lane_set=None,
         )
         self.elements_by_id[process_id] = process
         return process
@@ -245,6 +248,7 @@ class BPMNXMLGenerator:
                     y=node.y,
                     width=self._get_element_width(node),
                     height=self._get_element_height(node),
+                    waypoints=None,
                 )
 
                 # Record ID mapping
