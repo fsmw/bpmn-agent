@@ -347,6 +347,9 @@ class BPMNXMLGenerator:
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
                 script_language=node.properties.get("script_language"),
                 script=node.properties.get("script"),
             )

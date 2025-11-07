@@ -29,8 +29,11 @@ from bpmn_agent.models.extraction import (
     ExtractionError,
     ExtractionMetadata,
     ExtractionResultWithErrors,
+    EntityType,
+    RelationType,
+    ConfidenceLevel,
 )
-from bpmn_agent.models.graph import GraphEdge, GraphNode, ProcessGraph
+from bpmn_agent.models.graph import GraphEdge, GraphNode, ProcessGraph, NodeType, EdgeType
 from bpmn_agent.tools.graph_analysis import GraphAnalyzer
 from bpmn_agent.tools.refinement import ImprovementSuggester
 from bpmn_agent.validation.enhanced_xsd_validation import (
@@ -640,8 +643,10 @@ class Phase4TestSuite:
                             id=f"edge_{len(edges)+1}",
                             source_id=source_id,
                             target_id=target_id,
-                            type="control_flow",
+                            type=EdgeType.CONTROL_FLOW,
                             label="",
+                            condition=None,
+                            is_default=False,
                         )
                         edges.append(edge)
 
@@ -681,15 +686,25 @@ class Phase4TestSuite:
                     element_name = elem.get("name", f"{tag_name}_{len(entities)}")
 
                     # Create mock entity
-                    confidence = "high" if test_case.complexity != "complex" else "medium"
+                    confidence_level = ConfidenceLevel.HIGH if test_case.complexity != "complex" else ConfidenceLevel.MEDIUM
+                    # Map tag_name to EntityType
+                    entity_type = EntityType.ACTIVITY
+                    if "event" in tag_name.lower():
+                        entity_type = EntityType.EVENT
+                    elif "gateway" in tag_name.lower() or "decision" in tag_name.lower():
+                        entity_type = EntityType.GATEWAY
+                    
                     entity = ExtractedEntity(
-                        identifier=node_id,
+                        id=node_id,
                         name=element_name,
-                        type=tag_name,
-                        confidence=confidence,
-                        source_context=(
+                        type=entity_type,
+                        confidence=confidence_level,
+                        source_text=(
                             elem.text if hasattr(elem, "text") else f"BPMN element '{element_name}'"
                         ),
+                        character_offsets=None,
+                        is_implicit=False,
+                        is_uncertain=False,
                     )
                     entities.append(entity)
 
@@ -704,7 +719,7 @@ class Phase4TestSuite:
                         (
                             e
                             for e in entities
-                            if e.identifier == f"entity_{source_name}" or e.name == source_name
+                            if e.id == f"entity_{source_name}" or e.name == source_name
                         ),
                         None,
                     )
@@ -712,19 +727,23 @@ class Phase4TestSuite:
                         (
                             e
                             for e in entities
-                            if e.identifier == f"entity_{target_name}" or e.name == target_name
+                            if e.id == f"entity_{target_name}" or e.name == target_name
                         ),
                         None,
                     )
 
                     if source_entity and target_entity:
                         relation = ExtractedRelation(
-                            source_name=source_entity.name,
-                            source_type=source_entity.type,
-                            target_name=target_entity.name,
-                            target_type=target_entity.type,
-                            relation_type="sequence_flow",
-                            confidence="high",
+                            id=f"relation_{len(relations)+1}",
+                            type=RelationType.PRECEDES,
+                            source_id=source_entity.id,
+                            target_id=target_entity.id,
+                            label="sequence_flow",
+                            confidence=ConfidenceLevel.HIGH,
+                            source_text=None,
+                            is_implicit=False,
+                            is_conditional=False,
+                            condition_expression=None,
                         )
                         relations.append(relation)
 
@@ -738,12 +757,12 @@ class Phase4TestSuite:
                 llm_temperature=0.3,
                 stage="extraction",
                 total_entities_extracted=len(entities),
-                high_confidence_entities=len([e for e in entities if e.confidence == "high"]),
+                high_confidence_entities=len([e for e in entities if e.confidence == ConfidenceLevel.HIGH]),
                 total_relations_extracted=len(relations),
-                high_confidence_relations=len([r for r in relations if r.confidence == "high"]),
+                high_confidence_relations=len([r for r in relations if r.confidence == ConfidenceLevel.HIGH]),
                 co_reference_groups=0,
                 warnings=[],
-                errors=[],
+                notes=None,
             )
 
             return ExtractionResultWithErrors(
@@ -909,13 +928,13 @@ class Phase4TestSuite:
         # Phase 4 validation gate check
         logger.info("\n✅ Phase 4 Validation Gates:")
         logger.info(
-            f"  ✅ Enhanced XSD Validation: {xsd_results['passed_tests']}/{xsdd_results['total_tests']} (≥80% pass rate)"
+            f"  ✅ Enhanced XSD Validation: {xsd_results.get('passed_tests', 0)}/{xsd_results.get('total_tests', 0)} (≥80% pass rate)"
         )
         logger.info(
-            f"  ✅ Graph Analysis Integration: {graph_results['successful_analyses']}/{graph_results['total_tests']} (100% success)"
+            f"  ✅ Graph Analysis Integration: {graph_results.get('successful_analyses', 0)}/{graph_results.get('total_tests', 0)} (100% success)"
         )
         logger.info(
-            f"  ✅ Improvement Suggestions: {improvement_results['total_tests']} capabilities demonstrated"
+            f"  ✅ Improvement Suggestions: {improvement_results.get('total_tests', 0)} capabilities demonstrated"
         )
 
         logger.info(f"\n🚀 Phase 4 Status: {'✅ COMPLETE' if phase4_success else '❌ NEEDS WORK'}")
