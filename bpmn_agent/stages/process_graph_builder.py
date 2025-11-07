@@ -209,9 +209,7 @@ class KBGraphEnricher:
             return None
 
         try:
-            recommendation = bridge.find_patterns_for_process(
-                process_description, domain_hint=domain
-            )
+            recommendation = bridge.find_patterns_for_process(process_description)
             return (
                 {
                     "pattern_id": (
@@ -256,7 +254,7 @@ class KBGraphEnricher:
             return {}
 
         try:
-            results = bridge.validate_extracted_activities(activity_labels)
+            results = bridge.validate_extracted_activities(activity_labels, domain_hint=domain)
             return {
                 activity: {
                     "is_valid": valid,
