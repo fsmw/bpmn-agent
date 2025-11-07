@@ -240,6 +240,8 @@ class BPMNXMLGenerator:
             if element:
                 self.elements_by_id[element.id] = element
                 self.graph_id_to_bpmn_id[node.id] = element.id  # Store reverse mapping
+                if self.process is None:
+                    raise ValueError("Process not initialized")
                 self.process.flow_nodes.append(element)
 
                 # Record layout
@@ -505,6 +507,8 @@ class BPMNXMLGenerator:
                     self.lanes_by_id[lane.id] = lane
 
             if lane_set.lanes:
+                if self.process is None:
+                    raise ValueError("Process not initialized")
                 self.process.lane_set = lane_set
 
     def _build_xml_root(self) -> etree._Element:
@@ -535,6 +539,8 @@ class BPMNXMLGenerator:
 
     def _build_process_element(self) -> etree._Element:
         """Build process XML element."""
+        if self.process is None:
+            raise ValueError("Process not initialized")
         process_elem = etree.Element("process")
         process_elem.set("id", self.process.id)
         if self.process.name:
@@ -657,6 +663,8 @@ class BPMNXMLGenerator:
 
         plane = etree.SubElement(diagram, "{%s}BPMNPlane" % BPMNDI_NAMESPACE)
         plane.set("id", self._generate_id("BPMNPlane", "Plane"))
+        if self.process is None:
+            raise ValueError("Process not initialized")
         plane.set("bpmnElement", self.process.id)
 
         # Add shapes for nodes

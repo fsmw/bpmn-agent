@@ -328,6 +328,8 @@ class ContextSelector:
         actual_budget = min(token_budget, remaining_tokens)
 
         # Get examples for domain
+        if self.kb is None:
+            return []
         domain_examples = self.kb.get_examples_by_domain(domain)
 
         # Sort by validation score and difficulty

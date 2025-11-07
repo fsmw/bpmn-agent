@@ -140,6 +140,8 @@ class BPMNAgent:
         domain: Optional[str] = None,
     ) -> Tuple[Optional[str], AgentState]:
         """Standard processing mode (all 5 stages)."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
         # Start pipeline tracking
         self.observability_hooks.start_pipeline(self.state.session_id)
 
@@ -207,6 +209,8 @@ class BPMNAgent:
             detected_domain = domain
             if self.config.kb_domain_auto_detect and not domain:
                 detected_domain = await self._detect_domain(text)
+                if self.state is None:
+                    raise ValueError("AgentState not initialized")
                 self.state.input_domain = detected_domain
 
             # Process all stages with KB context
@@ -302,6 +306,8 @@ class BPMNAgent:
 
     async def _process_validation_only(self, text: str) -> Tuple[Optional[str], AgentState]:
         """Validation-only mode (check input validity)."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
         try:
             # Stage 1: Text Preprocessing (validation)
             preprocessed = await self._stage1_preprocess(text)
@@ -385,6 +391,8 @@ class BPMNAgent:
         use_kb: bool = False,
     ) -> Optional[ExtractionResultWithErrors]:
         """Stage 2: Entity & Relation Extraction."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
         stage_name = "entity_extraction"
         result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
         result.start_time = datetime.now()
@@ -468,6 +476,8 @@ class BPMNAgent:
         self, extraction_result: ExtractionResultWithErrors
     ) -> Optional[ExtractionResultWithErrors]:
         """Stage 3: Entity Resolution."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
         stage_name = "entity_resolution"
         result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
         result.start_time = datetime.now()
@@ -608,6 +618,8 @@ class BPMNAgent:
         domain: Optional[str] = None,
     ) -> Optional[str]:
         """Stage 5: BPMN XML Generation."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
         stage_name = "xml_generation"
         result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
         result.start_time = datetime.now()
@@ -673,6 +685,11 @@ class BPMNAgent:
         patterns_applied: Optional[List[str]] = None,
     ) -> None:
         """Stage 6: Phase 4 Validation (XSD + RAG Pattern Validation)."""
+        if self.state is None:
+            raise ValueError("AgentState not initialized")
+        if self.validation_layer is None:
+            logger.warning("Validation layer not initialized, skipping validation")
+            return
         stage_name = "phase4_validation"
         result = StageResult(stage_name=stage_name, status=StageStatus.RUNNING)
         result.start_time = datetime.now()

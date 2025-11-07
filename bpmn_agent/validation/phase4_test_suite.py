@@ -540,10 +540,14 @@ class Phase4TestSuite:
                     workflow_result["workflow_steps"]["improvement_suggestions"] = "failed"
 
                 # Test workflow success
-                steps_success = all(
-                    workflow_result["workflow_steps"].get(step) == "success"
-                    for step in workflow_result["workflow_steps"]
-                )
+                workflow_steps = workflow_result.get("workflow_steps")
+                if isinstance(workflow_steps, dict):
+                    steps_success = all(
+                        workflow_steps.get(step) == "success"
+                        for step in workflow_steps
+                    )
+                else:
+                    steps_success = False
 
                 workflow_result["workflow_success"] = steps_success
 
