@@ -33,7 +33,7 @@ from bpmn_agent.models.extraction import (
     RelationType,
     ConfidenceLevel,
 )
-from bpmn_agent.models.graph import GraphEdge, GraphNode, ProcessGraph, NodeType, EdgeType
+from bpmn_agent.models.graph import GraphEdge, GraphNode, ProcessGraph, EdgeType
 from bpmn_agent.tools.graph_analysis import GraphAnalyzer
 from bpmn_agent.tools.refinement import ImprovementSuggester
 from bpmn_agent.validation.enhanced_xsd_validation import (
