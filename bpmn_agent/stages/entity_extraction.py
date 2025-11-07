@@ -320,10 +320,12 @@ class EntityExtractor:
                             LLMMessage(
                                 role="system",
                                 content=self.prompt_template.system_message,
+                                name=None,
                             ),
                             LLMMessage(
                                 role="user",
                                 content=full_prompt,
+                                name=None,
                             ),
                         ],
                         temperature=llm_temperature,

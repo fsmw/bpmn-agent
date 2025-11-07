@@ -704,6 +704,7 @@ class Phase4TestSuite:
                         id=node_id,
                         name=element_name,
                         type=entity_type,
+                        description=None,
                         confidence=confidence_level,
                         source_text=(
                             elem.text if hasattr(elem, "text") else f"BPMN element '{element_name}'"

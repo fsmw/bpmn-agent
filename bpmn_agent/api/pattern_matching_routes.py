@@ -227,7 +227,7 @@ async def find_patterns_for_process(
                 )
 
         recommendation = bridge.find_patterns_for_process(
-            process_description, domain_hint=domain_type
+            process_description, domain=domain_type
         )
 
         alternatives = [
