@@ -495,7 +495,7 @@ class EntityExtractor:
         Returns:
             List of ExtractedRelation objects
         """
-        relations = []
+        relations: List[ExtractedRelation] = []
 
         for relation_data in relations_data:
             try:

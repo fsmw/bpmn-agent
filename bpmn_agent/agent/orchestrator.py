@@ -26,6 +26,7 @@ from bpmn_agent.stages import (
     SemanticGraphConstructionPipeline,
     TextPreprocessor,
 )
+from bpmn_agent.stages.entity_resolution import ActorProfile
 from bpmn_agent.stages.xml_generation import BPMNXMLGenerator
 from bpmn_agent.validation.integration_layer import ValidationIntegrationLayer
 
@@ -537,7 +538,7 @@ class BPMNAgent:
         ) as stage_metrics:
             try:
                 # Build graph - need to extract actor profiles from resolved
-                actor_profiles = {}  # TODO: extract from resolved if available
+                actor_profiles: Dict[str, ActorProfile] = {}  # TODO: extract from resolved if available
                 # Convert string domain to DomainType if needed
                 from bpmn_agent.models.knowledge_base import DomainType
 

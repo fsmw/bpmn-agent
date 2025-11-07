@@ -26,6 +26,7 @@ if sys.prefix != str(_VENV_PATH):
     sys.exit(1)
 
 from bpmn_agent.agent import AgentConfig, BPMNAgent, ProcessingMode
+from bpmn_agent.agent.state import AgentState
 from bpmn_agent.core.llm_client import LLMConfig
 from bpmn_agent.core.observability import LogLevel, ObservabilityConfig, ObservabilityManager
 
