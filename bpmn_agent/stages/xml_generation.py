@@ -355,6 +355,10 @@ class BPMNXMLGenerator:
                 id=task_id,
                 name=node.label,
                 documentation=node.properties.get("description"),
+                is_for_compensation=False,
+                loop_characteristics=None,
+                implementation=None,
+                message_ref=None,
             )
         elif task_type == "receivetask":
             task = ReceiveTask(
@@ -480,6 +484,9 @@ class BPMNXMLGenerator:
                     lane = Lane(
                         id=self._generate_id("Lane", actor_node.label),
                         name=actor_node.label,
+                        documentation=None,
+                        parent_lane=None,
+                        partition_element_ref=None,
                     )
 
                     # Add task references to lane
@@ -763,6 +770,7 @@ class BPMNXMLGenerator:
             graph_id=graph_id,
             bpmn_id=bpmn_id,
             element_type=element_type,
+            pattern_reference=None,
         )
         self.id_mappings.append(mapping)
 
