@@ -1,4 +1,5 @@
 """Compatibility module for imports."""
+
 import sys
 from pathlib import Path
 
@@ -7,13 +8,13 @@ current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
 # Create a virtual bpmn_agent module
-import types
-import importlib
+import importlib  # noqa: E402
+import types  # noqa: E402
 
-bpmn_agent = types.ModuleType('bpmn_agent')
+bpmn_agent = types.ModuleType("bpmn_agent")
 
 # Import all submodules and add them to bpmn_agent
-submodules = ['core', 'knowledge', 'models', 'stages', 'tools', 'validators']
+submodules = ["core", "knowledge", "models", "stages", "tools", "validators"]
 for submodule in submodules:
     try:
         mod = importlib.import_module(submodule)
@@ -21,4 +22,4 @@ for submodule in submodules:
     except ImportError:
         pass
 
-sys.modules['bpmn_agent'] = bpmn_agent
+sys.modules["bpmn_agent"] = bpmn_agent

@@ -8,22 +8,22 @@ Implements validation and self-critique mechanism to improve extraction quality:
 - Supports refinement loop for iterative extraction improvement
 """
 
-import logging
 import json
+import logging
+from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from bpmn_agent.core.llm_client import BaseLLMClient, LLMConfig, LLMMessage
+from bpmn_agent.core.llm_client import BaseLLMClient, LLMMessage
 from bpmn_agent.models.extraction import (
-    ExtractionResult,
+    ConfidenceLevel,
+    EntityType,
     ExtractedEntity,
     ExtractedRelation,
-    EntityType,
+    ExtractionResult,
     RelationType,
-    ConfidenceLevel,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class ValidationIssueSeverity(str, Enum):
     """Severity levels for validation issues."""
+
     CRITICAL = "critical"  # Blocks further processing
     ERROR = "error"  # Must be fixed
     WARNING = "warning"  # Should be fixed
@@ -39,6 +40,7 @@ class ValidationIssueSeverity(str, Enum):
 
 class ValidationIssueType(str, Enum):
     """Types of validation issues."""
+
     MISSING_START_EVENT = "missing_start_event"
     MISSING_END_EVENT = "missing_end_event"
     DISCONNECTED_NODES = "disconnected_nodes"
@@ -54,70 +56,56 @@ class ValidationIssueType(str, Enum):
 
 class ValidationIssue(BaseModel):
     """A single validation issue found during critique."""
-    
+
     type: ValidationIssueType = Field(..., description="Issue type")
     severity: ValidationIssueSeverity = Field(..., description="Issue severity")
     message: str = Field(..., description="Human-readable issue description")
     affected_entity_ids: List[str] = Field(
-        default_factory=list,
-        description="Entity IDs affected by this issue"
+        default_factory=list, description="Entity IDs affected by this issue"
     )
-    suggestion: Optional[str] = Field(
-        None,
-        description="Suggested fix or improvement"
-    )
+    suggestion: Optional[str] = Field(None, description="Suggested fix or improvement")
     confidence: float = Field(
-        default=0.8,
-        ge=0.0,
-        le=1.0,
-        description="Confidence in the issue assessment"
+        default=0.8, ge=0.0, le=1.0, description="Confidence in the issue assessment"
     )
 
 
 class CritiqueResult(BaseModel):
     """Result of the critique validation process."""
-    
+
     is_valid: bool = Field(..., description="Whether extraction passes validation")
     issues: List[ValidationIssue] = Field(
-        default_factory=list,
-        description="List of validation issues found"
+        default_factory=list, description="List of validation issues found"
     )
     quality_score: float = Field(
-        default=0.0,
-        ge=0.0,
-        le=1.0,
-        description="Overall quality score (0-1)"
+        default=0.0, ge=0.0, le=1.0, description="Overall quality score (0-1)"
     )
     suggestions_for_improvement: List[str] = Field(
-        default_factory=list,
-        description="Overall suggestions for improvement"
+        default_factory=list, description="Overall suggestions for improvement"
     )
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="When critique was performed"
+        default_factory=datetime.utcnow, description="When critique was performed"
     )
     needs_refinement: bool = Field(
-        default=False,
-        description="Whether refinement loop should be triggered"
+        default=False, description="Whether refinement loop should be triggered"
     )
 
 
 class ExtractionValidator:
     """Validates extracted entities and relationships."""
-    
+
     @staticmethod
     def validate_extraction(result: ExtractionResult) -> CritiqueResult:
         """
         Validate extraction result against business rules.
-        
+
         Args:
             result: Extraction result to validate
-            
+
         Returns:
             CritiqueResult with validation issues
         """
         issues = []
-        
+
         # Check for start and end events
         has_start_event = any(
             entity.type == EntityType.EVENT and "start" in entity.name.lower()
@@ -127,111 +115,119 @@ class ExtractionValidator:
             entity.type == EntityType.EVENT and "end" in entity.name.lower()
             for entity in result.entities
         )
-        
+
         if not has_start_event:
-            issues.append(ValidationIssue(
-                type=ValidationIssueType.MISSING_START_EVENT,
-                severity=ValidationIssueSeverity.ERROR,
-                message="No start event detected in the extraction",
-                suggestion="Process should begin with a start event",
-            ))
-        
+            issues.append(
+                ValidationIssue(
+                    type=ValidationIssueType.MISSING_START_EVENT,
+                    severity=ValidationIssueSeverity.ERROR,
+                    message="No start event detected in the extraction",
+                    suggestion="Process should begin with a start event",
+                )
+            )
+
         if not has_end_event:
-            issues.append(ValidationIssue(
-                type=ValidationIssueType.MISSING_END_EVENT,
-                severity=ValidationIssueSeverity.ERROR,
-                message="No end event detected in the extraction",
-                suggestion="Process should end with an end event",
-            ))
-        
+            issues.append(
+                ValidationIssue(
+                    type=ValidationIssueType.MISSING_END_EVENT,
+                    severity=ValidationIssueSeverity.ERROR,
+                    message="No end event detected in the extraction",
+                    suggestion="Process should end with an end event",
+                )
+            )
+
         # Check for low confidence entities
         low_confidence_entities = [
-            entity.id for entity in result.entities
-            if entity.confidence == ConfidenceLevel.LOW
+            entity.id for entity in result.entities if entity.confidence == ConfidenceLevel.LOW
         ]
         if low_confidence_entities:
-            issues.append(ValidationIssue(
-                type=ValidationIssueType.LOW_CONFIDENCE_ENTITIES,
-                severity=ValidationIssueSeverity.WARNING,
-                message=f"Found {len(low_confidence_entities)} low-confidence entities",
-                affected_entity_ids=low_confidence_entities,
-                suggestion="Review and validate low-confidence extractions",
-            ))
-        
+            issues.append(
+                ValidationIssue(
+                    type=ValidationIssueType.LOW_CONFIDENCE_ENTITIES,
+                    severity=ValidationIssueSeverity.WARNING,
+                    message=f"Found {len(low_confidence_entities)} low-confidence entities",
+                    affected_entity_ids=low_confidence_entities,
+                    suggestion="Review and validate low-confidence extractions",
+                )
+            )
+
         # Check for entities without descriptions
         entities_without_desc = [
-            entity.id for entity in result.entities
+            entity.id
+            for entity in result.entities
             if not entity.description or entity.description.strip() == ""
         ]
         if len(entities_without_desc) > len(result.entities) * 0.3:
-            issues.append(ValidationIssue(
-                type=ValidationIssueType.MISSING_LABELS,
-                severity=ValidationIssueSeverity.WARNING,
-                message=f"Many entities ({len(entities_without_desc)}) lack descriptions",
-                affected_entity_ids=entities_without_desc,
-                suggestion="Add descriptions to entities for clarity",
-            ))
-        
+            issues.append(
+                ValidationIssue(
+                    type=ValidationIssueType.MISSING_LABELS,
+                    severity=ValidationIssueSeverity.WARNING,
+                    message=f"Many entities ({len(entities_without_desc)}) lack descriptions",
+                    affected_entity_ids=entities_without_desc,
+                    suggestion="Add descriptions to entities for clarity",
+                )
+            )
+
         # Check for isolated nodes
         connected_ids = set()
         for rel in result.relations:
             connected_ids.add(rel.source_id)
             connected_ids.add(rel.target_id)
-        
+
         all_entity_ids = {entity.id for entity in result.entities}
         disconnected_ids = all_entity_ids - connected_ids
-        
+
         if disconnected_ids:
-            issues.append(ValidationIssue(
-                type=ValidationIssueType.DISCONNECTED_NODES,
-                severity=ValidationIssueSeverity.WARNING,
-                message=f"Found {len(disconnected_ids)} disconnected entities",
-                affected_entity_ids=list(disconnected_ids),
-                suggestion="Ensure all entities are connected by relationships",
-            ))
-        
+            issues.append(
+                ValidationIssue(
+                    type=ValidationIssueType.DISCONNECTED_NODES,
+                    severity=ValidationIssueSeverity.WARNING,
+                    message=f"Found {len(disconnected_ids)} disconnected entities",
+                    affected_entity_ids=list(disconnected_ids),
+                    suggestion="Ensure all entities are connected by relationships",
+                )
+            )
+
         # Check for data flow completeness
         tasks = [e for e in result.entities if e.type == EntityType.ACTIVITY]
         data_entities = [e for e in result.entities if e.type == EntityType.DATA]
-        
+
         if tasks and not data_entities:
-            issues.append(ValidationIssue(
-                type=ValidationIssueType.INCOMPLETE_DATA_FLOW,
-                severity=ValidationIssueSeverity.INFO,
-                message="No data objects identified in process",
-                suggestion="Consider if process has data inputs/outputs",
-            ))
-        
+            issues.append(
+                ValidationIssue(
+                    type=ValidationIssueType.INCOMPLETE_DATA_FLOW,
+                    severity=ValidationIssueSeverity.INFO,
+                    message="No data objects identified in process",
+                    suggestion="Consider if process has data inputs/outputs",
+                )
+            )
+
         # Calculate quality score
-        quality_score = ExtractionValidator._calculate_quality_score(
-            result, issues
-        )
-        
+        quality_score = ExtractionValidator._calculate_quality_score(result, issues)
+
         # Determine if needs refinement
         needs_refinement = any(
             issue.severity in [ValidationIssueSeverity.ERROR, ValidationIssueSeverity.CRITICAL]
             for issue in issues
         )
-        
+
         # Generate overall suggestions
         suggestions = ExtractionValidator._generate_suggestions(result, issues)
-        
+
         return CritiqueResult(
-            is_valid=len([i for i in issues if i.severity == ValidationIssueSeverity.CRITICAL]) == 0,
+            is_valid=len([i for i in issues if i.severity == ValidationIssueSeverity.CRITICAL])
+            == 0,
             issues=issues,
             quality_score=quality_score,
             suggestions_for_improvement=suggestions,
             needs_refinement=needs_refinement,
         )
-    
+
     @staticmethod
-    def _calculate_quality_score(
-        result: ExtractionResult,
-        issues: List[ValidationIssue]
-    ) -> float:
+    def _calculate_quality_score(result: ExtractionResult, issues: List[ValidationIssue]) -> float:
         """Calculate overall quality score."""
         base_score = 1.0
-        
+
         # Deduct for each issue based on severity
         severity_weights = {
             ValidationIssueSeverity.CRITICAL: 0.3,
@@ -239,52 +235,44 @@ class ExtractionValidator:
             ValidationIssueSeverity.WARNING: 0.05,
             ValidationIssueSeverity.INFO: 0.02,
         }
-        
+
         for issue in issues:
             weight = severity_weights.get(issue.severity, 0.0)
             base_score -= weight * issue.confidence
-        
+
         # Bonus for high-confidence entities
         high_confidence_count = sum(
-            1 for entity in result.entities
-            if entity.confidence == ConfidenceLevel.HIGH
+            1 for entity in result.entities if entity.confidence == ConfidenceLevel.HIGH
         )
         if result.entities:
             confidence_bonus = (high_confidence_count / len(result.entities)) * 0.1
             base_score += confidence_bonus
-        
+
         return max(0.0, min(1.0, base_score))
-    
+
     @staticmethod
-    def _generate_suggestions(
-        result: ExtractionResult,
-        issues: List[ValidationIssue]
-    ) -> List[str]:
+    def _generate_suggestions(result: ExtractionResult, issues: List[ValidationIssue]) -> List[str]:
         """Generate improvement suggestions."""
         suggestions = []
-        
+
         if len(result.entities) < 3:
             suggestions.append(
                 "Process seems simplified (< 3 entities). Verify if all steps were captured."
             )
-        
+
         if len(result.relations) < len(result.entities) - 1:
-            suggestions.append(
-                "Relations seem sparse. Ensure activities are properly sequenced."
-            )
-        
+            suggestions.append("Relations seem sparse. Ensure activities are properly sequenced.")
+
         actors = [e for e in result.entities if e.type == EntityType.ACTOR]
         if not actors:
             suggestions.append(
                 "No actors identified. Consider if process involves roles or participants."
             )
-        
+
         gateways = [e for e in result.entities if e.type == EntityType.GATEWAY]
         if not gateways:
-            suggestions.append(
-                "No decision gateways found. Verify if process has branching logic."
-            )
-        
+            suggestions.append("No decision gateways found. Verify if process has branching logic.")
+
         return suggestions
 
 
@@ -292,28 +280,29 @@ class CritiqueAgent:
     """
     Generates critique feedback using LLM to identify extraction issues.
     """
-    
+
     def __init__(self, llm_client: Optional[BaseLLMClient] = None):
         """
         Initialize critique agent.
-        
+
         Args:
             llm_client: LLM client for critique generation (optional)
         """
         self.llm_client = llm_client
-    
+
     def _format_extraction_for_critique(self, result: ExtractionResult) -> str:
         """Format extraction result for LLM critique."""
-        entities_str = "\n".join([
-            f"- {entity.name} ({entity.type.value}): {entity.description or 'No description'} [Confidence: {entity.confidence.value}]"
-            for entity in result.entities
-        ])
-        
-        relations_str = "\n".join([
-            f"- {rel.type.value}: {rel.source_id} -> {rel.target_id}"
-            for rel in result.relations
-        ])
-        
+        entities_str = "\n".join(
+            [
+                f"- {entity.name} ({entity.type.value}): {entity.description or 'No description'} [Confidence: {entity.confidence.value}]"
+                for entity in result.entities
+            ]
+        )
+
+        relations_str = "\n".join(
+            [f"- {rel.type.value}: {rel.source_id} -> {rel.target_id}" for rel in result.relations]
+        )
+
         return f"""Extracted Process:
 
 Entities:
@@ -322,7 +311,7 @@ Entities:
 Relationships:
 {relations_str or "No relationships"}
 """
-    
+
     def _create_critique_prompt(self, extraction_str: str, original_text: str) -> str:
         """Create LLM prompt for critique."""
         return f"""You are a business process expert. Review the following extraction from the process description and provide critique.
@@ -341,7 +330,7 @@ Please analyze this extraction and provide:
 
 Provide your response as JSON with keys: issues, suggestions, confidence_assessment, quality_score
 """
-    
+
     async def generate_critique_feedback(
         self,
         result: ExtractionResult,
@@ -350,31 +339,29 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
     ) -> Dict:
         """
         Generate critique feedback for extraction results.
-        
+
         Args:
             result: Extraction result to critique
             original_text: Original input text
             max_iterations: Maximum refinement iterations
-            
+
         Returns:
             Dictionary with critique feedback and recommendations
         """
         # First do rule-based validation
         validation = ExtractionValidator.validate_extraction(result)
-        
+
         # Try LLM-based critique if client available
         llm_critique = None
         if self.llm_client:
             try:
                 extraction_str = self._format_extraction_for_critique(result)
                 prompt = self._create_critique_prompt(extraction_str, original_text)
-                
-                messages = [
-                    LLMMessage(role="user", content=prompt)
-                ]
-                
+
+                messages = [LLMMessage(role="user", content=prompt)]
+
                 response = await self.llm_client.call(messages, temperature=0.3, max_tokens=1024)
-                
+
                 # Parse LLM response as JSON
                 try:
                     response_text = response
@@ -385,7 +372,7 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
                         json_str = response_text.split("```")[1].split("```")[0].strip()
                     else:
                         json_str = response_text
-                    
+
                     llm_critique = json.loads(json_str)
                 except (json.JSONDecodeError, IndexError):
                     # If parsing fails, store raw response
@@ -393,7 +380,7 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
             except Exception as e:
                 logger.warning(f"LLM critique failed: {e}")
                 llm_critique = None
-        
+
         return {
             "validation": validation,
             "llm_critique": llm_critique,
@@ -401,7 +388,7 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
                 validation, max_iterations
             ),
         }
-    
+
     @staticmethod
     def _generate_refinement_plan(
         validation: CritiqueResult,
@@ -410,16 +397,16 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
         """Generate refinement plan if needed."""
         if not validation.needs_refinement:
             return None
-        
+
         critical_issues = [
-            issue for issue in validation.issues
+            issue
+            for issue in validation.issues
             if issue.severity == ValidationIssueSeverity.CRITICAL
         ]
         error_issues = [
-            issue for issue in validation.issues
-            if issue.severity == ValidationIssueSeverity.ERROR
+            issue for issue in validation.issues if issue.severity == ValidationIssueSeverity.ERROR
         ]
-        
+
         return {
             "total_issues": len(validation.issues),
             "critical_count": len(critical_issues),
@@ -439,10 +426,10 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
 class ExtractionRefinementPipeline:
     """
     Pipeline for critique-based refinement of extraction results.
-    
+
     Iteratively critiques extraction and attempts refinement.
     """
-    
+
     def __init__(
         self,
         validator: Optional[ExtractionValidator] = None,
@@ -451,7 +438,7 @@ class ExtractionRefinementPipeline:
     ):
         """
         Initialize refinement pipeline.
-        
+
         Args:
             validator: Custom validator (uses default if not provided)
             critique_agent: Critique agent for LLM feedback
@@ -461,7 +448,7 @@ class ExtractionRefinementPipeline:
         self.critique_agent = critique_agent or CritiqueAgent()
         self.max_iterations = max_iterations
         self.iteration_history = []
-    
+
     def _create_refinement_prompt(
         self,
         original_text: str,
@@ -469,11 +456,13 @@ class ExtractionRefinementPipeline:
         issues: List[ValidationIssue],
     ) -> str:
         """Create LLM prompt for refinement based on issues."""
-        issues_str = "\n".join([
-            f"- [{issue.severity.value}] {issue.message}: {issue.suggestion}"
-            for issue in issues[:5]  # Top 5 issues
-        ])
-        
+        issues_str = "\n".join(
+            [
+                f"- [{issue.severity.value}] {issue.message}: {issue.suggestion}"
+                for issue in issues[:5]  # Top 5 issues
+            ]
+        )
+
         return f"""You are a business process extraction expert. The initial extraction had these issues:
 
 {issues_str}
@@ -495,7 +484,7 @@ Return ONLY valid JSON with keys: entities, relations
 Each entity should have: id, type, name, description, confidence
 Each relation should have: id, type, source_id, target_id
 """
-    
+
     async def refine_extraction(
         self,
         initial_result: ExtractionResult,
@@ -503,11 +492,11 @@ Each relation should have: id, type, source_id, target_id
     ) -> Tuple[ExtractionResult, CritiqueResult, List[Dict]]:
         """
         Refine extraction result through critique loop.
-        
+
         Args:
             initial_result: Initial extraction result
             original_text: Original input text
-            
+
         Returns:
             (refined_result, final_critique, history)
         """
@@ -515,56 +504,58 @@ Each relation should have: id, type, source_id, target_id
         best_result = initial_result
         best_quality = 0.0
         iteration = 0
-        
+
         while iteration < self.max_iterations:
             # Validate current result
             validation = self.validator.validate_extraction(current_result)
-            
+
             # Track best result
             if validation.quality_score > best_quality:
                 best_quality = validation.quality_score
                 best_result = current_result
-            
+
             # Record iteration
-            self.iteration_history.append({
-                "iteration": iteration,
-                "validation": validation,
-                "issue_count": len(validation.issues),
-                "quality_score": validation.quality_score,
-            })
-            
+            self.iteration_history.append(
+                {
+                    "iteration": iteration,
+                    "validation": validation,
+                    "issue_count": len(validation.issues),
+                    "quality_score": validation.quality_score,
+                }
+            )
+
             # Check if refinement needed
             if not validation.needs_refinement:
                 logger.info(f"Extraction validated at iteration {iteration}")
                 return current_result, validation, self.iteration_history
-            
+
             # Generate critique feedback
             critique_feedback = await self.critique_agent.generate_critique_feedback(
                 current_result,
                 original_text,
                 self.max_iterations - iteration,
             )
-            
+
             # Try to refine based on feedback if LLM is available
             if self.critique_agent.llm_client and critique_feedback.get("llm_critique"):
                 try:
-                    extraction_str = self.critique_agent._format_extraction_for_critique(current_result)
+                    extraction_str = self.critique_agent._format_extraction_for_critique(
+                        current_result
+                    )
                     refinement_prompt = self._create_refinement_prompt(
                         original_text,
                         extraction_str,
                         validation.issues,
                     )
-                    
-                    messages = [
-                        LLMMessage(role="user", content=refinement_prompt)
-                    ]
-                    
+
+                    messages = [LLMMessage(role="user", content=refinement_prompt)]
+
                     response = await self.critique_agent.llm_client.call(
                         messages,
                         temperature=0.4,
                         max_tokens=2048,
                     )
-                    
+
                     # Try to parse refined extraction
                     refined_data = self._parse_refined_extraction(response)
                     if refined_data:
@@ -577,16 +568,16 @@ Each relation should have: id, type, source_id, target_id
                         logger.warning(f"Could not parse refinement at iteration {iteration}")
                         iteration += 1
                         continue
-                        
+
                 except Exception as e:
                     logger.warning(f"LLM refinement failed at iteration {iteration}: {e}")
-            
+
             iteration += 1
-        
+
         # Return best result after max iterations
         final_validation = self.validator.validate_extraction(best_result)
         return best_result, final_validation, self.iteration_history
-    
+
     @staticmethod
     def _parse_refined_extraction(response: str) -> Optional[Dict]:
         """Parse refined extraction from LLM response."""
@@ -599,11 +590,11 @@ Each relation should have: id, type, source_id, target_id
                 json_str = response_text.split("```")[1].split("```")[0].strip()
             else:
                 json_str = response_text
-            
+
             return json.loads(json_str)
         except (json.JSONDecodeError, IndexError):
             return None
-    
+
     @staticmethod
     def _apply_refinement(
         original: ExtractionResult,
@@ -619,12 +610,10 @@ Each relation should have: id, type, source_id, target_id
                     type=EntityType(entity_data.get("type", "activity")),
                     name=entity_data.get("name", "Unknown"),
                     description=entity_data.get("description"),
-                    confidence=ConfidenceLevel(
-                        entity_data.get("confidence", "medium")
-                    ),
+                    confidence=ConfidenceLevel(entity_data.get("confidence", "medium")),
                 )
                 entities.append(entity)
-            
+
             # Parse refined relations
             relations = []
             for rel_data in refined_data.get("relations", []):
@@ -636,9 +625,13 @@ Each relation should have: id, type, source_id, target_id
                     label=rel_data.get("label"),
                 )
                 relations.append(relation)
-            
+
             # Create refined result - reconstruct metadata as dict for validation
-            metadata_dict = original.metadata.model_dump() if hasattr(original.metadata, 'model_dump') else original.metadata.dict()
+            metadata_dict = (
+                original.metadata.model_dump()
+                if hasattr(original.metadata, "model_dump")
+                else original.metadata.dict()
+            )
             result_dict = {
                 "entities": entities,
                 "relations": relations,

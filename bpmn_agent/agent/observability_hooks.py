@@ -12,20 +12,19 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
 from bpmn_agent.core.observability import (
-    ObservabilityManager,
     record_metric,
     span,
-    log_execution,
 )
 
 
 class StageMetricType(str, Enum):
     """Types of stage-level metrics."""
+
     EXECUTION_TIME = "stage_execution_time_ms"
     SUCCESS_RATE = "stage_success_rate"
     ERROR_COUNT = "stage_error_count"
@@ -36,6 +35,7 @@ class StageMetricType(str, Enum):
 
 class RecoveryMetricType(str, Enum):
     """Types of recovery-related metrics."""
+
     RECOVERY_ATTEMPT = "recovery_attempt_total"
     RECOVERY_SUCCESS = "recovery_success_total"
     RECOVERY_FAILURE = "recovery_failure_total"
@@ -45,6 +45,7 @@ class RecoveryMetricType(str, Enum):
 
 class CheckpointMetricType(str, Enum):
     """Types of checkpoint-related metrics."""
+
     CHECKPOINT_SAVE = "checkpoint_save_time_ms"
     CHECKPOINT_LOAD = "checkpoint_load_time_ms"
     CHECKPOINT_SIZE_BYTES = "checkpoint_size_bytes"
@@ -55,6 +56,7 @@ class CheckpointMetricType(str, Enum):
 @dataclass
 class StageMetrics:
     """Metrics collected for a single stage execution."""
+
     stage_name: str
     start_time: float = field(default_factory=time.time)
     end_time: Optional[float] = None
@@ -93,14 +95,14 @@ class StageMetrics:
             "recovery_attempts": self.recovery_attempts,
         }
         # Add custom attributes if they exist
-        if hasattr(self, '_custom_attributes'):
+        if hasattr(self, "_custom_attributes"):
             base_dict.update(self._custom_attributes)
         return base_dict
-    
+
     def add_attribute(self, key: str, value: Any) -> None:
         """Add a custom metric attribute."""
         # Store custom attributes for later reporting
-        if not hasattr(self, '_custom_attributes'):
+        if not hasattr(self, "_custom_attributes"):
             self._custom_attributes = {}
         self._custom_attributes[key] = value
 
@@ -108,6 +110,7 @@ class StageMetrics:
 @dataclass
 class PipelineMetrics:
     """Aggregated metrics for entire pipeline execution."""
+
     session_id: str
     start_time: float = field(default_factory=time.time)
     end_time: Optional[float] = None
@@ -127,7 +130,7 @@ class PipelineMetrics:
         if self.end_time is None:
             self.end_time = time.time()
         self.total_duration_ms = (self.end_time - self.start_time) * 1000
-        
+
         # Calculate aggregates
         for stage_metrics in self.stages.values():
             stage_metrics.finalize()
@@ -149,8 +152,7 @@ class PipelineMetrics:
             "total_input_size_bytes": self.total_input_size_bytes,
             "total_output_size_bytes": self.total_output_size_bytes,
             "stages": {
-                stage_name: metrics.to_dict()
-                for stage_name, metrics in self.stages.items()
+                stage_name: metrics.to_dict() for stage_name, metrics in self.stages.items()
             },
         }
 
@@ -160,7 +162,7 @@ class ObservabilityHooks:
 
     def __init__(self, enable_tracing: bool = True, enable_metrics: bool = True):
         """Initialize observability hooks.
-        
+
         Args:
             enable_tracing: Enable OpenTelemetry tracing
             enable_metrics: Enable metrics collection
@@ -172,23 +174,23 @@ class ObservabilityHooks:
 
     def start_pipeline(self, session_id: str) -> PipelineMetrics:
         """Start tracking a pipeline execution.
-        
+
         Args:
             session_id: Unique session identifier
-            
+
         Returns:
             PipelineMetrics tracker
         """
         self._pipeline_metrics = PipelineMetrics(session_id=session_id)
-        logger.info(f"Pipeline started", extra={"session_id": session_id})
+        logger.info("Pipeline started", extra={"session_id": session_id})
         return self._pipeline_metrics
 
     def end_pipeline(self, success: bool = True) -> PipelineMetrics:
         """End tracking a pipeline execution.
-        
+
         Args:
             success: Whether pipeline succeeded
-            
+
         Returns:
             Finalized PipelineMetrics
         """
@@ -228,11 +230,11 @@ class ObservabilityHooks:
         attributes: Optional[Dict[str, Any]] = None,
     ):
         """Context manager for tracking stage execution.
-        
+
         Args:
             stage_name: Name of the stage
             attributes: Optional attributes for tracing
-            
+
         Yields:
             StageMetrics object for this stage
         """
@@ -304,7 +306,7 @@ class ObservabilityHooks:
         stage_name: Optional[str] = None,
     ) -> None:
         """Record an error during execution.
-        
+
         Args:
             error_message: Description of the error
             error_type: Type/category of error
@@ -332,7 +334,7 @@ class ObservabilityHooks:
             )
 
         logger.warning(
-            f"Error recorded",
+            "Error recorded",
             extra={
                 "error_message": error_message,
                 "error_type": error_type,
@@ -347,7 +349,7 @@ class ObservabilityHooks:
         success: bool = False,
     ) -> None:
         """Record a recovery attempt.
-        
+
         Args:
             strategy: Name of recovery strategy used
             stage_name: Optional stage where recovery occurred
@@ -397,7 +399,7 @@ class ObservabilityHooks:
         output_quality: int = 0,
     ) -> None:
         """Record a fallback to degraded mode.
-        
+
         Args:
             fallback_type: Type of fallback applied
             stage_name: Optional stage where fallback occurred
@@ -443,7 +445,7 @@ class ObservabilityHooks:
         success: bool = True,
     ) -> None:
         """Record a checkpoint operation.
-        
+
         Args:
             operation: Type of operation (save/load/cleanup)
             duration_ms: Duration of operation in milliseconds
@@ -491,7 +493,7 @@ class ObservabilityHooks:
         token_count: int = 0,
     ) -> None:
         """Record detailed stage metrics.
-        
+
         Args:
             stage_name: Name of the stage
             input_size_bytes: Size of stage input
@@ -536,11 +538,11 @@ def initialize_observability_hooks(
     enable_metrics: bool = True,
 ) -> ObservabilityHooks:
     """Initialize global observability hooks.
-    
+
     Args:
         enable_tracing: Enable OpenTelemetry tracing
         enable_metrics: Enable metrics collection
-        
+
     Returns:
         ObservabilityHooks instance
     """

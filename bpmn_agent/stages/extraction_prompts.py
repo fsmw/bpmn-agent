@@ -11,50 +11,40 @@ This stage:
 """
 
 import json
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
-
-from bpmn_agent.models.extraction import (
-    ConfidenceLevel,
-    EntityAttribute,
-    EntityType,
-    ExtractedEntity,
-    ExtractedRelation,
-    RelationType,
-)
-
+from dataclasses import dataclass
+from typing import Any, Dict, List
 
 # ===========================
 # Task 2.2.1: Prompting Strategy
 # ===========================
 
+
 @dataclass
 class ExtractionPrompt:
     """Complete LLM prompt for entity and relation extraction."""
-    
+
     system_message: str
     """System role definition for LLM"""
-    
+
     user_message_template: str
     """Template for user message with {text} placeholder"""
-    
+
     few_shot_examples: List[Dict[str, Any]]
     """Few-shot examples of text → JSON extraction"""
-    
+
     output_schema: Dict[str, Any]
     """JSON schema definition for expected output"""
-    
+
     constraints: List[str]
     """Explicit constraints and rules for extraction"""
-    
+
     def render_user_message(self, text: str) -> str:
         """
         Render user message with text to extract from.
-        
+
         Args:
             text: Process description text
-            
+
         Returns:
             Complete user message
         """
@@ -64,11 +54,11 @@ class ExtractionPrompt:
 def create_extraction_prompt() -> ExtractionPrompt:
     """
     Create the complete extraction prompt for LLM.
-    
+
     Returns:
         ExtractionPrompt with system message, user template, examples, schema, and constraints
     """
-    
+
     # 1. System message - define LLM role
     system_message = """You are a BPMN 2.0 Process Analysis Expert with deep knowledge of business process modeling.
 
@@ -125,7 +115,7 @@ Subprocess Detection:
 - If text describes phases or stages that are broken down: these are subprocesses
 - If multiple related activities are grouped: consider as subprocess candidate
 """
-    
+
     # 2. Few-shot examples
     few_shot_examples = [
         {
@@ -135,21 +125,73 @@ Subprocess Detection:
                     {"id": "cust_1", "type": "actor", "name": "customer", "confidence": "high"},
                     {"id": "sales_1", "type": "actor", "name": "sales", "confidence": "high"},
                     {"id": "wh_1", "type": "actor", "name": "warehouse", "confidence": "high"},
-                    {"id": "act_1", "type": "activity", "name": "submit order", "confidence": "high"},
-                    {"id": "act_2", "type": "activity", "name": "verify order", "confidence": "high"},
+                    {
+                        "id": "act_1",
+                        "type": "activity",
+                        "name": "submit order",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_2",
+                        "type": "activity",
+                        "name": "verify order",
+                        "confidence": "high",
+                    },
                     {"id": "act_3", "type": "activity", "name": "pick items", "confidence": "high"},
-                    {"id": "act_4", "type": "activity", "name": "notify customer", "confidence": "high"},
-                    {"id": "evt_1", "type": "event", "name": "order received", "confidence": "medium"},
-                    {"id": "gw_1", "type": "gateway", "name": "order valid", "confidence": "high"}
+                    {
+                        "id": "act_4",
+                        "type": "activity",
+                        "name": "notify customer",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "evt_1",
+                        "type": "event",
+                        "name": "order received",
+                        "confidence": "medium",
+                    },
+                    {"id": "gw_1", "type": "gateway", "name": "order valid", "confidence": "high"},
                 ],
                 "relations": [
-                    {"id": "rel_1", "type": "precedes", "source_id": "act_1", "target_id": "act_2", "confidence": "high"},
-                    {"id": "rel_2", "type": "conditional", "source_id": "gw_1", "target_id": "act_3", "condition": "valid", "confidence": "high"},
-                    {"id": "rel_3", "type": "conditional", "source_id": "gw_1", "target_id": "act_4", "condition": "invalid", "confidence": "high"},
-                    {"id": "rel_4", "type": "involves", "source_id": "cust_1", "target_id": "act_1", "confidence": "high"},
-                    {"id": "rel_5", "type": "involves", "source_id": "sales_1", "target_id": "act_2", "confidence": "high"},
-                ]
-            }
+                    {
+                        "id": "rel_1",
+                        "type": "precedes",
+                        "source_id": "act_1",
+                        "target_id": "act_2",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "rel_2",
+                        "type": "conditional",
+                        "source_id": "gw_1",
+                        "target_id": "act_3",
+                        "condition": "valid",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "rel_3",
+                        "type": "conditional",
+                        "source_id": "gw_1",
+                        "target_id": "act_4",
+                        "condition": "invalid",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "rel_4",
+                        "type": "involves",
+                        "source_id": "cust_1",
+                        "target_id": "act_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "rel_5",
+                        "type": "involves",
+                        "source_id": "sales_1",
+                        "target_id": "act_2",
+                        "confidence": "high",
+                    },
+                ],
+            },
         },
         {
             "input": "Manager reviews requests daily. If approved, accountant processes payment. Finance confirms transaction.",
@@ -158,91 +200,335 @@ Subprocess Detection:
                     {"id": "actor_1", "type": "actor", "name": "manager", "confidence": "high"},
                     {"id": "actor_2", "type": "actor", "name": "accountant", "confidence": "high"},
                     {"id": "actor_3", "type": "actor", "name": "finance", "confidence": "high"},
-                    {"id": "act_1", "type": "activity", "name": "review requests", "confidence": "high"},
-                    {"id": "act_2", "type": "activity", "name": "process payment", "confidence": "high"},
-                    {"id": "act_3", "type": "activity", "name": "confirm transaction", "confidence": "high"},
-                    {"id": "gw_1", "type": "gateway", "name": "approved", "confidence": "high"}
+                    {
+                        "id": "act_1",
+                        "type": "activity",
+                        "name": "review requests",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_2",
+                        "type": "activity",
+                        "name": "process payment",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_3",
+                        "type": "activity",
+                        "name": "confirm transaction",
+                        "confidence": "high",
+                    },
+                    {"id": "gw_1", "type": "gateway", "name": "approved", "confidence": "high"},
                 ],
                 "relations": [
-                    {"id": "r1", "type": "precedes", "source_id": "act_1", "target_id": "gw_1", "confidence": "high"},
-                    {"id": "r2", "type": "conditional", "source_id": "gw_1", "target_id": "act_2", "condition": "approved", "confidence": "high"},
-                    {"id": "r3", "type": "precedes", "source_id": "act_2", "target_id": "act_3", "confidence": "high"},
-                    {"id": "r4", "type": "involves", "source_id": "actor_1", "target_id": "act_1", "confidence": "high"},
-                    {"id": "r5", "type": "involves", "source_id": "actor_2", "target_id": "act_2", "confidence": "high"},
-                ]
-            }
-         },
+                    {
+                        "id": "r1",
+                        "type": "precedes",
+                        "source_id": "act_1",
+                        "target_id": "gw_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r2",
+                        "type": "conditional",
+                        "source_id": "gw_1",
+                        "target_id": "act_2",
+                        "condition": "approved",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r3",
+                        "type": "precedes",
+                        "source_id": "act_2",
+                        "target_id": "act_3",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r4",
+                        "type": "involves",
+                        "source_id": "actor_1",
+                        "target_id": "act_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r5",
+                        "type": "involves",
+                        "source_id": "actor_2",
+                        "target_id": "act_2",
+                        "confidence": "high",
+                    },
+                ],
+            },
+        },
         {
             "input": "The order fulfillment process consists of order validation (check inventory, verify customer data, check payment) and fulfillment (pick items, pack order, arrange shipping). Both phases are executed in sequence.",
             "output": {
                 "entities": [
-                    {"id": "act_1", "type": "activity", "name": "order fulfillment", "confidence": "high", "attributes": {"activity_type": "subprocess"}},
-                    {"id": "act_2", "type": "activity", "name": "order validation", "confidence": "high", "attributes": {"activity_type": "subprocess"}},
-                    {"id": "act_3", "type": "activity", "name": "check inventory", "confidence": "high"},
-                    {"id": "act_4", "type": "activity", "name": "verify customer data", "confidence": "high"},
-                    {"id": "act_5", "type": "activity", "name": "check payment", "confidence": "high"},
-                    {"id": "act_6", "type": "activity", "name": "fulfillment", "confidence": "high", "attributes": {"activity_type": "subprocess"}},
+                    {
+                        "id": "act_1",
+                        "type": "activity",
+                        "name": "order fulfillment",
+                        "confidence": "high",
+                        "attributes": {"activity_type": "subprocess"},
+                    },
+                    {
+                        "id": "act_2",
+                        "type": "activity",
+                        "name": "order validation",
+                        "confidence": "high",
+                        "attributes": {"activity_type": "subprocess"},
+                    },
+                    {
+                        "id": "act_3",
+                        "type": "activity",
+                        "name": "check inventory",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_4",
+                        "type": "activity",
+                        "name": "verify customer data",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_5",
+                        "type": "activity",
+                        "name": "check payment",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_6",
+                        "type": "activity",
+                        "name": "fulfillment",
+                        "confidence": "high",
+                        "attributes": {"activity_type": "subprocess"},
+                    },
                     {"id": "act_7", "type": "activity", "name": "pick items", "confidence": "high"},
                     {"id": "act_8", "type": "activity", "name": "pack order", "confidence": "high"},
-                    {"id": "act_9", "type": "activity", "name": "arrange shipping", "confidence": "high"}
+                    {
+                        "id": "act_9",
+                        "type": "activity",
+                        "name": "arrange shipping",
+                        "confidence": "high",
+                    },
                 ],
                 "relations": [
-                    {"id": "r1", "type": "precedes", "source_id": "act_2", "target_id": "act_6", "confidence": "high"},
-                    {"id": "r2", "type": "precedes", "source_id": "act_3", "target_id": "act_4", "confidence": "medium"},
-                    {"id": "r3", "type": "precedes", "source_id": "act_7", "target_id": "act_8", "confidence": "medium"}
-                ]
-            }
+                    {
+                        "id": "r1",
+                        "type": "precedes",
+                        "source_id": "act_2",
+                        "target_id": "act_6",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r2",
+                        "type": "precedes",
+                        "source_id": "act_3",
+                        "target_id": "act_4",
+                        "confidence": "medium",
+                    },
+                    {
+                        "id": "r3",
+                        "type": "precedes",
+                        "source_id": "act_7",
+                        "target_id": "act_8",
+                        "confidence": "medium",
+                    },
+                ],
+            },
         },
         {
-             "input": "A payment processing task is performed by the accountant. If the payment fails, an error notification is sent immediately. Additionally, if the task takes longer than 30 minutes, a timeout alert is triggered. Once payment is confirmed, the system sends a confirmation message.",
-             "output": {
-                 "entities": [
-                     {"id": "actor_1", "type": "actor", "name": "accountant", "confidence": "high"},
-                     {"id": "act_1", "type": "activity", "name": "payment processing", "confidence": "high"},
-                     {"id": "evt_1", "type": "event", "name": "payment fails", "confidence": "high", "attributes": {"event_type": "boundary_event", "trigger": "error"}},
-                     {"id": "evt_2", "type": "event", "name": "timeout alert", "confidence": "high", "attributes": {"event_type": "boundary_event", "trigger": "timer"}},
-                     {"id": "evt_3", "type": "event", "name": "confirmation message", "confidence": "high", "attributes": {"event_type": "intermediate_event", "trigger": "message"}},
-                     {"id": "act_2", "type": "activity", "name": "send error notification", "confidence": "high"},
-                     {"id": "act_3", "type": "activity", "name": "send timeout notification", "confidence": "medium"}
-                 ],
-                 "relations": [
-                     {"id": "r1", "type": "involves", "source_id": "actor_1", "target_id": "act_1", "confidence": "high"},
-                     {"id": "r2", "type": "precedes", "source_id": "evt_1", "target_id": "act_2", "confidence": "high"},
-                     {"id": "r3", "type": "precedes", "source_id": "evt_2", "target_id": "act_3", "confidence": "high"}
-                 ]
-             }
-         },
+            "input": "A payment processing task is performed by the accountant. If the payment fails, an error notification is sent immediately. Additionally, if the task takes longer than 30 minutes, a timeout alert is triggered. Once payment is confirmed, the system sends a confirmation message.",
+            "output": {
+                "entities": [
+                    {"id": "actor_1", "type": "actor", "name": "accountant", "confidence": "high"},
+                    {
+                        "id": "act_1",
+                        "type": "activity",
+                        "name": "payment processing",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "evt_1",
+                        "type": "event",
+                        "name": "payment fails",
+                        "confidence": "high",
+                        "attributes": {"event_type": "boundary_event", "trigger": "error"},
+                    },
+                    {
+                        "id": "evt_2",
+                        "type": "event",
+                        "name": "timeout alert",
+                        "confidence": "high",
+                        "attributes": {"event_type": "boundary_event", "trigger": "timer"},
+                    },
+                    {
+                        "id": "evt_3",
+                        "type": "event",
+                        "name": "confirmation message",
+                        "confidence": "high",
+                        "attributes": {"event_type": "intermediate_event", "trigger": "message"},
+                    },
+                    {
+                        "id": "act_2",
+                        "type": "activity",
+                        "name": "send error notification",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_3",
+                        "type": "activity",
+                        "name": "send timeout notification",
+                        "confidence": "medium",
+                    },
+                ],
+                "relations": [
+                    {
+                        "id": "r1",
+                        "type": "involves",
+                        "source_id": "actor_1",
+                        "target_id": "act_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r2",
+                        "type": "precedes",
+                        "source_id": "evt_1",
+                        "target_id": "act_2",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r3",
+                        "type": "precedes",
+                        "source_id": "evt_2",
+                        "target_id": "act_3",
+                        "confidence": "high",
+                    },
+                ],
+            },
+        },
         {
             "input": "The customer submits their invoice through the online portal. The finance department reviews the invoice details. If the invoice is approved, the accountant processes the payment and generates a receipt. The customer receives the receipt via email.",
             "output": {
                 "entities": [
                     {"id": "actor_1", "type": "actor", "name": "customer", "confidence": "high"},
-                    {"id": "actor_2", "type": "actor", "name": "finance department", "confidence": "high"},
+                    {
+                        "id": "actor_2",
+                        "type": "actor",
+                        "name": "finance department",
+                        "confidence": "high",
+                    },
                     {"id": "actor_3", "type": "actor", "name": "accountant", "confidence": "high"},
-                    {"id": "act_1", "type": "activity", "name": "submit invoice", "confidence": "high"},
-                    {"id": "act_2", "type": "activity", "name": "review invoice", "confidence": "high"},
-                    {"id": "act_3", "type": "activity", "name": "process payment", "confidence": "high"},
-                    {"id": "act_4", "type": "activity", "name": "generate receipt", "confidence": "high"},
-                    {"id": "gw_1", "type": "gateway", "name": "invoice approved", "confidence": "high"},
+                    {
+                        "id": "act_1",
+                        "type": "activity",
+                        "name": "submit invoice",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_2",
+                        "type": "activity",
+                        "name": "review invoice",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_3",
+                        "type": "activity",
+                        "name": "process payment",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "act_4",
+                        "type": "activity",
+                        "name": "generate receipt",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "gw_1",
+                        "type": "gateway",
+                        "name": "invoice approved",
+                        "confidence": "high",
+                    },
                     {"id": "data_1", "type": "data", "name": "invoice", "confidence": "high"},
-                    {"id": "data_2", "type": "data", "name": "receipt", "confidence": "high"}
+                    {"id": "data_2", "type": "data", "name": "receipt", "confidence": "high"},
                 ],
                 "relations": [
-                    {"id": "r1", "type": "involves", "source_id": "actor_1", "target_id": "act_1", "confidence": "high"},
-                    {"id": "r2", "type": "produces", "source_id": "act_1", "target_id": "data_1", "confidence": "high"},
-                    {"id": "r3", "type": "involves", "source_id": "actor_2", "target_id": "act_2", "confidence": "high"},
-                    {"id": "r4", "type": "uses", "source_id": "act_2", "target_id": "data_1", "confidence": "high"},
-                    {"id": "r5", "type": "conditional", "source_id": "gw_1", "target_id": "act_3", "condition": "approved", "confidence": "high"},
-                    {"id": "r6", "type": "involves", "source_id": "actor_3", "target_id": "act_3", "confidence": "high"},
-                    {"id": "r7", "type": "uses", "source_id": "act_3", "target_id": "data_1", "confidence": "high"},
-                    {"id": "r8", "type": "precedes", "source_id": "act_3", "target_id": "act_4", "confidence": "high"},
-                    {"id": "r9", "type": "produces", "source_id": "act_4", "target_id": "data_2", "confidence": "high"},
-                    {"id": "r10", "type": "involves", "source_id": "actor_1", "target_id": "act_4", "confidence": "medium"}
-                ]
-            }
-        }
-      ]
-    
+                    {
+                        "id": "r1",
+                        "type": "involves",
+                        "source_id": "actor_1",
+                        "target_id": "act_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r2",
+                        "type": "produces",
+                        "source_id": "act_1",
+                        "target_id": "data_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r3",
+                        "type": "involves",
+                        "source_id": "actor_2",
+                        "target_id": "act_2",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r4",
+                        "type": "uses",
+                        "source_id": "act_2",
+                        "target_id": "data_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r5",
+                        "type": "conditional",
+                        "source_id": "gw_1",
+                        "target_id": "act_3",
+                        "condition": "approved",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r6",
+                        "type": "involves",
+                        "source_id": "actor_3",
+                        "target_id": "act_3",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r7",
+                        "type": "uses",
+                        "source_id": "act_3",
+                        "target_id": "data_1",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r8",
+                        "type": "precedes",
+                        "source_id": "act_3",
+                        "target_id": "act_4",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r9",
+                        "type": "produces",
+                        "source_id": "act_4",
+                        "target_id": "data_2",
+                        "confidence": "high",
+                    },
+                    {
+                        "id": "r10",
+                        "type": "involves",
+                        "source_id": "actor_1",
+                        "target_id": "act_4",
+                        "confidence": "medium",
+                    },
+                ],
+            },
+        },
+    ]
+
     # 3. Output schema - JSON schema for structured extraction
     output_schema = {
         "type": "object",
@@ -257,25 +543,25 @@ Subprocess Detection:
                         "type": {
                             "type": "string",
                             "enum": ["activity", "event", "gateway", "actor", "data"],
-                            "description": "Entity type"
+                            "description": "Entity type",
                         },
                         "name": {"type": "string", "description": "Entity name"},
                         "description": {
                             "type": "string",
-                            "description": "Optional entity description"
+                            "description": "Optional entity description",
                         },
                         "confidence": {
                             "type": "string",
                             "enum": ["high", "medium", "low"],
-                            "description": "Extraction confidence"
+                            "description": "Extraction confidence",
                         },
                         "attributes": {
                             "type": "object",
-                            "description": "Entity-specific attributes"
-                        }
+                            "description": "Entity-specific attributes",
+                        },
                     },
-                    "required": ["id", "type", "name", "confidence"]
-                }
+                    "required": ["id", "type", "name", "confidence"],
+                },
             },
             "relations": {
                 "type": "array",
@@ -287,34 +573,43 @@ Subprocess Detection:
                         "type": {
                             "type": "string",
                             "enum": [
-                                "precedes", "conditional", "parallel",
-                                "involves", "uses", "produces", "consumes",
-                                "sends_to", "receives_from"
+                                "precedes",
+                                "conditional",
+                                "parallel",
+                                "involves",
+                                "uses",
+                                "produces",
+                                "consumes",
+                                "sends_to",
+                                "receives_from",
                             ],
-                            "description": "Relationship type"
+                            "description": "Relationship type",
                         },
                         "source_id": {"type": "string", "description": "Source entity ID"},
                         "target_id": {"type": "string", "description": "Target entity ID"},
                         "label": {"type": "string", "description": "Optional relationship label"},
-                        "condition": {"type": "string", "description": "Guard condition if applicable"},
+                        "condition": {
+                            "type": "string",
+                            "description": "Guard condition if applicable",
+                        },
                         "confidence": {
                             "type": "string",
                             "enum": ["high", "medium", "low"],
-                            "description": "Extraction confidence"
-                        }
+                            "description": "Extraction confidence",
+                        },
                     },
-                    "required": ["id", "type", "source_id", "target_id", "confidence"]
-                }
+                    "required": ["id", "type", "source_id", "target_id", "confidence"],
+                },
             },
             "warnings": {
                 "type": "array",
                 "description": "Extraction warnings (ambiguities, truncations, etc.)",
-                "items": {"type": "string"}
-            }
+                "items": {"type": "string"},
+            },
         },
-        "required": ["entities", "relations"]
+        "required": ["entities", "relations"],
     }
-    
+
     # 4. User message template
     user_message_template = """Analyze this process description and extract entities and relationships in JSON format.
 
@@ -323,7 +618,7 @@ Process Description:
 
 Return ONLY valid JSON matching the schema. No additional text or explanation.
 """
-    
+
     # 5. Explicit constraints
     constraints = [
         "Extract ONLY entities mentioned in or strongly implied by the text",
@@ -336,7 +631,7 @@ Return ONLY valid JSON matching the schema. No additional text or explanation.
         "If you detect any truncation or incompleteness, add warning",
         "Return IDs in format: entity_type_number (e.g., act_1, gw_2, actor_3)",
     ]
-    
+
     return ExtractionPrompt(
         system_message=system_message,
         user_message_template=user_message_template,
@@ -349,11 +644,11 @@ Return ONLY valid JSON matching the schema. No additional text or explanation.
 def render_full_prompt(prompt: ExtractionPrompt, text: str) -> str:
     """
     Render complete prompt including few-shot examples.
-    
+
     Args:
         prompt: ExtractionPrompt template
         text: Text to extract from
-        
+
     Returns:
         Complete formatted prompt with examples
     """
@@ -368,16 +663,16 @@ def render_full_prompt(prompt: ExtractionPrompt, text: str) -> str:
         "\n" + "=" * 60,
         "FEW-SHOT EXAMPLES:",
     ]
-    
+
     for i, example in enumerate(prompt.few_shot_examples, 1):
         prompt_parts.append(f"\nExample {i}:")
         prompt_parts.append(f"Input: {example['input']}")
         prompt_parts.append(f"Output: {json.dumps(example['output'], indent=2)}")
-    
+
     prompt_parts.append("\n" + "=" * 60)
     prompt_parts.append("YOUR TASK:")
     prompt_parts.append(prompt.render_user_message(text))
-    
+
     return "\n".join(prompt_parts)
 
 
@@ -385,9 +680,10 @@ def render_full_prompt(prompt: ExtractionPrompt, text: str) -> str:
 # Task 2.2.4: Taxonomy Mapper (included here for cohesion)
 # ===========================
 
+
 class BPMNTypeMappings:
     """Maps extracted entity types to canonical BPMN types."""
-    
+
     # Activity mappings
     ACTIVITY_MAPPINGS = {
         "activity": "Task",
@@ -405,7 +701,7 @@ class BPMNTypeMappings:
         "manual": "ManualTask",
         "script": "ScriptTask",
     }
-    
+
     # Event mappings
     EVENT_MAPPINGS = {
         "event": "IntermediateEvent",
@@ -419,7 +715,7 @@ class BPMNTypeMappings:
         "timer": "IntermediateTimerEvent",
         "signal": "IntermediateSignalEvent",
     }
-    
+
     # Gateway mappings
     GATEWAY_MAPPINGS = {
         "gateway": "ExclusiveGateway",
@@ -436,22 +732,22 @@ class BPMNTypeMappings:
         "or": "InclusiveGateway",
         "inclusive": "InclusiveGateway",
     }
-    
+
     @classmethod
     def map_entity_type(cls, extracted_type: str, entity_name: str = "") -> str:
         """
         Map extracted entity type to BPMN type.
-        
+
         Args:
             extracted_type: Type from LLM extraction (activity, event, gateway, etc.)
             entity_name: Entity name for additional context
-            
+
         Returns:
             Canonical BPMN element type
         """
         extracted_lower = extracted_type.lower().strip()
         name_lower = entity_name.lower()
-        
+
         # Try direct mapping
         if extracted_lower in cls.ACTIVITY_MAPPINGS:
             return cls.ACTIVITY_MAPPINGS[extracted_lower]
@@ -459,17 +755,27 @@ class BPMNTypeMappings:
             return cls.EVENT_MAPPINGS[extracted_lower]
         if extracted_lower in cls.GATEWAY_MAPPINGS:
             return cls.GATEWAY_MAPPINGS[extracted_lower]
-        
+
         # Try name-based inference for activities
-        activity_keywords = ["process", "execute", "handle", "perform", "send", "receive", "check", "review", "approve"]
+        activity_keywords = [
+            "process",
+            "execute",
+            "handle",
+            "perform",
+            "send",
+            "receive",
+            "check",
+            "review",
+            "approve",
+        ]
         if any(kw in name_lower for kw in activity_keywords):
             return "Task"
-        
+
         # Try name-based inference for gateways
         gateway_keywords = ["if", "decision", "choice", "approve", "verify", "validate"]
         if any(kw in name_lower for kw in gateway_keywords):
             return "ExclusiveGateway"
-        
+
         # Default based on entity type
         if extracted_lower in ["activity", "action", "task"]:
             return "Task"
@@ -477,7 +783,7 @@ class BPMNTypeMappings:
             return "IntermediateEvent"
         elif extracted_lower == "gateway":
             return "ExclusiveGateway"
-        
+
         # Ultimate fallback
         return "Task"
 

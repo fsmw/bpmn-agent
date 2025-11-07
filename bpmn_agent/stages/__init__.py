@@ -10,52 +10,47 @@ Implements the 6-stage extraction pipeline:
 6. BPMN XML Generation: Convert graph to valid BPMN 2.0 XML
 """
 
-from bpmn_agent.stages.text_preprocessing import (
-    TextChunk,
-    PreprocessedText,
-    TextPreprocessor,
+from bpmn_agent.stages.entity_extraction import (
+    EntityExtractor,
+    JSONParser,
 )
-
+from bpmn_agent.stages.entity_resolution import (
+    ActorConsolidator,
+    ActorProfile,
+    CoReferenceResolver,
+    EntityResolutionPipeline,
+    RelationshipValidationReport,
+    RelationshipValidator,
+)
+from bpmn_agent.stages.extraction_critique import (
+    CritiqueAgent,
+    CritiqueResult,
+    ExtractionRefinementPipeline,
+    ExtractionValidator,
+    ValidationIssue,
+    ValidationIssueSeverity,
+    ValidationIssueType,
+)
 from bpmn_agent.stages.extraction_prompts import (
+    BPMNTypeMappings,
     ExtractionPrompt,
     create_extraction_prompt,
     render_full_prompt,
-    BPMNTypeMappings,
 )
-
-from bpmn_agent.stages.entity_extraction import (
-    JSONParser,
-    EntityExtractor,
-)
-
-from bpmn_agent.stages.entity_resolution import (
-    CoReferenceResolver,
-    ActorProfile,
-    ActorConsolidator,
-    RelationshipValidationReport,
-    RelationshipValidator,
-    EntityResolutionPipeline,
-)
-
 from bpmn_agent.stages.process_graph_builder import (
-    ProcessGraphBuilder,
-    LaneStructure,
-    LaneStructureBuilder,
     GraphValidationIssue,
     GraphValidator,
     ImplicitFlow,
     ImplicitFlowInferrer,
+    LaneStructure,
+    LaneStructureBuilder,
+    ProcessGraphBuilder,
     SemanticGraphConstructionPipeline,
 )
-
-from bpmn_agent.stages.extraction_critique import (
-    ValidationIssueSeverity,
-    ValidationIssueType,
-    ValidationIssue,
-    CritiqueResult,
-    ExtractionValidator,
-    CritiqueAgent,
-    ExtractionRefinementPipeline,
+from bpmn_agent.stages.text_preprocessing import (
+    PreprocessedText,
+    TextChunk,
+    TextPreprocessor,
 )
 
 __all__ = [
@@ -63,7 +58,6 @@ __all__ = [
     "TextChunk",
     "PreprocessedText",
     "TextPreprocessor",
-    
     # Stage 2: Entity & Relation Extraction
     "ExtractionPrompt",
     "create_extraction_prompt",
@@ -71,7 +65,6 @@ __all__ = [
     "BPMNTypeMappings",
     "JSONParser",
     "EntityExtractor",
-    
     # Stage 3: Entity Resolution
     "CoReferenceResolver",
     "ActorProfile",
@@ -79,7 +72,6 @@ __all__ = [
     "RelationshipValidationReport",
     "RelationshipValidator",
     "EntityResolutionPipeline",
-    
     # Stage 4: Semantic Graph Construction
     "ProcessGraphBuilder",
     "LaneStructure",
@@ -89,7 +81,6 @@ __all__ = [
     "ImplicitFlow",
     "ImplicitFlowInferrer",
     "SemanticGraphConstructionPipeline",
-    
     # Stage 5: Self-Critique & Validation
     "ValidationIssueSeverity",
     "ValidationIssueType",

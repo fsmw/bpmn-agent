@@ -8,22 +8,28 @@ Provides a comprehensive REST API for:
 - Pattern enrichment and details
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query, Path
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import List, Optional
 
-from bpmn_agent.models.knowledge_base import DomainType, PatternCategory, ComplexityLevel
+from fastapi import APIRouter, HTTPException, Path, Query
+from pydantic import BaseModel, Field
+
 from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
-from bpmn_agent.models.knowledge_base import KnowledgeBase
-
+from bpmn_agent.models.knowledge_base import (
+    ComplexityLevel,
+    DomainType,
+    KnowledgeBase,
+    PatternCategory,
+)
 
 # ===========================
 # Request/Response Models
 # ===========================
 
+
 class DomainTypeEnum(str, Enum):
     """Domain types for API."""
+
     FINANCE = "finance"
     HEALTHCARE = "healthcare"
     MANUFACTURING = "manufacturing"
@@ -33,6 +39,7 @@ class DomainTypeEnum(str, Enum):
 
 class ComplexityLevelEnum(str, Enum):
     """Complexity levels for API."""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
@@ -40,6 +47,7 @@ class ComplexityLevelEnum(str, Enum):
 
 class PatternCategoryEnum(str, Enum):
     """Pattern categories for API."""
+
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
     EXCLUSIVE_CHOICE = "exclusive_choice"
@@ -51,6 +59,7 @@ class PatternCategoryEnum(str, Enum):
 
 class PatternMatchResult(BaseModel):
     """Result of pattern matching."""
+
     id: str
     name: str
     score: float = Field(..., ge=0.0, le=1.0, description="Match score between 0 and 1")
@@ -62,6 +71,7 @@ class PatternMatchResult(BaseModel):
 
 class PatternRecommendation(BaseModel):
     """Pattern recommendation with alternatives."""
+
     best_pattern_id: Optional[str]
     best_pattern_name: Optional[str]
     confidence: float = Field(ge=0.0, le=1.0)
@@ -70,6 +80,7 @@ class PatternRecommendation(BaseModel):
 
 class ActivityValidationResult(BaseModel):
     """Result of activity validation."""
+
     activity: str
     is_valid: bool
     confidence: float = Field(ge=0.0, le=1.0)
@@ -78,12 +89,14 @@ class ActivityValidationResult(BaseModel):
 
 class PatternSearchResult(BaseModel):
     """Result of pattern search."""
+
     patterns: List[PatternMatchResult] = Field(default_factory=list)
     total_count: int
 
 
 class DomainPatternsResult(BaseModel):
     """Patterns for a specific domain."""
+
     domain: str
     patterns: List[PatternMatchResult] = Field(default_factory=list)
     total_count: int
@@ -91,6 +104,7 @@ class DomainPatternsResult(BaseModel):
 
 class PatternDetailsResult(BaseModel):
     """Detailed information about a pattern."""
+
     id: str
     name: str
     description: str
@@ -121,9 +135,8 @@ def get_bridge() -> AdvancedPatternMatchingBridge:
             _bridge_instance = AdvancedPatternMatchingBridge(kb)
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail=f"Failed to initialize pattern matching bridge: {str(e)}"
-            )
+                status_code=500, detail=f"Failed to initialize pattern matching bridge: {str(e)}"
+            ) from e
     return _bridge_instance
 
 
@@ -131,16 +144,17 @@ def get_bridge() -> AdvancedPatternMatchingBridge:
 # Endpoints
 # ===========================
 
+
 @router.post("/search", response_model=PatternSearchResult)
 async def search_patterns(
     query: str = Query(..., min_length=1, description="Search query"),
     domain: Optional[DomainTypeEnum] = Query(None, description="Filter by domain"),
     category: Optional[PatternCategoryEnum] = Query(None, description="Filter by category"),
-    max_results: int = Query(10, ge=1, le=100, description="Maximum results to return")
+    max_results: int = Query(10, ge=1, le=100, description="Maximum results to return"),
 ) -> PatternSearchResult:
     """
     Search for patterns using advanced matching.
-    
+
     Supports:
     - Fuzzy keyword matching
     - Semantic similarity
@@ -156,9 +170,9 @@ async def search_patterns(
             if domain_type is None:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}",
                 )
-        
+
         category_type = None
         if category:
             category_mapping = {c.value: c for c in PatternCategory}
@@ -166,15 +180,11 @@ async def search_patterns(
             if category_type is None:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid category: {category.value}. Valid categories: {', '.join([c.value for c in PatternCategory])}"
+                    detail=f"Invalid category: {category.value}. Valid categories: {', '.join([c.value for c in PatternCategory])}",
                 )
-        
-        results = bridge.search_patterns(
-            query,
-            domain=domain_type,
-            category=category_type
-        )
-        
+
+        results = bridge.search_patterns(query, domain=domain_type, category=category_type)
+
         pattern_results = [
             PatternMatchResult(
                 id=r.pattern.id,
@@ -183,27 +193,24 @@ async def search_patterns(
                 category=r.pattern.category.value,
                 complexity=r.pattern.complexity.value,
                 confidence=r.pattern.confidence,
-                tags=list(r.pattern.tags)
+                tags=list(r.pattern.tags),
             )
             for r in results[:max_results]
         ]
-        
-        return PatternSearchResult(
-            patterns=pattern_results,
-            total_count=len(results)
-        )
+
+        return PatternSearchResult(patterns=pattern_results, total_count=len(results))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}") from e
 
 
 @router.post("/find-for-process", response_model=PatternRecommendation)
 async def find_patterns_for_process(
     process_description: str = Query(..., min_length=1, description="Process description"),
-    domain: Optional[DomainTypeEnum] = Query(None, description="Domain hint")
+    domain: Optional[DomainTypeEnum] = Query(None, description="Domain hint"),
 ) -> PatternRecommendation:
     """
     Find matching patterns for a process description.
-    
+
     Returns the best matching pattern plus alternatives.
     """
     try:
@@ -216,14 +223,13 @@ async def find_patterns_for_process(
             if domain_type is None:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}",
                 )
-        
+
         recommendation = bridge.find_patterns_for_process(
-            process_description,
-            domain_hint=domain_type
+            process_description, domain_hint=domain_type
         )
-        
+
         alternatives = [
             PatternMatchResult(
                 id=p.pattern.id,
@@ -232,37 +238,39 @@ async def find_patterns_for_process(
                 category=p.pattern.category.value,
                 complexity=p.pattern.complexity.value,
                 confidence=p.pattern.confidence,
-                tags=list(p.pattern.tags)
+                tags=list(p.pattern.tags),
             )
             for p in recommendation.patterns
         ]
-        
+
         return PatternRecommendation(
             best_pattern_id=recommendation.best_pattern.id if recommendation.best_pattern else None,
-            best_pattern_name=recommendation.best_pattern.name if recommendation.best_pattern else None,
+            best_pattern_name=(
+                recommendation.best_pattern.name if recommendation.best_pattern else None
+            ),
             confidence=recommendation.confidence,
-            alternatives=alternatives
+            alternatives=alternatives,
         )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Pattern finding failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Pattern finding failed: {str(e)}") from e
 
 
 @router.post("/validate-activities", response_model=List[ActivityValidationResult])
 async def validate_activities(
     activities: List[str] = Query(..., description="List of activity labels to validate"),
-    domain: Optional[DomainTypeEnum] = Query(None, description="Domain for validation")
+    domain: Optional[DomainTypeEnum] = Query(None, description="Domain for validation"),
 ) -> List[ActivityValidationResult]:
     """
     Validate extracted activities against known patterns.
-    
+
     Checks if activities are recognized and provides suggestions.
     """
     try:
         if not activities:
             raise HTTPException(status_code=400, detail="Activities list cannot be empty")
-        
+
         bridge = get_bridge()
         # Convert API enum value to model enum type using value-based mapping
         domain_type = None
@@ -272,24 +280,18 @@ async def validate_activities(
             if domain_type is None:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                    detail=f"Invalid domain: {domain.value}. Valid domains: {', '.join([d.value for d in DomainType])}",
                 )
-        
-        results = bridge.validate_extracted_activities(
-            activities,
-            domain_hint=domain_type
-        )
-        
+
+        results = bridge.validate_extracted_activities(activities, domain_hint=domain_type)
+
         validation_results = [
             ActivityValidationResult(
-                activity=activity,
-                is_valid=valid,
-                confidence=score,
-                suggestions=suggestions
+                activity=activity, is_valid=valid, confidence=score, suggestions=suggestions
             )
             for activity, (valid, score, suggestions) in results.items()
         ]
-        
+
         return validation_results
     except HTTPException:
         raise
@@ -301,11 +303,11 @@ async def validate_activities(
 async def get_patterns_by_domain(
     domain: str = Path(..., description="Domain type"),
     max_patterns: int = Query(10, ge=1, le=100, description="Maximum patterns to return"),
-    complexity: Optional[str] = Query(None, description="Filter by complexity")
+    complexity: Optional[str] = Query(None, description="Filter by complexity"),
 ) -> DomainPatternsResult:
     """
     Get pattern suggestions for a specific domain.
-    
+
     Useful for discovering available patterns in a domain.
     """
     try:
@@ -316,10 +318,10 @@ async def get_patterns_by_domain(
         if domain_lower not in domain_mapping:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid domain: {domain}. Valid domains: {', '.join([d.value for d in DomainType])}"
+                detail=f"Invalid domain: {domain}. Valid domains: {', '.join([d.value for d in DomainType])}",
             )
         domain_type = domain_mapping[domain_lower]
-        
+
         complexity_level = None
         if complexity:
             # Map complexity string to ComplexityLevel
@@ -328,16 +330,14 @@ async def get_patterns_by_domain(
             if complexity_lower not in complexity_mapping:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid complexity: {complexity}. Valid levels: {', '.join([c.value for c in ComplexityLevel])}"
+                    detail=f"Invalid complexity: {complexity}. Valid levels: {', '.join([c.value for c in ComplexityLevel])}",
                 )
             complexity_level = complexity_mapping[complexity_lower]
-        
+
         patterns = bridge.suggest_patterns_by_domain(
-            domain_type,
-            complexity=complexity_level,
-            max_patterns=max_patterns
+            domain_type, complexity=complexity_level, max_patterns=max_patterns
         )
-        
+
         pattern_results = [
             PatternMatchResult(
                 id=p.get("id", ""),
@@ -346,20 +346,18 @@ async def get_patterns_by_domain(
                 category=p.get("category", ""),
                 complexity=p.get("complexity", ""),
                 confidence=p.get("confidence", 0.0),
-                tags=p.get("tags", [])
+                tags=p.get("tags", []),
             )
             for p in patterns
         ]
-        
+
         return DomainPatternsResult(
-            domain=domain,
-            patterns=pattern_results,
-            total_count=len(pattern_results)
+            domain=domain, patterns=pattern_results, total_count=len(pattern_results)
         )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Domain pattern retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Domain pattern retrieval failed: {str(e)}") from e
 
 
 @router.get("/pattern/{pattern_id}", response_model=PatternDetailsResult)
@@ -368,21 +366,18 @@ async def get_pattern_details(
 ) -> PatternDetailsResult:
     """
     Get detailed information about a specific pattern.
-    
+
     Includes related patterns and metadata.
     """
     try:
         bridge = get_bridge()
-        
+
         # Enrich the pattern with context
         enriched = bridge.enrich_pattern_context(pattern_id)
-        
+
         if not enriched:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Pattern not found: {pattern_id}"
-            )
-        
+            raise HTTPException(status_code=404, detail=f"Pattern not found: {pattern_id}")
+
         return PatternDetailsResult(
             id=enriched.get("id", pattern_id),
             name=enriched.get("name", ""),
@@ -392,7 +387,7 @@ async def get_pattern_details(
             complexity=enriched.get("complexity", ""),
             confidence=enriched.get("confidence", 0.0),
             tags=enriched.get("tags", []),
-            related_patterns=enriched.get("related_patterns", [])
+            related_patterns=enriched.get("related_patterns", []),
         )
     except HTTPException:
         raise
@@ -403,25 +398,22 @@ async def get_pattern_details(
 @router.get("/similar/{pattern_id}", response_model=PatternSearchResult)
 async def find_similar_patterns(
     pattern_id: str = Path(..., description="Reference pattern ID"),
-    max_patterns: int = Query(5, ge=1, le=50, description="Maximum similar patterns")
+    max_patterns: int = Query(5, ge=1, le=50, description="Maximum similar patterns"),
 ) -> PatternSearchResult:
     """
     Find patterns similar to a given pattern.
-    
+
     Based on category, complexity, domain, and content similarity.
     """
     try:
         bridge = get_bridge()
-        
-        similar = bridge.find_similar_patterns_for_pattern(
-            pattern_id,
-            max_similar=max_patterns
-        )
-        
+
+        similar = bridge.find_similar_patterns_for_pattern(pattern_id, max_similar=max_patterns)
+
         if not similar:
             # Pattern might not exist or have no similar patterns
             return PatternSearchResult(patterns=[], total_count=0)
-        
+
         pattern_results = [
             PatternMatchResult(
                 id=s.pattern.id,
@@ -430,15 +422,12 @@ async def find_similar_patterns(
                 category=s.pattern.category.value,
                 complexity=s.pattern.complexity.value,
                 confidence=s.pattern.confidence,
-                tags=list(s.pattern.tags)
+                tags=list(s.pattern.tags),
             )
             for s in similar
         ]
-        
-        return PatternSearchResult(
-            patterns=pattern_results,
-            total_count=len(pattern_results)
-        )
+
+        return PatternSearchResult(patterns=pattern_results, total_count=len(pattern_results))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Similar pattern search failed: {str(e)}")
 
@@ -447,7 +436,7 @@ async def find_similar_patterns(
 async def get_pattern_statistics():
     """
     Get statistics about the pattern library.
-    
+
     Includes counts by domain, category, complexity, etc.
     """
     try:
@@ -455,12 +444,13 @@ async def get_pattern_statistics():
         stats = bridge.get_pattern_statistics()
         return stats
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Statistics retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Statistics retrieval failed: {str(e)}") from e
 
 
 # ===========================
 # Health Checks
 # ===========================
+
 
 @router.get("/health")
 async def health_check():
@@ -468,12 +458,6 @@ async def health_check():
     try:
         bridge = get_bridge()
         stats = bridge.get_pattern_statistics()
-        return {
-            "status": "healthy",
-            "total_patterns": stats.get("total_patterns", 0)
-        }
+        return {"status": "healthy", "total_patterns": stats.get("total_patterns", 0)}
     except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        return {"status": "unhealthy", "error": str(e)}

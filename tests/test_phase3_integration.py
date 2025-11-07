@@ -69,14 +69,14 @@ class TestErrorRecoveryIntegration:
     def test_cascading_failure_detection_initialized(self):
         """Test that CascadingFailureDetector works correctly."""
         detector = CascadingFailureDetector(max_consecutive_failures=2)
-        
+
         # Record some failures on same stage
         cascading_1 = detector.record_failure("stage1")
         assert cascading_1 is False  # First failure
-        
+
         cascading_2 = detector.record_failure("stage1")
         assert cascading_2 is True  # Second consecutive failure triggers cascading detection
-        
+
         # Reset and test different stages
         detector.reset()
         assert detector.record_failure("stage1") is False
@@ -111,7 +111,7 @@ class TestCheckpointIntegration:
             # Verify cleanup_session can be called
             deleted = manager.cleanup_session(session_id="test-session")
             assert isinstance(deleted, int)  # Returns count of deleted checkpoints
-            
+
             # Verify directory still exists
             assert Path(tmpdir).exists()
 
@@ -119,10 +119,10 @@ class TestCheckpointIntegration:
         """Test that cleanup_session method exists."""
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = CheckpointManager(checkpoint_dir=str(tmpdir))
-            
+
             # Should be callable
             manager.cleanup_session("test-session")
-            
+
             # No error should occur
 
 
@@ -366,7 +366,7 @@ class TestComponentIntegration:
                 error_type="api_error",
                 stage_name="recovery_stage",
             )
-            
+
             # Record recovery
             hooks.record_recovery_attempt(
                 "exponential_backoff",
@@ -424,6 +424,7 @@ class TestOrchestratorWithObservability:
     def llm_config(self):
         """Create test LLM configuration."""
         from bpmn_agent.core.llm_client import LLMConfig
+
         return LLMConfig(
             provider="ollama",
             base_url="http://localhost:11434",
@@ -436,14 +437,19 @@ class TestOrchestratorWithObservability:
     @pytest.fixture
     def agent_config(self, llm_config):
         """Create test agent configuration."""
-        from bpmn_agent.agent.config import AgentConfig, ProcessingMode, ErrorHandlingStrategy, PipelineConfig
-        
+        from bpmn_agent.agent.config import (
+            AgentConfig,
+            ProcessingMode,
+            ErrorHandlingStrategy,
+            PipelineConfig,
+        )
+
         pipeline_config = PipelineConfig(
             chunk_size=256,
             extraction_retries=1,
             extraction_timeout=30,
         )
-        
+
         return AgentConfig(
             llm_config=llm_config,
             mode=ProcessingMode.STANDARD,

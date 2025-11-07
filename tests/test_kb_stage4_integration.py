@@ -243,15 +243,9 @@ class TestKBGraphEnricher:
 
         # Create sample nodes
         nodes = [
-            GraphNode(
-                id="n1", type=NodeType.TASK, label="Validate Payment", bpmn_type="Task"
-            ),
-            GraphNode(
-                id="n2", type=NodeType.TASK, label="Process Payment", bpmn_type="Task"
-            ),
-            GraphNode(
-                id="n3", type=NodeType.TASK, label="Confirm Payment", bpmn_type="Task"
-            ),
+            GraphNode(id="n1", type=NodeType.TASK, label="Validate Payment", bpmn_type="Task"),
+            GraphNode(id="n2", type=NodeType.TASK, label="Process Payment", bpmn_type="Task"),
+            GraphNode(id="n3", type=NodeType.TASK, label="Confirm Payment", bpmn_type="Task"),
         ]
         edges = []
 
@@ -266,9 +260,7 @@ class TestKBGraphEnricher:
                 },
             },
         ):
-            flows = enricher.suggest_implicit_flows_for_pattern(
-                "Sequential Flow", nodes, edges
-            )
+            flows = enricher.suggest_implicit_flows_for_pattern("Sequential Flow", nodes, edges)
             # Should suggest flows between activities
             assert len(flows) > 0
 
@@ -292,9 +284,7 @@ class TestProcessGraphBuilderWithKB:
         builder = ProcessGraphBuilder(enable_kb=False)
         assert builder.enable_kb is False
 
-    def test_build_from_extraction_without_domain(
-        self, finance_extraction_result, actor_profiles
-    ):
+    def test_build_from_extraction_without_domain(self, finance_extraction_result, actor_profiles):
         """Test build from extraction without domain parameter."""
         builder = ProcessGraphBuilder(enable_kb=True)
         graph = builder.build_from_extraction(finance_extraction_result, actor_profiles)
@@ -305,9 +295,7 @@ class TestProcessGraphBuilderWithKB:
         assert len(graph.edges) > 0
         assert graph.metadata["domain"] is None
 
-    def test_build_from_extraction_with_domain(
-        self, finance_extraction_result, actor_profiles
-    ):
+    def test_build_from_extraction_with_domain(self, finance_extraction_result, actor_profiles):
         """Test build from extraction with domain parameter."""
         builder = ProcessGraphBuilder(enable_kb=True)
         graph = builder.build_from_extraction(
@@ -318,9 +306,7 @@ class TestProcessGraphBuilderWithKB:
         assert graph.metadata["domain"] == "finance"
         assert graph.metadata["kb_enabled"] is True
 
-    def test_build_from_extraction_kb_disabled(
-        self, finance_extraction_result, actor_profiles
-    ):
+    def test_build_from_extraction_kb_disabled(self, finance_extraction_result, actor_profiles):
         """Test build from extraction with KB disabled."""
         builder = ProcessGraphBuilder(enable_kb=False)
         graph = builder.build_from_extraction(
@@ -396,9 +382,7 @@ class TestImplicitFlowInferrerWithKB:
         )
 
         inferrer = ImplicitFlowInferrer(enable_kb=True)
-        with patch.object(
-            inferrer.kb_enricher, "get_relevant_patterns", return_value=[]
-        ):
+        with patch.object(inferrer.kb_enricher, "get_relevant_patterns", return_value=[]):
             flows = inferrer.infer_implicit_flows(graph, domain=DomainType.FINANCE)
 
             # Should process domain parameter without error
@@ -458,12 +442,10 @@ class TestImplicitFlowInferrerWithKB:
         inferrer = ImplicitFlowInferrer(enable_kb=False)
 
         # All inference methods would return duplicates
-        with patch.object(
-            inferrer, "_infer_fork_join_flows", return_value=[]
-        ), patch.object(
-            inferrer, "_infer_sequential_flows", return_value=[]
-        ), patch.object(
-            inferrer, "_infer_data_flow_dependencies", return_value=[]
+        with (
+            patch.object(inferrer, "_infer_fork_join_flows", return_value=[]),
+            patch.object(inferrer, "_infer_sequential_flows", return_value=[]),
+            patch.object(inferrer, "_infer_data_flow_dependencies", return_value=[]),
         ):
             flows = inferrer.infer_implicit_flows(graph)
 
@@ -591,14 +573,10 @@ class TestSemanticGraphConstructionPipelineWithKB:
         assert graph is not None
         assert report is not None
 
-    def test_graph_validation_included_in_report(
-        self, finance_extraction_result, actor_profiles
-    ):
+    def test_graph_validation_included_in_report(self, finance_extraction_result, actor_profiles):
         """Test that validation report is included."""
         pipeline = SemanticGraphConstructionPipeline(enable_kb=True)
-        graph, report, flows = pipeline.construct_graph(
-            finance_extraction_result, actor_profiles
-        )
+        graph, report, flows = pipeline.construct_graph(finance_extraction_result, actor_profiles)
 
         assert report.graph_id == graph.id
         assert hasattr(report, "metrics")
@@ -609,9 +587,7 @@ class TestSemanticGraphConstructionPipelineWithKB:
     ):
         """Test that implicit flows are included in suggestions."""
         pipeline = SemanticGraphConstructionPipeline(enable_kb=True)
-        graph, report, flows = pipeline.construct_graph(
-            finance_extraction_result, actor_profiles
-        )
+        graph, report, flows = pipeline.construct_graph(finance_extraction_result, actor_profiles)
 
         # Suggestions should mention implicit flows
         suggestions = report.suggestions
@@ -941,7 +917,7 @@ class TestFullPipelineIntegration:
         # Verify data node properties
         invoice_nodes = [n for n in data_nodes if "invoice" in n.label.lower()]
         assert len(invoice_nodes) > 0, "Should have invoice data node"
-        
+
         # Verify data flow edges are created
         data_edges = [e for e in graph.edges if e.type == EdgeType.DATA_FLOW]
         assert len(data_edges) >= 3, "Should have at least 3 data flow edges"
@@ -949,13 +925,14 @@ class TestFullPipelineIntegration:
         # Verify data edges connect to data nodes
         data_node_ids = {n.id for n in data_nodes}
         for edge in data_edges:
-            assert edge.source_id in data_node_ids or edge.target_id in data_node_ids, \
-                f"Data flow edge should connect to data node: {edge}"
+            assert (
+                edge.source_id in data_node_ids or edge.target_id in data_node_ids
+            ), f"Data flow edge should connect to data node: {edge}"
 
     def test_data_object_with_attributes(self):
         """Test data objects can have additional attributes."""
         from bpmn_agent.models.extraction import EntityAttribute
-        
+
         entities = [
             ExtractedEntity(
                 id="data_1",
@@ -965,8 +942,8 @@ class TestFullPipelineIntegration:
                 source_text="order",
                 attributes={
                     "data_type": EntityAttribute(key="data_type", value="document"),
-                    "format": EntityAttribute(key="format", value="JSON")
-                }
+                    "format": EntityAttribute(key="format", value="JSON"),
+                },
             ),
             ExtractedEntity(
                 id="act_1",
@@ -1014,6 +991,5 @@ class TestFullPipelineIntegration:
         # Verify attributes are preserved
         order_node = [n for n in data_nodes if "order" in n.label.lower()][0]
         assert order_node.properties is not None, "Data node should have properties"
-
 
     pytest.main([__file__, "-v"])
