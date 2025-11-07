@@ -384,7 +384,7 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
                     llm_critique = json.loads(json_str)
                 except (json.JSONDecodeError, IndexError):
                     # If parsing fails, store raw response
-                    llm_critique = {"raw_response": response_text if isinstance(response, LLMResponse) else response}
+                    llm_critique = {"raw_response": response_text}
             except Exception as e:
                 logger.warning(f"LLM critique failed: {e}")
                 llm_critique = None
