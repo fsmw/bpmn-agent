@@ -507,6 +507,8 @@ class BPMNXMLGenerator:
                     self.lanes_by_id[lane.id] = lane
 
             if lane_set.lanes:
+                if self.process is None:
+                    raise ValueError("Process not initialized")
                 self.process.lane_set = lane_set
 
     def _build_xml_root(self) -> etree._Element:
