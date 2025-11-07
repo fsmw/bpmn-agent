@@ -861,6 +861,8 @@ class LaneStructureBuilder:
                         label=f"Assigned to {actor_node.label}",
                         confidence=lane.confidence,
                         metadata={"lane_id": lane.lane_id},
+                        condition=None,
+                        is_default=False,
                     )
                     new_edges.append(edge)
 
