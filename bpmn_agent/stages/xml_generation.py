@@ -478,6 +478,7 @@ class BPMNXMLGenerator:
                 id=self._generate_id("LaneSet", "LaneSet"),
                 name=None,
                 documentation=None,
+                parent_lane=None,
             )
 
             for actor_id, task_ids in actor_tasks.items():

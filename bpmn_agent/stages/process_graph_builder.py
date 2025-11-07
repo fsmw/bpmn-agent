@@ -256,7 +256,7 @@ class KBGraphEnricher:
             return {}
 
         try:
-            results = bridge.validate_extracted_activities(activity_labels, domain_hint=domain)
+            results = bridge.validate_extracted_activities(activity_labels)
             return {
                 activity: {
                     "is_valid": valid,
@@ -515,6 +515,9 @@ class ProcessGraphBuilder:
                 bpmn_type="StartEvent",
                 confidence=1.0,
                 metadata={"synthetic": True},
+                x=None,
+                y=None,
+                is_abstract=False,
             )
             nodes_to_add.append(start_node)
 
