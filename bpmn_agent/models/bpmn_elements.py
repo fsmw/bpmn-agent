@@ -526,14 +526,14 @@ class BPMNDiagram:
 
     def get_flow_nodes(self) -> List[BaseElement]:
         """Get all flow nodes from all processes."""
-        nodes = []
+        nodes: List[BaseElement] = []
         for process in self.definitions.processes:
             nodes.extend(process.flow_nodes)
         return nodes
 
     def get_all_flows(self) -> List[Union[SequenceFlow, MessageFlow]]:
         """Get all flows (sequence and message)."""
-        flows = []
+        flows: List[Union[SequenceFlow, MessageFlow]] = []
         for process in self.definitions.processes:
             flows.extend(process.sequence_flows)
         for collaboration in self.definitions.collaborations:
