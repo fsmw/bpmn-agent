@@ -379,6 +379,7 @@ class EntityExtractor:
                     message=str(e),
                     severity="error",
                     recoverable=False,
+                    context=None,
                 )
             )
 
@@ -473,8 +474,11 @@ class EntityExtractor:
                     description=entity_data.get("description"),
                     confidence=confidence,
                     source_text=entity_data.get("source_text"),
+                    character_offsets=entity_data.get("character_offsets"),
                     attributes=attributes,
                     alternative_names=entity_data.get("alternative_names", []),
+                    is_implicit=entity_data.get("is_implicit", False),
+                    is_uncertain=entity_data.get("is_uncertain", False),
                 )
 
                 entities.append(entity)
@@ -524,6 +528,7 @@ class EntityExtractor:
                     attributes=relation_data.get("attributes", {}),
                     is_conditional=relation_data.get("condition") is not None,
                     condition_expression=relation_data.get("condition"),
+                    is_implicit=relation_data.get("is_implicit", False),
                 )
 
                 relations.append(relation)

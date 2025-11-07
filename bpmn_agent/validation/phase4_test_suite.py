@@ -622,7 +622,13 @@ class Phase4TestSuite:
                     label = elem.get("name", f"{tag_name}_{len(nodes)+1}")
 
                     node = GraphNode(
-                        id=node_id, type=node_type, label=label, bpmn_type=f"bpmn:{tag_name}"
+                        id=node_id,
+                        type=node_type,
+                        label=label,
+                        bpmn_type=f"bpmn:{tag_name}",
+                        x=None,
+                        y=None,
+                        is_abstract=False,
                     )
                     nodes.append(node)
 

@@ -543,6 +543,9 @@ class ProcessGraphBuilder:
                 bpmn_type="EndEvent",
                 confidence=1.0,
                 metadata={"synthetic": True},
+                x=None,
+                y=None,
+                is_abstract=False,
             )
             nodes_to_add.append(end_node)
 
