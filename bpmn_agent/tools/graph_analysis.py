@@ -368,11 +368,11 @@ class GraphAnalyzer:
 
     def _calculate_basic_metrics(self, graph: ProcessGraph) -> Dict[str, Any]:
         """Calculate basic graph metrics."""
-        node_types: dict[str, int] = defaultdict(int)
+        node_types: Dict[str, int] = defaultdict(int)
         for node in graph.nodes:
             node_types[node.type] += 1
 
-        edge_types: dict[str, int] = defaultdict(int)
+        edge_types: Dict[str, int] = defaultdict(int)
         for edge in graph.edges:
             edge_types[edge.type] += 1
 
