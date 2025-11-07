@@ -419,6 +419,7 @@ class EntityExtractor:
             total_relations_extracted=len(relations),
             high_confidence_relations=relation_confidence_counts[ConfidenceLevel.HIGH],
             warnings=extraction_warnings if extraction_warnings else [],
+            notes=None,
         )
 
         return ExtractionResultWithErrors(
