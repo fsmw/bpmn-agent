@@ -6,7 +6,7 @@ pattern matching capabilities for enhanced process understanding.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from bpmn_agent.knowledge.advanced_pattern_matcher import (
     AdvancedPatternMatcher,
