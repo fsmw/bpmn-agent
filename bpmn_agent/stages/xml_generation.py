@@ -435,7 +435,7 @@ class BPMNXMLGenerator:
             target_ref=target_elem.id,
             is_default=edge.is_default,
             documentation=None,
-            condition_expression=edge.properties.get("condition"),
+            condition_expression=edge.condition,
         )
 
         # Add condition if present
