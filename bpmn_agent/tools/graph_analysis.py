@@ -528,8 +528,8 @@ class GraphAnalyzer:
             return True
 
         # Count incoming/outgoing edges per node
-        incoming_count: dict[str, int] = defaultdict(int)
-        outgoing_count: dict[str, int] = defaultdict(int)
+        incoming_count: Dict[str, int] = defaultdict(int)
+        outgoing_count: Dict[str, int] = defaultdict(int)
 
         for edge in graph.edges:
             outgoing_count[edge.source_id] += 1
