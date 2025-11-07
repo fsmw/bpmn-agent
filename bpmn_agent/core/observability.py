@@ -265,7 +265,10 @@ def log_execution(
     def decorator(func: F) -> F:
         @functools.wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            log_level = level if isinstance(level, str) else level.value
+            if isinstance(level, str):
+                log_level = level
+            else:
+                log_level = level.value
             func_name = f"{func.__module__}.{func.__qualname__}"
 
             log_data: Dict[str, Any] = {"function": func_name}
@@ -303,7 +306,10 @@ def log_execution(
 
         @functools.wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            log_level = level if isinstance(level, str) else level.value
+            if isinstance(level, str):
+                log_level = level
+            else:
+                log_level = level.value
             func_name = f"{func.__module__}.{func.__qualname__}"
 
             log_data: Dict[str, Any] = {"function": func_name}
