@@ -261,6 +261,7 @@ class BPMNXMLGenerator:
             id=event_id,
             name=node.label,
             documentation=node.properties.get("description"),
+            is_interrupting=True,
         )
         return event
 
