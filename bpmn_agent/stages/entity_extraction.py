@@ -313,7 +313,7 @@ class EntityExtractor:
             for attempt in range(max_retries + 1):
                 try:
                     # Call LLM
-                    from bpmn_agent.core.llm_client import LLMMessage
+                    from bpmn_agent.core.llm_client import LLMMessage, LLMResponse
 
                     response = await self.llm_client.call(
                         messages=[
@@ -332,9 +332,18 @@ class EntityExtractor:
                         max_tokens=4096,
                     )
 
+                    # Handle union type: LLMResponse | AsyncIterator[str]
+                    if isinstance(response, LLMResponse):
+                        response_content = response.content
+                    else:
+                        # Collect chunks from AsyncIterator
+                        response_content = ""
+                        async for chunk in response:
+                            response_content += chunk
+
                     # Parse response
                     success, data, error_msg = JSONParser.parse_extraction_response(
-                        response.content
+                        response_content
                     )
 
                     if success:

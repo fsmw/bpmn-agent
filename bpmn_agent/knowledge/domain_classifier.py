@@ -241,7 +241,10 @@ class DomainClassifier:
 
             if results:
                 # Get domain from top pattern
-                domain = results[0].item.get("domain", "generic")
+                if results[0].item is not None:
+                    domain = results[0].item.get("domain", "generic")
+                else:
+                    domain = "generic"
                 confidence = results[0].similarity_score
                 return DomainClassificationResult(
                     domain=DomainType(domain), confidence=float(confidence)
