@@ -108,7 +108,7 @@ class EnhancedXSDValidator:
         """
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.enable_kb_patterns = enable_kb_patterns
-        self.xsd_content = None
+        self.xsd_content: Optional[str] = None
         self.xsd_schema = None
         self.domain_classifier = DomainClassifier()
         self._load_xsd_schema()
@@ -150,6 +150,9 @@ class EnhancedXSDValidator:
             self.xsd_content = self._download_xsd_schema()
 
             # Parse XSD content - handle encoding declaration properly
+            if self.xsd_content is None:
+                self.logger.error("Failed to load XSD schema")
+                return
             if isinstance(self.xsd_content, str):
                 # Remove XML declaration if present to avoid encoding issues
                 content = self.xsd_content
@@ -161,6 +164,7 @@ class EnhancedXSDValidator:
                 # Parse as bytes to avoid encoding declaration issues
                 schema_doc = etree.parse(StringIO(content))
             else:
+                # Handle bytes case (shouldn't happen with current implementation)
                 schema_doc = etree.parse(StringIO(self.xsd_content.decode("utf-8")))
 
             # Create XSD schema
@@ -789,14 +793,14 @@ class EnhancedXSDValidator:
         extraction_result: Optional[ExtractionResultWithErrors],
     ) -> None:
         """Calculate comprehensive quality metrics."""
-        metrics = {}
+        metrics: Dict[str, Any] = {}
 
         # Structural metrics
         metrics["xml_size_bytes"] = len(xml_content.encode("utf-8"))
         metrics["xml_lines"] = xml_content.count("\n") + 1
 
         # Count BPMN elements
-        element_counts = {}
+        element_counts: Dict[str, int] = {}
         import xml.etree.ElementTree as ET
 
         try:
@@ -906,7 +910,7 @@ class EnhancedXSDValidator:
 
         # Count pattern-related issues
         pattern_issues = [
-            e for e in result.errors if e.category == ValidationErrorCategory.PATTERN_VIOLIATION
+            e for e in result.errors if e.category == ValidationErrorCategory.PATTERN_VIOLATION
         ]
 
         if pattern_issues:

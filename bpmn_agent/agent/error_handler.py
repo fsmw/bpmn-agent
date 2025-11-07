@@ -161,6 +161,9 @@ class ErrorRecoveryEngine:
                     extra={"error": str(e)[:100]},
                 )
 
+        # This should never be reached, but mypy needs it
+        return None, None
+
     async def execute_with_fallback(
         self,
         stage_name: str,
@@ -303,6 +306,7 @@ class GracefulDegradationHandler:
             high_confidence_relations=0,
             co_reference_groups=0,
             warnings=["Extraction failed, returning empty result"],
+            notes=None,
         )
 
         return ExtractionResultWithErrors(
@@ -318,20 +322,26 @@ class GracefulDegradationHandler:
         """Create an empty graph result for failed graph construction."""
         from datetime import datetime
 
-        from bpmn_agent.models.graph import GraphNode, ProcessGraph
+        from bpmn_agent.models.graph import GraphNode, NodeType, ProcessGraph
 
         # Create start and end nodes for minimal valid graph
         start_node = GraphNode(
             id="start",
-            type="start",
+            type=NodeType.START,
             label="Start",
             bpmn_type="bpmn:StartEvent",
+            x=None,
+            y=None,
+            is_abstract=False,
         )
         end_node = GraphNode(
             id="end",
-            type="end",
+            type=NodeType.END,
             label="End",
             bpmn_type="bpmn:EndEvent",
+            x=None,
+            y=None,
+            is_abstract=False,
         )
 
         return ProcessGraph(

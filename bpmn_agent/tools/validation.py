@@ -608,7 +608,7 @@ class GraphValidator:
 
     def _build_adjacency(self, graph: ProcessGraph) -> Dict[str, List[str]]:
         """Build adjacency list from graph edges."""
-        adjacency = {}
+        adjacency: dict[str, list[str]] = {}
         for edge in graph.edges:
             if edge.source_id not in adjacency:
                 adjacency[edge.source_id] = []

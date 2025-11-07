@@ -134,7 +134,7 @@ def test_example_structure():
         data = json.load(f)
 
     example_count = 0
-    domain_examples = {}
+    domain_examples: dict[str, int] = {}
 
     for example_id, example in data.items():
         # Check required fields

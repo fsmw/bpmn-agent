@@ -161,7 +161,7 @@ class AdvancedPatternMatcher:
             keywords = self.pattern_keywords[pattern_id]
             tags = self.pattern_tags[pattern_id]
 
-            matched_keywords = []
+            matched_keywords: list[str] = []
             score = 0.0
 
             # Exact keyword matches
