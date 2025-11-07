@@ -596,7 +596,7 @@ class GraphValidator:
         reachable = set()
         to_visit = [start_id]
 
-        adjacency: dict[str, list[str]] = self._build_adjacency(graph)
+        adjacency: Dict[str, List[str]] = self._build_adjacency(graph)
 
         while to_visit:
             current = to_visit.pop()
@@ -608,7 +608,7 @@ class GraphValidator:
 
     def _build_adjacency(self, graph: ProcessGraph) -> Dict[str, List[str]]:
         """Build adjacency list from graph edges."""
-        adjacency: dict[str, list[str]] = {}
+        adjacency: Dict[str, List[str]] = {}
         for edge in graph.edges:
             if edge.source_id not in adjacency:
                 adjacency[edge.source_id] = []
