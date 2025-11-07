@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from bpmn_agent.models.graph import ProcessGraph
 from bpmn_agent.models.knowledge_base import BPMNPattern, KnowledgeBase
+from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class RAGPatternValidator:
 
         # Graceful degradation: funciona sin KB
         self.kb: Optional[KnowledgeBase] = None
-        self.pattern_bridge: Optional["AdvancedPatternMatchingBridge"] = None
+        self.pattern_bridge: Optional[AdvancedPatternMatchingBridge] = None
         try:
             if kb is None:
                 from bpmn_agent.knowledge.loader import PatternLibraryLoader

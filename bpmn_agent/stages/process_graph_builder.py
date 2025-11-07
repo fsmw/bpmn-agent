@@ -18,6 +18,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Set, Tuple
 
 from bpmn_agent.knowledge import PatternRecognizer
+from bpmn_agent.knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
 from bpmn_agent.models.extraction import (
     ConfidenceLevel,
     EntityType,
@@ -58,7 +59,7 @@ class KBGraphEnricher:
         """
         self.enable_kb = enable_kb
         self._pattern_recognizer: Optional[PatternRecognizer] = None
-        self._advanced_pattern_bridge: Optional["AdvancedPatternMatchingBridge"] = None
+        self._advanced_pattern_bridge: Optional[AdvancedPatternMatchingBridge] = None
 
     def _get_pattern_recognizer(self) -> Optional[PatternRecognizer]:
         """Lazy load pattern recognizer."""
@@ -1306,7 +1307,7 @@ class ImplicitFlowInferrer:
         inferred_flows.extend(data_flow_implications)
 
         # Remove duplicates
-        unique_flows = {}
+        unique_flows: Dict[Tuple[str, str], GraphEdge] = {}
         for flow in inferred_flows:
             key = (flow.source_id, flow.target_id)
             if key not in unique_flows or flow.confidence > unique_flows[key].confidence:

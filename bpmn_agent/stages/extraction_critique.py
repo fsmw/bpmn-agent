@@ -12,11 +12,11 @@ import json
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 
 from pydantic import BaseModel, Field
 
-from bpmn_agent.core.llm_client import BaseLLMClient, LLMMessage
+from bpmn_agent.core.llm_client import BaseLLMClient, LLMMessage, LLMResponse
 from bpmn_agent.models.extraction import (
     ConfidenceLevel,
     EntityType,
@@ -358,13 +358,21 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
                 extraction_str = self._format_extraction_for_critique(result)
                 prompt = self._create_critique_prompt(extraction_str, original_text)
 
-                messages = [LLMMessage(role="user", content=prompt)]
+                messages = [LLMMessage(role="user", content=prompt, name=None)]
 
                 response = await self.llm_client.call(messages, temperature=0.3, max_tokens=1024)
 
                 # Parse LLM response as JSON
                 try:
-                    response_text = response
+                    # Handle union type: LLMResponse | AsyncIterator[str]
+                    if isinstance(response, LLMResponse):
+                        response_text = response.content
+                    else:
+                        # Collect async iterator
+                        response_text = ""
+                        async for chunk in response:
+                            response_text += chunk
+                    
                     # Try to extract JSON from response
                     if "```json" in response_text:
                         json_str = response_text.split("```json")[1].split("```")[0].strip()
@@ -376,7 +384,7 @@ Provide your response as JSON with keys: issues, suggestions, confidence_assessm
                     llm_critique = json.loads(json_str)
                 except (json.JSONDecodeError, IndexError):
                     # If parsing fails, store raw response
-                    llm_critique = {"raw_response": response}
+                    llm_critique = {"raw_response": response_text}
             except Exception as e:
                 logger.warning(f"LLM critique failed: {e}")
                 llm_critique = None
@@ -447,7 +455,7 @@ class ExtractionRefinementPipeline:
         self.validator = validator or ExtractionValidator()
         self.critique_agent = critique_agent or CritiqueAgent()
         self.max_iterations = max_iterations
-        self.iteration_history = []
+        self.iteration_history: List[Dict[str, Any]] = []
 
     def _create_refinement_prompt(
         self,
@@ -548,7 +556,7 @@ Each relation should have: id, type, source_id, target_id
                         validation.issues,
                     )
 
-                    messages = [LLMMessage(role="user", content=refinement_prompt)]
+                    messages = [LLMMessage(role="user", content=refinement_prompt, name=None)]
 
                     response = await self.critique_agent.llm_client.call(
                         messages,
@@ -556,8 +564,17 @@ Each relation should have: id, type, source_id, target_id
                         max_tokens=2048,
                     )
 
+                    # Handle union type: LLMResponse | AsyncIterator[str]
+                    if isinstance(response, LLMResponse):
+                        response_text = response.content
+                    else:
+                        # Collect async iterator
+                        response_text = ""
+                        async for chunk in response:
+                            response_text += chunk
+
                     # Try to parse refined extraction
-                    refined_data = self._parse_refined_extraction(response)
+                    refined_data = self._parse_refined_extraction(response_text)
                     if refined_data:
                         current_result = self._apply_refinement(
                             current_result,
@@ -591,7 +608,7 @@ Each relation should have: id, type, source_id, target_id
             else:
                 json_str = response_text
 
-            return json.loads(json_str)
+            return json.loads(json_str)  # type: ignore[no-any-return]
         except (json.JSONDecodeError, IndexError):
             return None
 
@@ -603,7 +620,7 @@ Each relation should have: id, type, source_id, target_id
         """Apply refinement data to extraction result."""
         try:
             # Parse refined entities
-            entities = []
+            entities: List[ExtractedEntity] = []
             for entity_data in refined_data.get("entities", []):
                 entity = ExtractedEntity(
                     id=entity_data.get("id", f"entity_{len(entities)}"),
@@ -611,11 +628,15 @@ Each relation should have: id, type, source_id, target_id
                     name=entity_data.get("name", "Unknown"),
                     description=entity_data.get("description"),
                     confidence=ConfidenceLevel(entity_data.get("confidence", "medium")),
+                    source_text=entity_data.get("source_text"),
+                    character_offsets=entity_data.get("character_offsets"),
+                    is_implicit=entity_data.get("is_implicit", False),
+                    is_uncertain=entity_data.get("is_uncertain", False),
                 )
                 entities.append(entity)
 
             # Parse refined relations
-            relations = []
+            relations: List[ExtractedRelation] = []
             for rel_data in refined_data.get("relations", []):
                 relation = ExtractedRelation(
                     id=rel_data.get("id", f"relation_{len(relations)}"),
@@ -623,6 +644,10 @@ Each relation should have: id, type, source_id, target_id
                     source_id=rel_data.get("source_id"),
                     target_id=rel_data.get("target_id"),
                     label=rel_data.get("label"),
+                    source_text=rel_data.get("source_text"),
+                    is_implicit=rel_data.get("is_implicit", False),
+                    is_conditional=rel_data.get("is_conditional", False),
+                    condition_expression=rel_data.get("condition_expression"),
                 )
                 relations.append(relation)
 
