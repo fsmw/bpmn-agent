@@ -468,6 +468,7 @@ class EntityExtractor:
                                 value=value,
                                 value_type=type(value).__name__,
                                 confidence=confidence,
+                                source_text=None,
                             )
 
                 entity = ExtractedEntity(

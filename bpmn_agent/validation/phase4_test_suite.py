@@ -797,7 +797,7 @@ class Phase4TestSuite:
                 high_confidence_relations=0,
                 co_reference_groups=0,
                 warnings=[],
-                errors=[str(e)],
+                notes=None,
             )
             return ExtractionResultWithErrors(
                 entities=[],
@@ -810,6 +810,7 @@ class Phase4TestSuite:
                         message=str(e),
                         severity="error",
                         recoverable=True,
+                        context=None,
                     )
                 ],
             )
