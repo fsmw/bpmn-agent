@@ -114,9 +114,9 @@ class TestE2EStandardMode:
         # ElementTree doesn't support wildcard patterns like *Gateway,
         # so we need to search for each gateway type individually
         all_gateways = (
-            root.findall(".//bpmn:exclusiveGateway", namespaces) +
-            root.findall(".//bpmn:parallelGateway", namespaces) +
-            root.findall(".//bpmn:inclusiveGateway", namespaces)
+            root.findall(".//bpmn:exclusiveGateway", namespaces)
+            + root.findall(".//bpmn:parallelGateway", namespaces)
+            + root.findall(".//bpmn:inclusiveGateway", namespaces)
         )
         assert len(all_gateways) >= 1
 
@@ -347,9 +347,7 @@ class TestE2EMultipleModes:
             error_handling="recovery",
         )
         agent_standard = BPMNAgent(config_standard)
-        xml_standard, state_standard = await agent_standard.process(
-            PROCESS_DESCRIPTIONS["simple"]
-        )
+        xml_standard, state_standard = await agent_standard.process(PROCESS_DESCRIPTIONS["simple"])
 
         # Analysis-only mode
         config_analysis = AgentConfig(
@@ -358,9 +356,7 @@ class TestE2EMultipleModes:
             error_handling="recovery",
         )
         agent_analysis = BPMNAgent(config_analysis)
-        xml_analysis, state_analysis = await agent_analysis.process(
-            PROCESS_DESCRIPTIONS["simple"]
-        )
+        xml_analysis, state_analysis = await agent_analysis.process(PROCESS_DESCRIPTIONS["simple"])
 
         # Validation-only mode
         config_validation = AgentConfig(

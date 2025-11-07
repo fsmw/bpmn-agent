@@ -7,9 +7,6 @@ optional knowledge base pattern matching.
 """
 
 # Core components
-from bpmn_agent.core.llm_client import LLMClientFactory, LLMConfig, LLMMessage
-from bpmn_agent.core.observability import ObservabilityManager, ObservabilityConfig
-
 # Agent framework
 from bpmn_agent.agent import (
     AgentConfig,
@@ -17,25 +14,13 @@ from bpmn_agent.agent import (
     BPMNAgent,
     ErrorHandlingStrategy,
     PipelineConfig,
-    ProcessingMode,
     ProcessingMetrics,
+    ProcessingMode,
     StageResult,
     StageStatus,
 )
-
-# Pipeline stages
-from bpmn_agent.stages import (
-    CoReferenceResolver,
-    EntityExtractor,
-    EntityResolutionPipeline,
-    ExtractionPrompt,
-    JSONParser,
-    PreprocessedText,
-    ProcessGraphBuilder,
-    SemanticGraphConstructionPipeline,
-    TextChunk,
-    TextPreprocessor,
-)
+from bpmn_agent.core.llm_client import LLMClientFactory, LLMConfig, LLMMessage
+from bpmn_agent.core.observability import ObservabilityConfig, ObservabilityManager
 
 # Models
 from bpmn_agent.models import (
@@ -52,6 +37,20 @@ from bpmn_agent.models import (
     StartEvent,
     Task,
     UserTask,
+)
+
+# Pipeline stages
+from bpmn_agent.stages import (
+    CoReferenceResolver,
+    EntityExtractor,
+    EntityResolutionPipeline,
+    ExtractionPrompt,
+    JSONParser,
+    PreprocessedText,
+    ProcessGraphBuilder,
+    SemanticGraphConstructionPipeline,
+    TextChunk,
+    TextPreprocessor,
 )
 
 __version__ = "0.1.0"

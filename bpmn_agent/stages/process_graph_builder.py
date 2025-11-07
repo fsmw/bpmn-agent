@@ -12,27 +12,26 @@ Handles:
 """
 
 import logging
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple
-import uuid
 
 from bpmn_agent.knowledge import PatternRecognizer
 from bpmn_agent.models.extraction import (
     ConfidenceLevel,
     EntityType,
-    ExtractionResult,
     ExtractedEntity,
     ExtractedRelation,
+    ExtractionResult,
     RelationType,
 )
 from bpmn_agent.models.graph import (
     EdgeType,
     GraphEdge,
+    GraphMetrics,
     GraphNode,
     GraphValidationReport,
-    GraphMetrics,
     NodeType,
     ProcessGraph,
 )
@@ -45,6 +44,7 @@ logger = logging.getLogger(__name__)
 # ===========================
 # KB Integration Helpers
 # ===========================
+
 
 class KBGraphEnricher:
     """Enriches graph construction with KB patterns and domain insights."""
@@ -81,6 +81,7 @@ class KBGraphEnricher:
             try:
                 from knowledge.pattern_matching_bridge import AdvancedPatternMatchingBridge
                 from models.knowledge_base import KnowledgeBase
+
                 kb = KnowledgeBase()
                 self._advanced_pattern_bridge = AdvancedPatternMatchingBridge(kb)
                 logger.info("Advanced pattern matching bridge initialized")
@@ -89,7 +90,9 @@ class KBGraphEnricher:
                 return None
         return self._advanced_pattern_bridge
 
-    def get_relevant_patterns(self, domain: Optional[DomainType], max_patterns: int = 3) -> List[Dict]:
+    def get_relevant_patterns(
+        self, domain: Optional[DomainType], max_patterns: int = 3
+    ) -> List[Dict]:
         """
         Get relevant patterns for the domain.
 
@@ -187,7 +190,9 @@ class KBGraphEnricher:
 
         return suggestions
 
-    def find_patterns_for_process(self, process_description: str, domain: Optional[DomainType] = None) -> Optional[Dict]:
+    def find_patterns_for_process(
+        self, process_description: str, domain: Optional[DomainType] = None
+    ) -> Optional[Dict]:
         """
         Find matching patterns for a process description using advanced matching.
 
@@ -203,26 +208,38 @@ class KBGraphEnricher:
             return None
 
         try:
-            recommendation = bridge.find_patterns_for_process(process_description, domain_hint=domain)
-            return {
-                "pattern_id": recommendation.best_pattern.id if recommendation.best_pattern else None,
-                "pattern_name": recommendation.best_pattern.name if recommendation.best_pattern else None,
-                "confidence": recommendation.confidence,
-                "patterns": [
-                    {
-                        "id": p.pattern.id,
-                        "name": p.pattern.name,
-                        "category": p.pattern.category.value,
-                        "score": p.match_score,
-                    }
-                    for p in recommendation.patterns
-                ],
-            } if recommendation else None
+            recommendation = bridge.find_patterns_for_process(
+                process_description, domain_hint=domain
+            )
+            return (
+                {
+                    "pattern_id": (
+                        recommendation.best_pattern.id if recommendation.best_pattern else None
+                    ),
+                    "pattern_name": (
+                        recommendation.best_pattern.name if recommendation.best_pattern else None
+                    ),
+                    "confidence": recommendation.confidence,
+                    "patterns": [
+                        {
+                            "id": p.pattern.id,
+                            "name": p.pattern.name,
+                            "category": p.pattern.category.value,
+                            "score": p.match_score,
+                        }
+                        for p in recommendation.patterns
+                    ],
+                }
+                if recommendation
+                else None
+            )
         except Exception as e:
             logger.warning(f"Error finding patterns for process: {e}")
             return None
 
-    def match_activities_to_patterns(self, activity_labels: List[str], domain: Optional[DomainType] = None) -> Dict[str, Dict]:
+    def match_activities_to_patterns(
+        self, activity_labels: List[str], domain: Optional[DomainType] = None
+    ) -> Dict[str, Dict]:
         """
         Match extracted activities to known patterns for validation.
 
@@ -283,7 +300,9 @@ class KBGraphEnricher:
             logger.warning(f"Error getting domain patterns: {e}")
             return []
 
-    def search_patterns(self, query: str, domain: Optional[DomainType] = None, category: Optional[str] = None) -> List[Dict]:
+    def search_patterns(
+        self, query: str, domain: Optional[DomainType] = None, category: Optional[str] = None
+    ) -> List[Dict]:
         """
         Search for patterns using advanced pattern matching.
 
@@ -315,10 +334,10 @@ class KBGraphEnricher:
             return []
 
 
-
 # ===========================
 # Task 2.4.1: Build Graph Nodes and Edges
 # ===========================
+
 
 class ProcessGraphBuilder:
     """Converts extraction results to ProcessGraph with optional KB integration."""
@@ -354,7 +373,7 @@ class ProcessGraphBuilder:
         """
         # Initialize graph
         graph_id = f"graph_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-        
+
         nodes: List[GraphNode] = []
         edges: List[GraphEdge] = []
 
@@ -367,7 +386,10 @@ class ProcessGraphBuilder:
 
         # 2. Build edges from relations
         for relation in extraction_result.relations:
-            if relation.source_id in entity_to_node_map and relation.target_id in entity_to_node_map:
+            if (
+                relation.source_id in entity_to_node_map
+                and relation.target_id in entity_to_node_map
+            ):
                 edge = self._relation_to_edge(
                     relation,
                     entity_to_node_map[relation.source_id],
@@ -406,29 +428,33 @@ class ProcessGraphBuilder:
     def _upgrade_gateway_types(self, graph: ProcessGraph) -> ProcessGraph:
         """
         Detect and upgrade gateway node types from DECISION to PARALLEL_FORK/PARALLEL_JOIN.
-        
+
         A gateway is considered:
         - PARALLEL_FORK if it has 1 incoming edge and 2+ outgoing edges
         - PARALLEL_JOIN if it has 2+ incoming edges and 1 outgoing edge
         - DECISION otherwise (exclusive choice)
-        
+
         Args:
             graph: ProcessGraph to enhance
-            
+
         Returns:
             Updated ProcessGraph with upgraded gateway types
         """
         updated_nodes = []
-        
+
         for node in graph.nodes:
             if node.type != NodeType.DECISION:
                 updated_nodes.append(node)
                 continue
-            
+
             # Get control flow edges only
-            incoming = [e for e in graph.edges if e.target_id == node.id and e.type == EdgeType.CONTROL_FLOW]
-            outgoing = [e for e in graph.edges if e.source_id == node.id and e.type == EdgeType.CONTROL_FLOW]
-            
+            incoming = [
+                e for e in graph.edges if e.target_id == node.id and e.type == EdgeType.CONTROL_FLOW
+            ]
+            outgoing = [
+                e for e in graph.edges if e.source_id == node.id and e.type == EdgeType.CONTROL_FLOW
+            ]
+
             # Determine gateway type based on incoming/outgoing edges
             if len(incoming) == 1 and len(outgoing) >= 2:
                 # Fork: single path splits into multiple
@@ -438,9 +464,9 @@ class ProcessGraphBuilder:
                 # Join: multiple paths converge
                 node.type = NodeType.PARALLEL_JOIN
                 node.bpmn_type = "ParallelGateway"
-            
+
             updated_nodes.append(node)
-        
+
         # Create new graph with updated nodes
         return ProcessGraph(
             id=graph.id,
@@ -455,30 +481,30 @@ class ProcessGraphBuilder:
     def _inject_synthetic_start_end_nodes(self, graph: ProcessGraph) -> ProcessGraph:
         """
         Inject synthetic START and END nodes if they don't exist.
-        
+
         This ensures the graph has explicit start and end events for proper BPMN generation.
-        
+
         Args:
             graph: ProcessGraph to enhance
-            
+
         Returns:
             Updated ProcessGraph with synthetic start/end nodes
         """
         # Check if explicit START/END nodes exist
         has_start = any(n.type == NodeType.START for n in graph.nodes)
         has_end = any(n.type == NodeType.END for n in graph.nodes)
-        
+
         if has_start and has_end:
             # Already has proper start/end nodes
             return graph
-        
+
         # Find implicit start and end nodes
         implicit_start_nodes = [n for n in graph.get_start_nodes() if n.type != NodeType.START]
         implicit_end_nodes = [n for n in graph.get_end_nodes() if n.type != NodeType.END]
-        
+
         nodes_to_add = []
         edges_to_add = []
-        
+
         # Create synthetic START node if needed
         if implicit_start_nodes:
             start_node = GraphNode(
@@ -490,7 +516,7 @@ class ProcessGraphBuilder:
                 metadata={"synthetic": True},
             )
             nodes_to_add.append(start_node)
-            
+
             # Connect synthetic start to all implicit start nodes
             for implicit_start in implicit_start_nodes:
                 edge = GraphEdge(
@@ -503,7 +529,7 @@ class ProcessGraphBuilder:
                     metadata={"synthetic": True},
                 )
                 edges_to_add.append(edge)
-        
+
         # Create synthetic END node if needed
         if implicit_end_nodes:
             end_node = GraphNode(
@@ -515,7 +541,7 @@ class ProcessGraphBuilder:
                 metadata={"synthetic": True},
             )
             nodes_to_add.append(end_node)
-            
+
             # Connect all implicit end nodes to synthetic end
             for implicit_end in implicit_end_nodes:
                 edge = GraphEdge(
@@ -528,14 +554,16 @@ class ProcessGraphBuilder:
                     metadata={"synthetic": True},
                 )
                 edges_to_add.append(edge)
-        
+
         # Add synthetic nodes and edges to graph
         if nodes_to_add or edges_to_add:
             graph.nodes.extend(nodes_to_add)
             graph.edges.extend(edges_to_add)
             graph._build_indexes()
-            logger.debug(f"Injected {len(nodes_to_add)} synthetic nodes and {len(edges_to_add)} synthetic edges")
-        
+            logger.debug(
+                f"Injected {len(nodes_to_add)} synthetic nodes and {len(edges_to_add)} synthetic edges"
+            )
+
         return graph
 
     def _entity_to_node(self, entity: ExtractedEntity) -> GraphNode:
@@ -547,7 +575,7 @@ class ProcessGraphBuilder:
 
         Returns:
             GraphNode
-         """
+        """
         # Map entity type to node type
         node_type = self._map_entity_to_node_type(entity.type)
         bpmn_type = ProcessGraphBuilder._map_entity_to_bpmn_type_with_attributes(entity)
@@ -643,17 +671,17 @@ class ProcessGraphBuilder:
             EntityType.DATA: "DataObject",
         }
         return mapping.get(entity_type, "Task")
-    
+
     @staticmethod
     def _map_entity_to_bpmn_type_with_attributes(entity) -> str:
         """
         Map entity to BPMN element type, using entity attributes for refinement.
-        
+
         For events, checks for event_type and trigger attributes to determine
         the specific event kind (e.g., BoundaryEvent, TimerEvent, etc.)
         """
         from bpmn_agent.models.extraction import EntityType
-        
+
         # Base type mapping
         base_mapping = {
             EntityType.ACTIVITY: "Task",
@@ -662,24 +690,28 @@ class ProcessGraphBuilder:
             EntityType.ACTOR: "Lane",
             EntityType.DATA: "DataObject",
         }
-        
+
         base_type = base_mapping.get(entity.type, "Task")
-        
+
         # For events, check attributes for more specific type
         if entity.type == EntityType.EVENT and entity.attributes:
             # Check for event_type attribute
             event_type_attr = entity.attributes.get("event_type")
             if event_type_attr:
-                event_type_value = event_type_attr.value if hasattr(event_type_attr, "value") else event_type_attr
+                event_type_value = (
+                    event_type_attr.value if hasattr(event_type_attr, "value") else event_type_attr
+                )
                 if "boundary" in str(event_type_value).lower():
                     return "BoundaryEvent"
-            
+
             # Check for trigger attribute to determine timer/signal/message events
             trigger_attr = entity.attributes.get("trigger")
             if trigger_attr:
-                trigger_value = trigger_attr.value if hasattr(trigger_attr, "value") else trigger_attr
+                trigger_value = (
+                    trigger_attr.value if hasattr(trigger_attr, "value") else trigger_attr
+                )
                 trigger_str = str(trigger_value).lower()
-                
+
                 if "timer" in trigger_str:
                     return "TimerIntermediateCatchEvent"
                 elif "signal" in trigger_str:
@@ -688,15 +720,19 @@ class ProcessGraphBuilder:
                     return "MessageIntermediateCatchEvent"
                 elif "error" in trigger_str:
                     return "ErrorIntermediateCatchEvent"
-        
+
         # For activities, check for subprocess attribute
         if entity.type == EntityType.ACTIVITY and entity.attributes:
             activity_type_attr = entity.attributes.get("activity_type")
             if activity_type_attr:
-                activity_type_value = activity_type_attr.value if hasattr(activity_type_attr, "value") else activity_type_attr
+                activity_type_value = (
+                    activity_type_attr.value
+                    if hasattr(activity_type_attr, "value")
+                    else activity_type_attr
+                )
                 if "subprocess" in str(activity_type_value).lower():
                     return "SubProcess"
-        
+
         return base_type
 
     @staticmethod
@@ -722,6 +758,7 @@ class ProcessGraphBuilder:
 # ===========================
 # Task 2.4.2: Build Lane Structure
 # ===========================
+
 
 @dataclass
 class LaneStructure:
@@ -782,7 +819,7 @@ class LaneStructureBuilder:
         # 1. Create lane structures for each actor
         for actor_id, profile in actor_profiles.items():
             lane_id = f"lane_{uuid.uuid4().hex[:8]}"
-            
+
             lane = LaneStructure(
                 lane_id=lane_id,
                 lane_name=profile.actor_name,
@@ -802,7 +839,7 @@ class LaneStructureBuilder:
                 # Find actor node
                 actor_node = graph.get_node(actor_id)
                 activity_node = graph.get_node(activity_id)
-                
+
                 if actor_node and activity_node:
                     # Create edge: actor -> activity (swimlane assignment)
                     edge = GraphEdge(
@@ -844,7 +881,9 @@ class LaneStructureBuilder:
                 # Check if pattern suggests actor ordering or grouping
                 if "actors" in pattern:
                     suggested_order = pattern.get("actors", [])
-                    lane_structures = self._reorder_lanes_by_pattern(lane_structures, suggested_order)
+                    lane_structures = self._reorder_lanes_by_pattern(
+                        lane_structures, suggested_order
+                    )
 
                 # Check if pattern suggests lane isolation or grouping
                 if "swimlane_hints" in pattern:
@@ -889,7 +928,9 @@ class LaneStructureBuilder:
         return ordered_lanes
 
     @staticmethod
-    def _apply_swimlane_hints(lane_structures: Dict[str, LaneStructure], hints: Dict) -> Dict[str, LaneStructure]:
+    def _apply_swimlane_hints(
+        lane_structures: Dict[str, LaneStructure], hints: Dict
+    ) -> Dict[str, LaneStructure]:
         """
         Apply swimlane hints from domain patterns.
 
@@ -924,6 +965,7 @@ class LaneStructureBuilder:
 # Task 2.4.3: Graph Validation
 # ===========================
 
+
 @dataclass
 class GraphValidationIssue:
     """Represents a validation issue found in graph."""
@@ -944,7 +986,9 @@ class GraphValidationIssue:
 class GraphValidator:
     """Validates ProcessGraph structure and correctness."""
 
-    def validate_graph(self, graph: ProcessGraph) -> Tuple[bool, List[GraphValidationIssue], GraphMetrics]:
+    def validate_graph(
+        self, graph: ProcessGraph
+    ) -> Tuple[bool, List[GraphValidationIssue], GraphMetrics]:
         """
         Validate graph structure.
 
@@ -1028,7 +1072,7 @@ class GraphValidator:
         for node in graph.nodes:
             incoming = graph.get_incoming_edges(node.id)
             outgoing = graph.get_outgoing_edges(node.id)
-            
+
             # Exclude ACTOR nodes (they don't have control flow)
             if node.type != NodeType.ACTOR:
                 if not incoming and not outgoing:
@@ -1049,7 +1093,7 @@ class GraphValidator:
 
             for edge in graph.get_outgoing_edges(node_id):
                 target_id = edge.target_id
-                
+
                 if target_id not in visited:
                     if dfs(target_id):
                         cycle_nodes.append(node_id)
@@ -1086,7 +1130,8 @@ class GraphValidator:
 
                 # Only traverse control flow edges for reachability
                 control_flow_edges = [
-                    e for e in graph.get_outgoing_edges(current_id)
+                    e
+                    for e in graph.get_outgoing_edges(current_id)
                     if e.type == EdgeType.CONTROL_FLOW
                 ]
                 for edge in control_flow_edges:
@@ -1099,7 +1144,9 @@ class GraphValidator:
             bfs(start_node.id)
 
         # Unreachable are all nodes not in reachable set
-        unreachable = [n.id for n in graph.nodes if n.id not in reachable and n.type != NodeType.ACTOR]
+        unreachable = [
+            n.id for n in graph.nodes if n.id not in reachable and n.type != NodeType.ACTOR
+        ]
 
         return unreachable
 
@@ -1140,7 +1187,7 @@ class GraphValidator:
         # Basic counts
         node_count = len(graph.nodes)
         edge_count = len(graph.edges)
-        
+
         # Density (actual edges / possible edges)
         max_edges = node_count * (node_count - 1)
         density = edge_count / max_edges if max_edges > 0 else 0.0
@@ -1194,6 +1241,7 @@ class GraphValidator:
 # ===========================
 # Task 2.4.4: Implicit Flow Inference
 # ===========================
+
 
 @dataclass
 class ImplicitFlow:
@@ -1266,7 +1314,9 @@ class ImplicitFlowInferrer:
 
         return list(unique_flows.values())
 
-    def _infer_flows_from_kb_patterns(self, graph: ProcessGraph, domain: DomainType) -> List[ImplicitFlow]:
+    def _infer_flows_from_kb_patterns(
+        self, graph: ProcessGraph, domain: DomainType
+    ) -> List[ImplicitFlow]:
         """
         Infer flows based on recognized KB patterns.
 
@@ -1308,7 +1358,9 @@ class ImplicitFlowInferrer:
                     )
                     flows.extend(suggested_flows)
 
-            logger.info(f"KB patterns generated {len(flows)} potential implicit flows for domain {domain}")
+            logger.info(
+                f"KB patterns generated {len(flows)} potential implicit flows for domain {domain}"
+            )
 
         except Exception as e:
             logger.warning(f"Error inferring flows from KB patterns: {e}")
@@ -1430,28 +1482,32 @@ class ImplicitFlowInferrer:
     def _infer_fork_join_flows(graph: ProcessGraph) -> List[ImplicitFlow]:
         """Infer flows for fork/join parallelism."""
         flows: List[ImplicitFlow] = []
-        
+
         # Find fork nodes (multiple outgoing edges)
         for node in graph.nodes:
             outgoing = graph.get_outgoing_edges(node.id)
             if len(outgoing) > 1:
                 # This is a fork - infer join point
                 # Find nodes that should be joined after parallel paths
-                
+
                 # Get all nodes reachable from each outgoing branch
                 reachable_sets = []
                 for edge in outgoing:
-                    reachable = ImplicitFlowInferrer._find_reachable_from_node(graph, edge.target_id)
+                    reachable = ImplicitFlowInferrer._find_reachable_from_node(
+                        graph, edge.target_id
+                    )
                     reachable_sets.append(reachable)
-                
+
                 # Find common reachable nodes (candidates for join)
                 if reachable_sets:
-                    common_reachable = set.intersection(*reachable_sets) if len(reachable_sets) > 1 else set()
-                    
+                    common_reachable = (
+                        set.intersection(*reachable_sets) if len(reachable_sets) > 1 else set()
+                    )
+
                     # The first common reachable node is the join point
                     if common_reachable:
                         join_node_id = min(common_reachable)  # Arbitrary choice of first
-                        
+
                         # Create implicit flows from each branch end to join
                         for reachable_set in reachable_sets:
                             for node_id in reachable_set:
@@ -1489,13 +1545,13 @@ class ImplicitFlowInferrer:
     def _infer_sequential_flows(graph: ProcessGraph) -> List[ImplicitFlow]:
         """Infer flows for sequential activities."""
         flows: List[ImplicitFlow] = []
-        
+
         # Look for activities without sequence but that should be connected
         tasks = [n for n in graph.nodes if n.type == NodeType.TASK]
-        
+
         for task in tasks:
             outgoing = graph.get_outgoing_edges(task.id)
-            
+
             # If task has no outgoing edges but there are more tasks, infer flow
             if len(outgoing) == 0:
                 # Find the most likely next task
@@ -1518,24 +1574,25 @@ class ImplicitFlowInferrer:
     def _infer_data_flow_dependencies(graph: ProcessGraph) -> List[ImplicitFlow]:
         """Infer control flow from data flow dependencies."""
         flows: List[ImplicitFlow] = []
-        
+
         # If task A outputs data that task B uses, infer control flow
         data_edges = [e for e in graph.edges if e.type == EdgeType.DATA_FLOW]
-        
+
         for data_edge in data_edges:
             source = graph.get_node(data_edge.source_id)
             target = graph.get_node(data_edge.target_id)
-            
+
             if source and target:
                 # If source is task and target is task, infer control flow
                 if source.type == NodeType.TASK and target.type == NodeType.TASK:
                     # Check if control flow already exists
                     existing_flow = any(
-                        e.source_id == source.id and e.target_id == target.id 
+                        e.source_id == source.id
+                        and e.target_id == target.id
                         and e.type == EdgeType.CONTROL_FLOW
                         for e in graph.edges
                     )
-                    
+
                     if not existing_flow:
                         flow = ImplicitFlow(
                             source_id=source.id,
@@ -1551,6 +1608,7 @@ class ImplicitFlowInferrer:
 # ===========================
 # Full Stage 4 Pipeline
 # ===========================
+
 
 class SemanticGraphConstructionPipeline:
     """Complete semantic graph construction pipeline (Stage 4) with KB integration."""
@@ -1586,7 +1644,9 @@ class SemanticGraphConstructionPipeline:
             (process_graph, validation_report, inferred_flows)
         """
         # 1. Build initial graph from extraction (with domain-aware layout if KB enabled)
-        graph = self.graph_builder.build_from_extraction(extraction_result, actor_profiles, domain=domain)
+        graph = self.graph_builder.build_from_extraction(
+            extraction_result, actor_profiles, domain=domain
+        )
 
         # 2. Add lane structure (with domain-aware decisions if KB enabled)
         graph, lane_structures = self.lane_builder.build_lanes_from_actors(

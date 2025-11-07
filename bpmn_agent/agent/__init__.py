@@ -5,11 +5,28 @@ Main package for the BPMN Agent, providing a unified orchestrator
 that coordinates all pipeline stages with optional knowledge base integration.
 """
 
+from bpmn_agent.agent.checkpoint import (
+    CheckpointManager,
+    CheckpointType,
+    ResumableAgent,
+)
 from bpmn_agent.agent.config import (
     AgentConfig,
     ErrorHandlingStrategy,
     PipelineConfig,
     ProcessingMode,
+)
+from bpmn_agent.agent.error_handler import (
+    CascadingFailureDetector,
+    ErrorRecoveryEngine,
+    GracefulDegradationHandler,
+)
+from bpmn_agent.agent.observability_hooks import (
+    ObservabilityHooks,
+    PipelineMetrics,
+    StageMetrics,
+    get_observability_hooks,
+    initialize_observability_hooks,
 )
 from bpmn_agent.agent.orchestrator import BPMNAgent
 from bpmn_agent.agent.state import (
@@ -18,27 +35,10 @@ from bpmn_agent.agent.state import (
     StageResult,
     StageStatus,
 )
-from bpmn_agent.agent.checkpoint import (
-    CheckpointManager,
-    CheckpointType,
-    ResumableAgent,
-)
-from bpmn_agent.agent.error_handler import (
-    ErrorRecoveryEngine,
-    CascadingFailureDetector,
-    GracefulDegradationHandler,
-)
 from bpmn_agent.agent.tools import (
     GraphAnalyzer,
-    XMLValidator,
     ProcessRefinementTools,
-)
-from bpmn_agent.agent.observability_hooks import (
-    ObservabilityHooks,
-    PipelineMetrics,
-    StageMetrics,
-    get_observability_hooks,
-    initialize_observability_hooks,
+    XMLValidator,
 )
 
 __all__ = [
