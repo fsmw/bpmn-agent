@@ -76,8 +76,8 @@ def test_pattern_structure():
     }
 
     pattern_count = 0
-    domain_counts = {}
-    category_counts = {}
+    domain_counts: dict[str, int] = {}
+    category_counts: dict[str, int] = {}
 
     for json_file in sorted(patterns_dir.glob("*_patterns.json")):
         with open(json_file, "r") as f:
@@ -208,7 +208,7 @@ def test_domain_coverage():
 
     # Find domains in patterns
     domains_found = set()
-    pattern_count_by_domain = {}
+    pattern_count_by_domain: dict[str, int] = {}
 
     for json_file in patterns_dir.glob("*_patterns.json"):
         with open(json_file, "r") as f:
@@ -258,7 +258,7 @@ def test_pattern_categories():
 
     patterns_dir = Path(__file__).parent / "patterns"
     categories_found = set()
-    category_count = {}
+    category_count: dict[str, int] = {}
 
     for json_file in patterns_dir.glob("*_patterns.json"):
         with open(json_file, "r") as f:

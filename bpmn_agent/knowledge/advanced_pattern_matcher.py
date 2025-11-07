@@ -104,7 +104,7 @@ class AdvancedPatternMatcher:
 
     def _extract_keywords(self, pattern: BPMNPattern) -> Set[str]:
         """Extract searchable keywords from a pattern."""
-        keywords = set()
+        keywords: set[str] = set()
 
         # From name and description
         for text in [pattern.name, pattern.description]:

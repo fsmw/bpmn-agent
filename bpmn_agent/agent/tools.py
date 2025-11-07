@@ -93,12 +93,12 @@ class GraphAnalyzer:
         """
         isolated = []
 
-        for node_id in graph.nodes.keys():
+        for node in graph.nodes:
+            node_id = node.id
             incoming = [e for e in graph.edges if e.target_id == node_id]
             outgoing = [e for e in graph.edges if e.source_id == node_id]
 
             # Start events can have no incoming, end events can have no outgoing
-            node = graph.nodes[node_id]
             node_type = node.type if hasattr(node, "type") else None
 
             if not incoming and not outgoing and node_type not in ["start_event", "end_event"]:
@@ -145,7 +145,8 @@ class GraphAnalyzer:
                     dfs_cycle(edge.target_id, path.copy(), visited.copy())
 
         # Start DFS from each node
-        for node_id in graph.nodes.keys():
+        for node in graph.nodes:
+            node_id = node.id
             if node_id not in visited_global:
                 dfs_cycle(node_id, [], set())
                 visited_global.add(node_id)
@@ -186,7 +187,8 @@ class GraphAnalyzer:
                         queue.append(edge.source_id)
 
         # Count components
-        for node_id in graph.nodes.keys():
+        for node in graph.nodes:
+            node_id = node.id
             if node_id not in visited:
                 bfs(node_id)
                 components += 1
@@ -205,7 +207,8 @@ class GraphAnalyzer:
         """
         complex_gateways = []
 
-        for node_id, node in graph.nodes.items():
+        for node in graph.nodes:
+            node_id = node.id
             node_type = node.type if hasattr(node, "type") else None
 
             if node_type and "gateway" in str(node_type).lower():
@@ -231,7 +234,8 @@ class GraphAnalyzer:
         """
         implicit_joins = []
 
-        for node_id, node in graph.nodes.items():
+        for node in graph.nodes:
+            node_id = node.id
             node_type = node.type if hasattr(node, "type") else None
 
             if node_type and "gateway" in str(node_type).lower():
@@ -440,7 +444,7 @@ class ProcessRefinementTools:
         # Check for gateways without conditions
         gateways = [
             n
-            for n in graph.nodes.values()
+            for n in graph.nodes
             if hasattr(n, "type") and "gateway" in str(n.type).lower()
         ]
         if gateways:
@@ -449,7 +453,7 @@ class ProcessRefinementTools:
             )
 
         # Check for actors/lanes
-        lanes = [n for n in graph.nodes.values() if hasattr(n, "type") and n.type == "lane"]
+        lanes = [n for n in graph.nodes if hasattr(n, "type") and n.type == "lane"]
         if not lanes:
             questions.append("Which roles or departments are involved in this process?")
 

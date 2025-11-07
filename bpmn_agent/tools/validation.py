@@ -586,7 +586,7 @@ class GraphValidator:
         reachable = set()
         to_visit = [start_id]
 
-        adjacency = self._build_adjacency(graph)
+        adjacency: dict[str, list[str]] = self._build_adjacency(graph)
 
         while to_visit:
             current = to_visit.pop()
